@@ -16,7 +16,7 @@ Anthropic's [commercial terms](https://www.anthropic.com/legal/commercial-terms)
 
 ## What's stored on your site
 
-- **Members** are WordPress users. Pulse Question stores their mailing-list choices (`_pq_joined`, `_pq_marketing`, `_pq_join_asked`) and their votes.
+- **Members** are WordPress users. Pulse Question stores their mailing-list choices (`_pulse_question_joined`, `_pulse_question_marketing`, `_pulse_question_join_asked`) and their votes.
 - **Answers** are comments, with their votes, moderation verdict and the ids of members who reported them.
 - **Logs** of recent Claude batches, sign-ups, daily emails and social posts. Each keeps the latest 14 to 20 entries.
 

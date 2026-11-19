@@ -69,7 +69,7 @@ final class QuestionEditor {
 		);
 		echo '<fieldset>';
 		foreach ( $options as $value => $label ) {
-			echo '<label style="display:block;margin:4px 0"><input type="radio" name="pq_status" value="' . esc_attr( $value ) . '" ' . checked( $current, $value, false ) . ' /> ' . esc_html( $label ) . '</label>';
+			echo '<label style="display:block;margin:4px 0"><input type="radio" name="pulse_question_status" value="' . esc_attr( $value ) . '" ' . checked( $current, $value, false ) . ' /> ' . esc_html( $label ) . '</label>';
 		}
 		echo '</fieldset><p class="description">' . esc_html__( 'Approved questions are asked in queue order, one a day. Change the order under Questions → Queue.', 'pulse-question' ) . '</p>';
 	}
@@ -82,8 +82,8 @@ final class QuestionEditor {
 		$out = array();
 		foreach ( $columns as $key => $label ) {
 			if ( 'date' === $key ) {
-				$out['pq_status'] = __( 'Status', 'pulse-question' );
-				$out['pq_last']   = __( 'Last asked', 'pulse-question' );
+				$out['pulse_question_status'] = __( 'Status', 'pulse-question' );
+				$out['pulse_question_last']   = __( 'Last asked', 'pulse-question' );
 				continue;
 			}
 			$out[ $key ] = $label;
@@ -92,11 +92,11 @@ final class QuestionEditor {
 	}
 
 	public static function column( string $column, int $id ): void {
-		if ( 'pq_last' === $column ) {
+		if ( 'pulse_question_last' === $column ) {
 			echo esc_html( Render::dayLabel( (string) get_post_meta( $id, Questions::META_LAST, true ), false ) );
 			return;
 		}
-		if ( 'pq_status' !== $column ) {
+		if ( 'pulse_question_status' !== $column ) {
 			return;
 		}
 		$status = get_post_status( $id );

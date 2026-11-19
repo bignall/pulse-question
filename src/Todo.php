@@ -20,7 +20,7 @@ final class Todo {
 	public const SOURCE = 'pulse-question';
 
 	/** What was last sent: 'low' => days left or -1, 'waiting' => count. */
-	public const OPTION = 'pq_todo_sent';
+	public const OPTION = 'pulse_question_todo_sent';
 
 	private static bool $dirty = false;
 
@@ -82,7 +82,7 @@ final class Todo {
 						'priority' => $low <= 2 ? 'high' : 'normal',
 						'source'   => self::SOURCE,
 						'key'      => self::SOURCE . ':low-queue',
-						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pq-queue' ),
+						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pulse-question-queue' ),
 					)
 				);
 			}
@@ -102,7 +102,7 @@ final class Todo {
 						'category' => 'Pulse Question',
 						'source'   => self::SOURCE,
 						'key'      => self::SOURCE . ':approve',
-						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pq-queue' ),
+						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pulse-question-queue' ),
 					)
 				);
 			}
@@ -152,7 +152,7 @@ final class Todo {
 						'priority' => 'high',
 						'source'   => self::SOURCE,
 						'key'      => self::SOURCE . ':' . $what . '-failed',
-						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pq-settings' . $anchor ),
+						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pulse-question-settings' . $anchor ),
 					)
 				);
 			}

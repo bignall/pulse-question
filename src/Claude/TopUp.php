@@ -20,8 +20,8 @@ use PulseQuestion\Settings;
 
 final class TopUp {
 
-	public const WAIT     = 'pq_claude_wait';
-	public const FAILURES = 'pq_claude_failures';
+	public const WAIT     = 'pulse_question_claude_wait';
+	public const FAILURES = 'pulse_question_claude_failures';
 
 	public static function init(): void {
 		add_action( Daily::CRON_HOOK, array( self::class, 'check' ), 30 );

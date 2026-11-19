@@ -21,9 +21,9 @@ use PulseQuestion\Members\Members;
 
 final class Builtin {
 
-	public const BATCH_HOOK = 'pq_email_batch';
+	public const BATCH_HOOK = 'pulse_question_email_batch';
 	/** The email being sent: subject, preheader, body, day. */
-	private const JOB = 'pq_email_job';
+	private const JOB = 'pulse_question_email_job';
 
 	public static function init(): void {
 		add_action( self::BATCH_HOOK, array( self::class, 'batch' ) );
@@ -171,7 +171,7 @@ final class Builtin {
 	public static function unsubscribeUrl( int $user_id ): string {
 		return add_query_arg(
 			array(
-				'pq_unsubscribe' => $user_id,
+				'pulse_question_unsubscribe' => $user_id,
 				'k'              => self::key( $user_id ),
 			),
 			home_url( '/' )
@@ -185,10 +185,12 @@ final class Builtin {
 	/** The unsubscribe link (GET) and mail apps' one-click unsubscribe (POST). */
 	public static function unsubscribeRequest(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- the signed key is the check.
-		if ( ! isset( $_GET['pq_unsubscribe'], $_GET['k'] ) ) {
+		// pq_unsubscribe: links in emails sent before 0.6.0.
+		$param = isset( $_GET['pulse_question_unsubscribe'] ) ? 'pulse_question_unsubscribe' : 'pq_unsubscribe';
+		if ( ! isset( $_GET[ $param ], $_GET['k'] ) ) {
 			return;
 		}
-		$user_id = absint( $_GET['pq_unsubscribe'] );
+		$user_id = absint( $_GET[ $param ] );
 		$key     = sanitize_text_field( wp_unslash( (string) $_GET['k'] ) );
 		// phpcs:enable
 		if ( $user_id <= 0 || ! hash_equals( self::key( $user_id ), $key ) ) {

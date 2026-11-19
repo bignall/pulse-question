@@ -13,7 +13,7 @@ use PulseQuestion\Vendor\Bignall\WPFoundation\Settings\Settings as Store;
 
 final class Settings {
 
-	public const OPTION = 'pq_settings';
+	public const OPTION = 'pulse_question_settings';
 
 	private static ?Store $store = null;
 

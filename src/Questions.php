@@ -18,17 +18,17 @@ namespace PulseQuestion;
 
 final class Questions {
 
-	public const POST_TYPE       = 'pq_question';
-	public const TAXONOMY        = 'pq_category';
-	public const STATUS_APPROVED = 'pq_approved';
+	public const POST_TYPE       = 'pulse_question';
+	public const TAXONOMY        = 'pulse_question_category';
+	public const STATUS_APPROVED = 'pulseq_approved'; // Post statuses can be at most 20 characters.
 	public const CAPABILITY      = 'manage_pulse_questions';
 
 	/** One row per day asked (Y-m-d). */
-	public const META_ASKED = '_pq_asked';
+	public const META_ASKED = '_pulse_question_asked';
 	/** The last day asked (Y-m-d), for sorting. */
-	public const META_LAST = '_pq_last_asked';
+	public const META_LAST = '_pulse_question_last_asked';
 	/** Where it came from: mine, or later ai. */
-	public const META_SOURCE = '_pq_source';
+	public const META_SOURCE = '_pulse_question_source';
 
 	/** Set while the daily pick publishes a question. */
 	private static bool $asking = false;
@@ -96,7 +96,7 @@ final class Questions {
 				'supports'        => array( 'title', 'editor', 'excerpt', 'revisions' ),
 				'taxonomies'      => array( self::TAXONOMY ),
 				'map_meta_cap'    => true,
-				'capability_type' => 'pq_question',
+				'capability_type' => 'pulse_question',
 				'capabilities'    => array(
 					'create_posts'           => $cap,
 					'edit_posts'             => $cap,
@@ -150,8 +150,8 @@ final class Questions {
 			$data['post_status'] = 'publish';
 			return $data;
 		}
-		if ( isset( $postarr['pq_status'] ) ) {
-			$data['post_status'] = match ( (string) $postarr['pq_status'] ) {
+		if ( isset( $postarr['pulse_question_status'] ) ) {
+			$data['post_status'] = match ( (string) $postarr['pulse_question_status'] ) {
 				'approved' => self::STATUS_APPROVED,
 				'pending'  => 'pending',
 				default    => 'draft',
@@ -175,7 +175,7 @@ final class Questions {
 	public static function add( string $title, string $status = 'approved', string $source = 'mine', string $background = '' ): int|\WP_Error {
 		$title = trim( sanitize_text_field( $title ) );
 		if ( '' === $title ) {
-			return new \WP_Error( 'pq_empty', __( 'A question needs some words.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_empty', __( 'A question needs some words.', 'pulse-question' ) );
 		}
 		$id = wp_insert_post(
 			array(
@@ -183,7 +183,7 @@ final class Questions {
 				'post_title'   => $title,
 				'post_content' => wp_kses_post( $background ),
 				'post_status'  => 'draft',
-				'pq_status'    => $status,
+				'pulse_question_status'    => $status,
 				'menu_order'   => self::nextOrder(),
 			),
 			true
@@ -203,7 +203,7 @@ final class Questions {
 			wp_update_post(
 				array(
 					'ID'         => $id,
-					'pq_status'  => 'approved',
+					'pulse_question_status'  => 'approved',
 					'menu_order' => self::nextOrder(),
 				),
 				true

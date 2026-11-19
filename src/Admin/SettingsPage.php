@@ -17,12 +17,12 @@ use PulseQuestion\Settings;
 
 final class SettingsPage {
 
-	public const SLUG = 'pq-settings';
+	public const SLUG = 'pulse-question-settings';
 
 	public static function init(): void {
 		add_action( 'admin_menu', array( self::class, 'menu' ), 20 );
-		add_action( 'admin_post_pq_make_page', array( self::class, 'makePage' ) );
-		add_action( 'admin_post_pq_test_list', array( self::class, 'testList' ) );
+		add_action( 'admin_post_pulse_question_make_page', array( self::class, 'makePage' ) );
+		add_action( 'admin_post_pulse_question_test_list', array( self::class, 'testList' ) );
 		OutreachSettings::init();
 	}
 
@@ -39,7 +39,7 @@ final class SettingsPage {
 			echo '<label><input type="checkbox" name="' . esc_attr( $store->field( $key ) ) . '" value="1" ' . checked( (bool) $store->get( $key ), true, false ) . ' /> ' . esc_html( $label ) . '</label>';
 		};
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
-		$made = isset( $_GET['pq_page_made'] ) ? absint( $_GET['pq_page_made'] ) : 0;
+		$made = isset( $_GET['pulse_question_page_made'] ) ? absint( $_GET['pulse_question_page_made'] ) : 0;
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Pulse Question Settings', 'pulse-question' ); ?></h1>
@@ -120,8 +120,8 @@ final class SettingsPage {
 			<h2 id="pq-show"><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h2>
 			<p><?php esc_html_e( 'Add the "Question of the day" and "Past questions" blocks to any page or template, or use the shortcodes [pulse_question] and [pulse_question_past]. Each question also has its own page, and all asked questions are listed at /questions/.', 'pulse-question' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="pq_make_page" />
-				<?php wp_nonce_field( 'pq_make_page' ); ?>
+				<input type="hidden" name="action" value="pulse_question_make_page" />
+				<?php wp_nonce_field( 'pulse_question_make_page' ); ?>
 				<label><input type="checkbox" name="front" value="1" /> <?php esc_html_e( 'and make it the home page', 'pulse-question' ); ?></label>
 				<p><?php submit_button( __( 'Create a page with today\'s question and past questions', 'pulse-question' ), 'secondary', 'submit', false ); ?></p>
 			</form>
@@ -344,13 +344,13 @@ final class SettingsPage {
 					<p class="description"><?php esc_html_e( 'A user on that site with an application password (Users → Profile). An administrator works. Otherwise, under FluentCRM → Settings → Managers, give the user: "Add, update and import contacts", "Create and update tags, lists, companies and segments" and, for the daily email, "Write and send emails".', 'pulse-question' ); ?></p>
 				</div>
 				<p id="pq-list-test" style="margin-top:12px">
-					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=pq_test_list' ), 'pq_test_list' ) ); ?>"><?php esc_html_e( 'Test connection', 'pulse-question' ); ?></a>
+					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=pulse_question_test_list' ), 'pulse_question_test_list' ) ); ?>"><?php esc_html_e( 'Test connection', 'pulse-question' ); ?></a>
 					<span class="description"><?php esc_html_e( 'Checks the saved settings, so save your changes first. Nobody is added to the list.', 'pulse-question' ); ?></span>
 				</p>
 				<?php
-				$test = get_transient( 'pq_list_test_' . get_current_user_id() );
+				$test = get_transient( 'pulse_question_list_test_' . get_current_user_id() );
 				if ( is_array( $test ) ) {
-					delete_transient( 'pq_list_test_' . get_current_user_id() );
+					delete_transient( 'pulse_question_list_test_' . get_current_user_id() );
 					echo '<ul class="pq-list-test">';
 					foreach ( $test as $step ) {
 						$mark  = true === $step['ok'] ? '✓' : ( false === $step['ok'] ? '✗' : '!' );
@@ -379,8 +379,8 @@ final class SettingsPage {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'pulse-question' ), 403 );
 		}
-		check_admin_referer( 'pq_test_list' );
-		set_transient( 'pq_list_test_' . get_current_user_id(), ConnectionTest::run(), 5 * MINUTE_IN_SECONDS );
+		check_admin_referer( 'pulse_question_test_list' );
+		set_transient( 'pulse_question_list_test_' . get_current_user_id(), ConnectionTest::run(), 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=' . self::SLUG ) . '#pq-list-test' );
 		exit;
 	}
@@ -389,7 +389,7 @@ final class SettingsPage {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'pulse-question' ), 403 );
 		}
-		check_admin_referer( 'pq_make_page' );
+		check_admin_referer( 'pulse_question_make_page' );
 		$id = wp_insert_post(
 			array(
 				'post_type'    => 'page',
@@ -406,7 +406,7 @@ final class SettingsPage {
 			update_option( 'show_on_front', 'page' );
 			update_option( 'page_on_front', $id );
 		}
-		wp_safe_redirect( add_query_arg( 'pq_page_made', $id, admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=' . self::SLUG ) ) );
+		wp_safe_redirect( add_query_arg( 'pulse_question_page_made', $id, admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=' . self::SLUG ) ) );
 		exit;
 	}
 }

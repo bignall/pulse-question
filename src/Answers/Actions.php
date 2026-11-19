@@ -17,10 +17,10 @@ final class Actions {
 
 	public static function init(): void {
 		add_action( 'rest_api_init', array( self::class, 'routes' ) );
-		add_action( 'admin_post_pq_vote', array( self::class, 'formVote' ) );
-		add_action( 'admin_post_pq_report', array( self::class, 'formReport' ) );
-		add_action( 'admin_post_nopriv_pq_vote', array( self::class, 'toLogin' ) );
-		add_action( 'admin_post_nopriv_pq_report', array( self::class, 'toLogin' ) );
+		add_action( 'admin_post_pulse_question_vote', array( self::class, 'formVote' ) );
+		add_action( 'admin_post_pulse_question_report', array( self::class, 'formReport' ) );
+		add_action( 'admin_post_nopriv_pulse_question_vote', array( self::class, 'toLogin' ) );
+		add_action( 'admin_post_nopriv_pulse_question_report', array( self::class, 'toLogin' ) );
 	}
 
 	public static function routes(): void {
@@ -74,13 +74,13 @@ final class Actions {
 	}
 
 	public static function formVote(): void {
-		check_admin_referer( 'pq_vote' );
+		check_admin_referer( 'pulse_question_vote' );
 		Votes::toggle( sanitize_key( (string) ( $_POST['type'] ?? '' ) ), absint( $_POST['id'] ?? 0 ), get_current_user_id() );
 		self::back();
 	}
 
 	public static function formReport(): void {
-		check_admin_referer( 'pq_report' );
+		check_admin_referer( 'pulse_question_report' );
 		Answers::report( absint( $_POST['id'] ?? 0 ), get_current_user_id() );
 		self::back( 'reported' );
 	}
@@ -93,7 +93,7 @@ final class Actions {
 	private static function back( string $flag = '' ): void {
 		$to = wp_get_referer() ?: home_url();
 		if ( '' !== $flag ) {
-			$to = add_query_arg( 'pq_' . $flag, 1, $to );
+			$to = add_query_arg( 'pulse_question_' . $flag, 1, $to );
 		}
 		wp_safe_redirect( $to . '#pq-answers' );
 		exit;

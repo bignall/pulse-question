@@ -29,7 +29,7 @@ use PulseQuestion\Vendor\Anthropic\Core\Exceptions\RateLimitException;
 final class Generator {
 
 	public const SOURCE    = 'claude';
-	public const LOG       = 'pq_claude_log';
+	public const LOG       = 'pulse_question_claude_log';
 	private const LOG_SIZE = 30;
 
 	/** How many recent questions Claude sees, to avoid repeats. */
@@ -63,7 +63,7 @@ final class Generator {
 	public static function generate( int $count, string $theme = '', string $trigger = 'manual' ): array|\WP_Error {
 		$count = max( 1, min( 30, $count ) );
 		if ( ! self::isConfigured() ) {
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_no_key', __( 'Add an Anthropic API key in Questions → Settings first.', 'pulse-question' ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_no_key', __( 'Add an Anthropic API key in Questions → Settings first.', 'pulse-question' ) ) );
 		}
 		if ( function_exists( 'set_time_limit' ) ) {
 			set_time_limit( 300 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- a batch can take a minute or two.
@@ -93,27 +93,27 @@ final class Generator {
 				betas: array( 'server-side-fallback-2026-07-01' ),
 			);
 		} catch ( AuthenticationException ) {
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_auth', __( 'The Anthropic API key was refused. Check it in Questions → Settings.', 'pulse-question' ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_auth', __( 'The Anthropic API key was refused. Check it in Questions → Settings.', 'pulse-question' ) ) );
 		} catch ( RateLimitException ) {
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_rate', __( 'The Anthropic API is busy (rate limit). Try again in a few minutes.', 'pulse-question' ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_rate', __( 'The Anthropic API is busy (rate limit). Try again in a few minutes.', 'pulse-question' ) ) );
 		} catch ( InternalServerException ) {
 			// 5xx, including 529 overloaded: the SDK has already retried.
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_busy', __( 'Anthropic\'s servers are busy or having trouble right now. Try again in a few minutes.', 'pulse-question' ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_busy', __( 'Anthropic\'s servers are busy or having trouble right now. Try again in a few minutes.', 'pulse-question' ) ) );
 		} catch ( APIStatusException $e ) {
 			$detail = $e->getAPIMessage();
 			$detail = null !== $detail && '' !== $detail ? $detail : sprintf( 'HTTP %d', (int) $e->status );
 			/* translators: %s: error from the Anthropic API. */
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_api', sprintf( __( 'The Anthropic API returned an error: %s', 'pulse-question' ), $detail ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_api', sprintf( __( 'The Anthropic API returned an error: %s', 'pulse-question' ), $detail ) ) );
 		} catch ( APIConnectionException $e ) {
 			/* translators: %s: error message. */
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_connect', sprintf( __( 'Couldn\'t reach the Anthropic API: %s', 'pulse-question' ), $e->getMessage() ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_connect', sprintf( __( 'Couldn\'t reach the Anthropic API: %s', 'pulse-question' ), $e->getMessage() ) ) );
 		} catch ( \Throwable $e ) {
 			/* translators: %s: error message. */
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_error', sprintf( __( 'Writing questions failed: %s', 'pulse-question' ), $e->getMessage() ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_error', sprintf( __( 'Writing questions failed: %s', 'pulse-question' ), $e->getMessage() ) ) );
 		}
 
 		if ( 'refusal' === $message->stopReason ) {
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_refusal', __( 'Claude declined this request. Try a different theme or adjust the guidance in Settings.', 'pulse-question' ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_refusal', __( 'Claude declined this request. Try a different theme or adjust the guidance in Settings.', 'pulse-question' ) ) );
 		}
 
 		$json = '';
@@ -129,7 +129,7 @@ final class Generator {
 		if ( ! is_array( $data ) || ! isset( $data['questions'] ) || ! is_array( $data['questions'] ) ) {
 			$why = 'max_tokens' === $message->stopReason ? __( 'The answer was cut off.', 'pulse-question' ) : __( 'The answer wasn\'t in the expected format.', 'pulse-question' );
 			/* translators: %s: reason. */
-			return self::fail( $trigger, new \WP_Error( 'pq_claude_format', sprintf( __( 'Writing questions failed: %s', 'pulse-question' ), $why ) ) );
+			return self::fail( $trigger, new \WP_Error( 'pulse_question_claude_format', sprintf( __( 'Writing questions failed: %s', 'pulse-question' ), $why ) ) );
 		}
 
 		$result = self::save( $data['questions'] );

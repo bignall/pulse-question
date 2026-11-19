@@ -2,7 +2,7 @@
 /**
  * Votes on questions and answers: one per member, press again to take it back.
  *
- * Each vote is a row in the votes table; the total is also kept in meta (_pq_votes on the
+ * Each vote is a row in the votes table; the total is also kept in meta (_pulse_question_votes on the
  * question or the answer) so lists can sort by it.
  *
  * @package PulseQuestion
@@ -16,7 +16,7 @@ use PulseQuestion\Questions;
 
 final class Votes {
 
-	public const META = '_pq_votes';
+	public const META = '_pulse_question_votes';
 
 	private static function table(): string {
 		return ( new VotesTable() )->tableName();
@@ -41,13 +41,13 @@ final class Votes {
 	 */
 	public static function toggle( string $type, int $id, int $user_id ): array|\WP_Error {
 		if ( $user_id <= 0 ) {
-			return new \WP_Error( 'pq_vote_login', __( 'Log in to vote.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_vote_login', __( 'Log in to vote.', 'pulse-question' ) );
 		}
 		if ( ! self::votable( $type, $id ) ) {
-			return new \WP_Error( 'pq_vote_target', __( 'That can\'t be voted on.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_vote_target', __( 'That can\'t be voted on.', 'pulse-question' ) );
 		}
 		if ( 'answer' === $type && (int) get_comment( $id )->user_id === $user_id ) {
-			return new \WP_Error( 'pq_vote_own', __( 'You can\'t vote for your own answer.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_vote_own', __( 'You can\'t vote for your own answer.', 'pulse-question' ) );
 		}
 		global $wpdb;
 		$table = self::table();

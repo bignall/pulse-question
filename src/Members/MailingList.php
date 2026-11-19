@@ -21,8 +21,8 @@ use PulseQuestion\Settings;
 final class MailingList {
 
 	/** On the user while a subscription still has to be sent. */
-	public const META_PENDING = '_pq_list_pending';
-	public const LOG          = 'pq_list_log';
+	public const META_PENDING = '_pulse_question_list_pending';
+	public const LOG          = 'pulse_question_list_log';
 
 	public static function init(): void {
 		add_action( Daily::CRON_HOOK, array( self::class, 'retry' ), 40 );

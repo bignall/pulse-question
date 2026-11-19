@@ -21,8 +21,8 @@ use PulseQuestion\Settings;
 
 final class Answers {
 
-	public const META_REPORTS = '_pq_reports';
-	public const META_HIDDEN  = '_pq_hidden_by_reports';
+	public const META_REPORTS = '_pulse_question_reports';
+	public const META_HIDDEN  = '_pulse_question_hidden_by_reports';
 
 	public static function init(): void {
 		add_action( 'init', array( self::class, 'support' ), 20 );
@@ -126,13 +126,13 @@ final class Answers {
 	public static function report( int $comment_id, int $user_id ): array|\WP_Error {
 		$comment = get_comment( $comment_id );
 		if ( $user_id <= 0 ) {
-			return new \WP_Error( 'pq_report_login', __( 'Log in to report an answer.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_report_login', __( 'Log in to report an answer.', 'pulse-question' ) );
 		}
 		if ( ! $comment instanceof \WP_Comment || ! self::isAnswer( $comment ) || '1' !== $comment->comment_approved ) {
-			return new \WP_Error( 'pq_report_target', __( 'That answer can\'t be reported.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_report_target', __( 'That answer can\'t be reported.', 'pulse-question' ) );
 		}
 		if ( (int) $comment->user_id === $user_id ) {
-			return new \WP_Error( 'pq_report_own', __( 'You can\'t report your own answer.', 'pulse-question' ) );
+			return new \WP_Error( 'pulse_question_report_own', __( 'You can\'t report your own answer.', 'pulse-question' ) );
 		}
 		$reports = array_map( 'intval', (array) get_comment_meta( $comment_id, self::META_REPORTS ) );
 		if ( ! in_array( $user_id, $reports, true ) ) {

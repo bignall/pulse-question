@@ -41,10 +41,14 @@ Both need a logged-in member and an `X-WP-Nonce` header (`wp_rest`):
 
 ## Data
 
-- **Questions:** post type `pq_question`, categories `pq_category`. The statuses are `draft`, `pending`, `pq_approved` (queued) and `publish` (asked). `_pq_asked` holds each day asked; `_pq_last_asked` holds the last.
-- **Answers:** comments on questions, with `_pq_votes` (likes), `_pq_check` (the moderation verdict) and `_pq_reports`.
-- **Votes:** the table `{prefix}pq_votes`.
-- **Settings:** the option `pq_settings`.
+- **Questions:** post type `pulse_question`, categories `pulse_question_category`. The statuses are `draft`, `pending`, `pulseq_approved` (queued) and `publish` (asked); post statuses can be at most 20 characters. `_pulse_question_asked` holds each day asked, and `_pulse_question_last_asked` holds the last.
+- **Answers:** comments on questions, with `_pulse_question_votes` (likes), `_pulse_question_check` (the moderation verdict) and `_pulse_question_reports`.
+- **Votes:** the table `{prefix}pulse_question_votes`.
+- **Settings:** the option `pulse_question_settings`.
+
+### Names before 0.6.0
+
+Before 0.6.0, everything used the prefix `pq_`: the post type `pq_question`, the taxonomy `pq_category`, the query argument `pq_view`, and so on. Upgrading moves a site's data to the new names once, by itself. Queries that still use the old post type, taxonomy or `pq_view` keep working, but switch them to the new names when you can. The CSS classes (`pq-…`) haven't changed.
 
 ## Building from source
 

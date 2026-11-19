@@ -18,10 +18,10 @@ use PulseQuestion\Settings;
 
 final class Members {
 
-	public const META_JOINED    = '_pq_joined';
-	public const META_MARKETING = '_pq_marketing';
+	public const META_JOINED    = '_pulse_question_joined';
+	public const META_MARKETING = '_pulse_question_marketing';
 	/** When the member was offered the boxes, whatever they chose. */
-	public const META_ASKED = '_pq_join_asked';
+	public const META_ASKED = '_pulse_question_join_asked';
 
 	public static function init(): void {
 		add_action( 'register_form', array( self::class, 'signupFields' ) );
@@ -66,10 +66,10 @@ final class Members {
 		$list      = (string) Settings::get( 'list_label' );
 		$marketing = (string) Settings::get( 'marketing_label' );
 		$checked   = Settings::get( 'join_prechecked' ) ? ' checked' : '';
-		$html      = '<input type="hidden" name="pq_join_offered" value="1" />';
-		$html     .= '<p class="pq-join"><label><input type="checkbox" name="pq_join" value="1"' . $checked . ' /> ' . esc_html( $list ) . '</label></p>';
+		$html      = '<input type="hidden" name="pulse_question_join_offered" value="1" />';
+		$html     .= '<p class="pq-join"><label><input type="checkbox" name="pulse_question_join" value="1"' . $checked . ' /> ' . esc_html( $list ) . '</label></p>';
 		if ( '' !== $marketing ) {
-			$html .= '<p class="pq-join"><label><input type="checkbox" name="pq_marketing" value="1"' . $checked . ' /> ' . esc_html( $marketing ) . '</label></p>';
+			$html .= '<p class="pq-join"><label><input type="checkbox" name="pulse_question_marketing" value="1"' . $checked . ' /> ' . esc_html( $marketing ) . '</label></p>';
 		}
 		return $html;
 	}
@@ -81,8 +81,8 @@ final class Members {
 	/** Apply the boxes from a submitted form, if the form showed them. */
 	public static function fromForm( int $user_id ): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- WordPress's own registration and comment forms.
-		if ( ! empty( $_POST['pq_join_offered'] ) ) {
-			self::join( $user_id, ! empty( $_POST['pq_marketing'] ), ! empty( $_POST['pq_join'] ) );
+		if ( ! empty( $_POST['pulse_question_join_offered'] ) ) {
+			self::join( $user_id, ! empty( $_POST['pulse_question_marketing'] ), ! empty( $_POST['pulse_question_join'] ) );
 		}
 		// phpcs:enable
 	}

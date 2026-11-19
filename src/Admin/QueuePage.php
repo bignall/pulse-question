@@ -21,9 +21,9 @@ use PulseQuestion\Vendor\Bignall\WPFoundation\Plugin;
 
 final class QueuePage {
 
-	public const SLUG = 'pq-queue';
+	public const SLUG = 'pulse-question-queue';
 
-	private const ACTIONS = array( 'pq_add', 'pq_approve', 'pq_approve_all', 'pq_reorder', 'pq_ask_now', 'pq_trash', 'pq_claude' );
+	private const ACTIONS = array( 'pulse_question_add', 'pulse_question_approve', 'pulse_question_approve_all', 'pulse_question_reorder', 'pulse_question_ask_now', 'pulse_question_trash', 'pulse_question_claude' );
 
 	public static function init( Plugin $plugin ): void {
 		add_action( 'admin_menu', array( self::class, 'menu' ), 9 );
@@ -77,7 +77,7 @@ final class QueuePage {
 		}
 		wp_enqueue_style( 'pq-admin', App::url( 'assets/admin.css' ), array(), App::version() );
 		if ( str_ends_with( $hook, self::SLUG ) ) {
-			wp_enqueue_script( 'pq-queue', App::url( 'assets/queue.js' ), array( 'jquery', 'jquery-ui-sortable' ), App::version(), true );
+			wp_enqueue_script( 'pulse-question-queue', App::url( 'assets/queue.js' ), array( 'jquery', 'jquery-ui-sortable' ), App::version(), true );
 		}
 	}
 
@@ -118,15 +118,15 @@ final class QueuePage {
 						}
 						?>
 					</p>
-					<p><a class="button" href="<?php echo esc_url( self::actionUrl( 'pq_ask_now' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Replace today\'s question with the next one in the queue?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Ask the next one now', 'pulse-question' ); ?></a></p>
+					<p><a class="button" href="<?php echo esc_url( self::actionUrl( 'pulse_question_ask_now' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Replace today\'s question with the next one in the queue?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Ask the next one now', 'pulse-question' ); ?></a></p>
 				<?php endif; ?>
 			</div>
 
 			<div class="pq-panel">
 				<h2><?php esc_html_e( 'Add questions', 'pulse-question' ); ?></h2>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-					<input type="hidden" name="action" value="pq_add" />
-					<?php wp_nonce_field( 'pq_add' ); ?>
+					<input type="hidden" name="action" value="pulse_question_add" />
+					<?php wp_nonce_field( 'pulse_question_add' ); ?>
 					<label class="screen-reader-text" for="pq-new"><?php esc_html_e( 'Questions, one per line', 'pulse-question' ); ?></label>
 					<textarea id="pq-new" name="questions" rows="4" class="large-text" placeholder="<?php esc_attr_e( 'One question per line', 'pulse-question' ); ?>"></textarea>
 					<p>
@@ -153,16 +153,16 @@ final class QueuePage {
 						/* translators: %s: number of questions. */
 						echo esc_html( sprintf( __( 'Waiting for approval (%s)', 'pulse-question' ), number_format_i18n( count( $waiting ) ) ) );
 						?>
-						<a class="button button-small" href="<?php echo esc_url( self::actionUrl( 'pq_approve_all' ) ); ?>"><?php esc_html_e( 'Approve all', 'pulse-question' ); ?></a>
+						<a class="button button-small" href="<?php echo esc_url( self::actionUrl( 'pulse_question_approve_all' ) ); ?>"><?php esc_html_e( 'Approve all', 'pulse-question' ); ?></a>
 					</h2>
 					<ul class="pq-list">
 						<?php foreach ( $waiting as $id ) : ?>
 							<li class="pq-row">
 								<span class="pq-row__title"><?php echo esc_html( get_the_title( $id ) ); ?><?php self::badge( $id ); ?></span>
 								<span class="pq-row__actions">
-									<a class="button button-small button-primary" href="<?php echo esc_url( self::actionUrl( 'pq_approve', $id ) ); ?>"><?php esc_html_e( 'Approve', 'pulse-question' ); ?></a>
+									<a class="button button-small button-primary" href="<?php echo esc_url( self::actionUrl( 'pulse_question_approve', $id ) ); ?>"><?php esc_html_e( 'Approve', 'pulse-question' ); ?></a>
 									<a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php esc_html_e( 'Edit', 'pulse-question' ); ?></a>
-									<a class="pq-delete" href="<?php echo esc_url( self::actionUrl( 'pq_trash', $id ) ); ?>"><?php esc_html_e( 'Reject', 'pulse-question' ); ?></a>
+									<a class="pq-delete" href="<?php echo esc_url( self::actionUrl( 'pulse_question_trash', $id ) ); ?>"><?php esc_html_e( 'Reject', 'pulse-question' ); ?></a>
 								</span>
 							</li>
 						<?php endforeach; ?>
@@ -191,8 +191,8 @@ final class QueuePage {
 				<?php endif; ?>
 				<?php if ( $queue ) : ?>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-						<input type="hidden" name="action" value="pq_reorder" />
-						<?php wp_nonce_field( 'pq_reorder' ); ?>
+						<input type="hidden" name="action" value="pulse_question_reorder" />
+						<?php wp_nonce_field( 'pulse_question_reorder' ); ?>
 						<p class="description"><?php esc_html_e( 'Drag to change the order, then save.', 'pulse-question' ); ?></p>
 						<ol class="pq-list pq-queue">
 							<?php
@@ -207,7 +207,7 @@ final class QueuePage {
 									<span class="pq-row__title"><?php echo esc_html( get_the_title( $id ) ); ?><?php self::badge( $id ); ?></span>
 									<span class="pq-row__actions">
 										<a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php esc_html_e( 'Edit', 'pulse-question' ); ?></a>
-										<a href="<?php echo esc_url( self::actionUrl( 'pq_ask_now', $id ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Make this today\'s question now?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Ask now', 'pulse-question' ); ?></a>
+										<a href="<?php echo esc_url( self::actionUrl( 'pulse_question_ask_now', $id ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Make this today\'s question now?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Ask now', 'pulse-question' ); ?></a>
 									</span>
 								</li>
 							<?php endforeach; ?>
@@ -239,8 +239,8 @@ final class QueuePage {
 				</p>
 			<?php else : ?>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="pq-claude-form" onsubmit="this.querySelector('[type=submit]').disabled=true;this.querySelector('.spinner').classList.add('is-active');">
-					<input type="hidden" name="action" value="pq_claude" />
-					<?php wp_nonce_field( 'pq_claude' ); ?>
+					<input type="hidden" name="action" value="pulse_question_claude" />
+					<?php wp_nonce_field( 'pulse_question_claude' ); ?>
 					<label><?php esc_html_e( 'How many', 'pulse-question' ); ?>
 						<input type="number" name="count" min="1" max="30" class="small-text" value="<?php echo esc_attr( (string) Settings::get( 'claude_batch' ) ); ?>" /></label>
 					<label><?php esc_html_e( 'Theme (optional)', 'pulse-question' ); ?>
@@ -273,7 +273,7 @@ final class QueuePage {
 
 	private static function notice(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
-		$msg   = isset( $_GET['pq_msg'] ) ? sanitize_key( $_GET['pq_msg'] ) : '';
+		$msg   = isset( $_GET['pulse_question_msg'] ) ? sanitize_key( $_GET['pulse_question_msg'] ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$count = isset( $_GET['n'] ) ? absint( $_GET['n'] ) : 0;
 		$texts = array(
@@ -309,8 +309,8 @@ final class QueuePage {
 				: sprintf( _n( 'Claude wrote %s question; it\'s waiting for your approval.', 'Claude wrote %s questions; they\'re waiting for your approval.', $count, 'pulse-question' ), number_format_i18n( $count ) ) ) . ' ' . $texts['claude'];
 		}
 		if ( 'claude_error' === $msg ) {
-			$error = (string) get_transient( 'pq_claude_error_' . get_current_user_id() );
-			delete_transient( 'pq_claude_error_' . get_current_user_id() );
+			$error = (string) get_transient( 'pulse_question_claude_error_' . get_current_user_id() );
+			delete_transient( 'pulse_question_claude_error_' . get_current_user_id() );
 			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( '' !== $error ? $error : __( 'Writing questions failed.', 'pulse-question' ) ) . '</p></div>';
 			return;
 		}
@@ -327,9 +327,9 @@ final class QueuePage {
 		}
 		check_admin_referer( $action . ( $id ? '_' . $id : '' ) );
 
-		$args = array( 'pq_msg' => 'none' );
+		$args = array( 'pulse_question_msg' => 'none' );
 		switch ( $action ) {
-			case 'pq_add':
+			case 'pulse_question_add':
 				$lines  = preg_split( '/\R/', (string) wp_unslash( $_POST['questions'] ?? '' ) ) ?: array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per line in Questions::add().
 				$status = Settings::get( 'approve_mine' ) ? 'approved' : 'pending';
 				$n      = 0;
@@ -339,48 +339,48 @@ final class QueuePage {
 					}
 				}
 				$args = array(
-					'pq_msg' => $n ? 'added' : 'none',
+					'pulse_question_msg' => $n ? 'added' : 'none',
 					'n'      => $n,
 				);
 				break;
-			case 'pq_approve':
+			case 'pulse_question_approve':
 				$args = array(
-					'pq_msg' => Questions::approve( $id ) ? 'approved' : 'none',
+					'pulse_question_msg' => Questions::approve( $id ) ? 'approved' : 'none',
 					'n'      => 1,
 				);
 				break;
-			case 'pq_approve_all':
+			case 'pulse_question_approve_all':
 				$n = 0;
 				foreach ( Questions::waiting() as $wid ) {
 					$n += Questions::approve( $wid ) ? 1 : 0;
 				}
 				$args = array(
-					'pq_msg' => 'approved',
+					'pulse_question_msg' => 'approved',
 					'n'      => $n,
 				);
 				break;
-			case 'pq_reorder':
+			case 'pulse_question_reorder':
 				Questions::reorder( array_map( 'absint', (array) wp_unslash( $_POST['order'] ?? array() ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- absint.
-				$args = array( 'pq_msg' => 'reordered' );
+				$args = array( 'pulse_question_msg' => 'reordered' );
 				break;
-			case 'pq_ask_now':
-				$args = array( 'pq_msg' => null !== Daily::askNow( $id ) ? 'asked' : 'none' );
+			case 'pulse_question_ask_now':
+				$args = array( 'pulse_question_msg' => null !== Daily::askNow( $id ) ? 'asked' : 'none' );
 				break;
-			case 'pq_claude':
+			case 'pulse_question_claude':
 				$result = Generator::generate( absint( $_POST['count'] ?? 10 ), sanitize_text_field( wp_unslash( (string) ( $_POST['theme'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast and sanitized.
 				if ( is_wp_error( $result ) ) {
-					set_transient( 'pq_claude_error_' . get_current_user_id(), $result->get_error_message(), 5 * MINUTE_IN_SECONDS );
-					$args = array( 'pq_msg' => 'claude_error' );
+					set_transient( 'pulse_question_claude_error_' . get_current_user_id(), $result->get_error_message(), 5 * MINUTE_IN_SECONDS );
+					$args = array( 'pulse_question_msg' => 'claude_error' );
 				} else {
 					$args = array(
-						'pq_msg' => 'claude',
+						'pulse_question_msg' => 'claude',
 						'n'      => count( $result['added'] ),
 						's'      => $result['skipped'],
 					);
 				}
 				break;
-			case 'pq_trash':
-				$args = array( 'pq_msg' => $id && get_post_type( $id ) === Questions::POST_TYPE && wp_trash_post( $id ) ? 'trashed' : 'none' );
+			case 'pulse_question_trash':
+				$args = array( 'pulse_question_msg' => $id && get_post_type( $id ) === Questions::POST_TYPE && wp_trash_post( $id ) ? 'trashed' : 'none' );
 				break;
 		}
 		wp_safe_redirect( self::url( $args ) );

@@ -13,9 +13,11 @@ use PulseQuestion\Vendor\Bignall\WPFoundation\Plugin;
 
 final class Bootstrap {
 
-	public const PREFIX = 'pq';
+	public const PREFIX = 'pulse_question';
 
 	public static function plugin( string $file ): Plugin {
+		// Data saved before 0.6.0 used the prefix pq_; move it before WP Foundation reads its version.
+		PrefixMigration::maybeRun();
 		return Plugin::create( $file, self::PREFIX )
 			->requires( php: '8.1', wp: '6.4' )
 			->settings( Settings::store() )
@@ -28,7 +30,7 @@ final class Bootstrap {
 					Email\DailyEmail::LOG => array(),
 					Social\Webhook::STATE => array(),
 					Social\Webhook::LOG => array(),
-					'pq_social_secret'       => '',
+					'pulse_question_social_secret'       => '',
 					Admin\Setup::OPTION     => array(),
 				)
 			)

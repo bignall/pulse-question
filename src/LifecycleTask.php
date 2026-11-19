@@ -49,7 +49,7 @@ final class LifecycleTask implements Task {
 		foreach ( array( Members\Members::META_JOINED, Members\Members::META_MARKETING, Members\Members::META_ASKED, Members\MailingList::META_PENDING ) as $key ) {
 			delete_metadata( 'user', 0, $key, '', true );
 		}
-		delete_option( 'pq_email_job' );
-		delete_option( 'pq_email_lock' );
+		delete_option( 'pulse_question_email_job' );
+		delete_option( 'pulse_question_email_lock' );
 	}
 }

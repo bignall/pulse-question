@@ -25,12 +25,12 @@ final class AnswersAdmin {
 	 * @return array<string, string>
 	 */
 	public static function columns( array $columns ): array {
-		$columns['pq_check'] = __( 'Check', 'pulse-question' );
+		$columns['pulse_question_check'] = __( 'Check', 'pulse-question' );
 		return $columns;
 	}
 
 	public static function column( string $column, int|string $comment_id ): void {
-		if ( 'pq_check' !== $column ) {
+		if ( 'pulse_question_check' !== $column ) {
 			return;
 		}
 		$comment = get_comment( (int) $comment_id );

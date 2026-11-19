@@ -24,3 +24,17 @@ jobs:
       - run: composer test
       - name: Lint every PHP file
         run: find src pulse-question.php -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+  standards:
+    name: WordPress coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --no-progress
+      # Errors fail the build; warnings are shown but don't.
+      - run: vendor/bin/phpcs -q --warning-severity=0 --report=full

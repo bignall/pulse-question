@@ -27,10 +27,10 @@ use PulseQuestion\Settings;
 
 final class DailyEmail {
 
-	public const HOOK  = 'pq_daily_email';
-	public const STATE = 'pq_email_state';
-	public const LOG   = 'pq_email_log';
-	private const LOCK = 'pq_email_lock';
+	public const HOOK  = 'pulse_question_daily_email';
+	public const STATE = 'pulse_question_email_state';
+	public const LOG   = 'pulse_question_email_log';
+	private const LOCK = 'pulse_question_email_lock';
 
 	private const MAX_TRIES = 5;
 

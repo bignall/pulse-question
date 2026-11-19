@@ -10,7 +10,7 @@
 	var preview = box.find( '.pq-logo-preview' );
 	var frame;
 
-	box.on( 'change', 'input[name="pq_logo_mode"]', function () {
+	box.on( 'change', 'input[name="pulse_question_logo_mode"]', function () {
 		var mode = this.value;
 		if ( 'auto' === mode ) {
 			value.val( 0 );
@@ -37,7 +37,7 @@
 				value.val( image.id );
 				var size = image.sizes && image.sizes.medium ? image.sizes.medium : image;
 				preview.attr( 'src', size.url ).show();
-				box.find( 'input[name="pq_logo_mode"][value="image"]' ).prop( 'checked', true );
+				box.find( 'input[name="pulse_question_logo_mode"][value="image"]' ).prop( 'checked', true );
 			} );
 		}
 		frame.open();

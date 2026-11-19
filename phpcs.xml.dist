@@ -40,7 +40,6 @@
 			<property name="prefixes" type="array">
 				<element value="PulseQuestion"/>
 				<element value="pulse_question"/>
-				<element value="pq"/>
 			</property>
 		</properties>
 	</rule>

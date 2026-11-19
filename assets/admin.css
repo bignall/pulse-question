@@ -78,8 +78,8 @@
 }
 
 /* The question editor: no publish date or visibility; the Status box decides. */
-.post-type-pq_question #minor-publishing-actions,
-.post-type-pq_question #misc-publishing-actions {
+.post-type-pulse_question #minor-publishing-actions,
+.post-type-pulse_question #misc-publishing-actions {
 	display: none;
 }
 

@@ -45,11 +45,11 @@ To style everything yourself, untick **Settings → Styles → Use the plugin's 
 
 ## Etch and other page builders
 
-Query questions in any WP Query loop with the `pq_view` argument:
+Query questions in any WP Query loop with the `pulse_question_view` argument:
 
 ```php
-new WP_Query( array( 'post_type' => 'pq_question', 'pq_view' => 'today' ) );                  // today's question
-new WP_Query( array( 'post_type' => 'pq_question', 'pq_view' => 'past', 'posts_per_page' => 12 ) ); // asked, newest first
+new WP_Query( array( 'post_type' => 'pulse_question', 'pulse_question_view' => 'today' ) );                  // today's question
+new WP_Query( array( 'post_type' => 'pulse_question', 'pulse_question_view' => 'past', 'posts_per_page' => 12 ) ); // asked, newest first
 ```
 
-A question's post date is the day it was last asked, so builders can show and sort by it. The background is the post content. To show the answers and share links on a custom question template, use the post content, or call `PulseQuestion\Front\AnswersView::render( $post_id )` and `PulseQuestion\Social\ShareButtons::render( $post_id )`.
+Loops set up before 0.6.0 with `pq_question` and `pq_view` keep working. A question's post date is the day it was last asked, so builders can show and sort by it. The background is the post content. To show the answers and share links on a custom question template, use the post content, or call `PulseQuestion\Front\AnswersView::render( $post_id )` and `PulseQuestion\Social\ShareButtons::render( $post_id )`.

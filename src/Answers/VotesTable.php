@@ -14,7 +14,7 @@ use PulseQuestion\Vendor\Bignall\WPFoundation\Database\Table;
 final class VotesTable extends Table {
 
 	public function name(): string {
-		return 'pq_votes';
+		return 'pulse_question_votes';
 	}
 
 	public function columns(): string {

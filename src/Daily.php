@@ -17,9 +17,9 @@ namespace PulseQuestion;
 final class Daily {
 
 	/** array{id: int, day: string, reused: bool} for today's question. */
-	public const OPTION    = 'pq_today';
-	public const CRON_HOOK = 'pq_daily_check';
-	private const LOCK     = 'pq_pick_lock';
+	public const OPTION    = 'pulse_question_today';
+	public const CRON_HOOK = 'pulse_question_daily_check';
+	private const LOCK     = 'pulse_question_pick_lock';
 
 	public static function init(): void {
 		add_action( self::CRON_HOOK, array( self::class, 'current' ) );

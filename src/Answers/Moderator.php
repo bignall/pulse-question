@@ -24,8 +24,8 @@ use PulseQuestion\Settings;
 
 final class Moderator {
 
-	public const META       = '_pq_check';
-	public const RETRY_HOOK = 'pq_recheck_answer';
+	public const META       = '_pulse_question_check';
+	public const RETRY_HOOK = 'pulse_question_recheck_answer';
 	private const MAX_TRIES = 6;
 
 	public const CATEGORIES = array( 'none', 'profanity', 'harassment', 'hate', 'sexual', 'violence', 'self_harm', 'personal_info', 'spam', 'off_topic', 'other' );

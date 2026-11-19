@@ -22,9 +22,9 @@ use PulseQuestion\Settings;
 
 final class Webhook {
 
-	public const HOOK  = 'pq_social_post';
-	public const STATE = 'pq_social_state';
-	public const LOG   = 'pq_social_log';
+	public const HOOK  = 'pulse_question_social_post';
+	public const STATE = 'pulse_question_social_state';
+	public const LOG   = 'pulse_question_social_log';
 
 	private const MAX_TRIES = 5;
 
@@ -244,10 +244,10 @@ final class Webhook {
 
 	/** The signing secret, made the first time it's needed. */
 	public static function secret(): string {
-		$secret = (string) get_option( 'pq_social_secret', '' );
+		$secret = (string) get_option( 'pulse_question_social_secret', '' );
 		if ( '' === $secret ) {
 			$secret = wp_generate_password( 40, false );
-			update_option( 'pq_social_secret', $secret, false );
+			update_option( 'pulse_question_social_secret', $secret, false );
 		}
 		return $secret;
 	}

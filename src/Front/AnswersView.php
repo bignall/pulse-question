@@ -37,17 +37,17 @@ final class AnswersView {
 		if ( ! Answers::isAnswer( $comment ) || '1' === $comment->comment_approved ) {
 			return $location;
 		}
-		return add_query_arg( 'pq_held', $comment->comment_ID, get_permalink( (int) $comment->comment_post_ID ) ) . '#pq-answers';
+		return add_query_arg( 'pulse_question_held', $comment->comment_ID, get_permalink( (int) $comment->comment_post_ID ) ) . '#pq-answers';
 	}
 
 	public static function render( int $post_id ): string {
 		$user  = get_current_user_id();
 		$count = (int) get_comments_number( $post_id );
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- display options only.
-		$sort = isset( $_GET['pq_sort'] ) && 'new' === $_GET['pq_sort'] ? 'new' : 'top';
-		$page = isset( $_GET['pq_ap'] ) ? max( 1, absint( $_GET['pq_ap'] ) ) : 1;
-		$held = isset( $_GET['pq_held'] ) ? absint( $_GET['pq_held'] ) : 0;
-		$sent = isset( $_GET['pq_reported'] );
+		$sort = isset( $_GET['pulse_question_sort'] ) && 'new' === $_GET['pulse_question_sort'] ? 'new' : 'top';
+		$page = isset( $_GET['pulse_question_ap'] ) ? max( 1, absint( $_GET['pulse_question_ap'] ) ) : 1;
+		$held = isset( $_GET['pulse_question_held'] ) ? absint( $_GET['pulse_question_held'] ) : 0;
+		$sent = isset( $_GET['pulse_question_reported'] );
 		// phpcs:enable
 
 		if ( ! wp_script_is( 'pulse-question-answers', 'registered' ) ) {
@@ -97,7 +97,7 @@ final class AnswersView {
 	}
 
 	private static function sortLink( string $base, string $value, string $label, string $current ): string {
-		$url = add_query_arg( 'pq_sort', $value, $base ) . '#pq-answers';
+		$url = add_query_arg( 'pulse_question_sort', $value, $base ) . '#pq-answers';
 		return '<a href="' . esc_url( $url ) . '"' . ( $value === $current ? ' aria-current="true" class="is-current"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
 
@@ -208,8 +208,8 @@ final class AnswersView {
 				array(
 					'base'      => add_query_arg(
 						array(
-							'pq_ap' => '%#%',
-							'pq_sort' => $sort,
+							'pulse_question_ap' => '%#%',
+							'pulse_question_sort' => $sort,
 						),
 						(string) get_permalink( $post_id )
 					) . '#pq-answers',
@@ -267,8 +267,8 @@ final class AnswersView {
 			}
 			if ( $user > 0 && (int) $c->user_id !== $user ) {
 				$html .= '<form class="pq-report" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">'
-					. wp_nonce_field( 'pq_report', '_wpnonce', true, false )
-					. '<input type="hidden" name="action" value="pq_report" /><input type="hidden" name="id" value="' . $id . '" />'
+					. wp_nonce_field( 'pulse_question_report', '_wpnonce', true, false )
+					. '<input type="hidden" name="action" value="pulse_question_report" /><input type="hidden" name="id" value="' . $id . '" />'
 					. '<button type="submit" class="pq-link pq-link--quiet">' . esc_html__( 'Report', 'pulse-question' ) . '</button></form>';
 			}
 			$html .= '</div>';
@@ -298,8 +298,8 @@ final class AnswersView {
 		}
 		$voted = $voted ?? Votes::hasVoted( $type, $id, $user );
 		return '<form class="pq-vote-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">'
-			. wp_nonce_field( 'pq_vote', '_wpnonce', true, false )
-			. '<input type="hidden" name="action" value="pq_vote" /><input type="hidden" name="type" value="' . esc_attr( $type ) . '" /><input type="hidden" name="id" value="' . $id . '" />'
+			. wp_nonce_field( 'pulse_question_vote', '_wpnonce', true, false )
+			. '<input type="hidden" name="action" value="pulse_question_vote" /><input type="hidden" name="type" value="' . esc_attr( $type ) . '" /><input type="hidden" name="id" value="' . $id . '" />'
 			. '<button type="submit" class="pq-vote" aria-pressed="' . ( $voted ? 'true' : 'false' ) . '" aria-label="' . esc_attr( $aria ) . '" data-pq-vote="' . esc_attr( $type ) . '" data-pq-id="' . $id . '">' . self::heart() . $text . $num . '</button></form>';
 	}
 }

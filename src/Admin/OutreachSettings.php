@@ -25,10 +25,10 @@ use PulseQuestion\Social\Webhook;
 final class OutreachSettings {
 
 	public static function init(): void {
-		add_action( 'admin_post_pq_email_preview', array( self::class, 'preview' ) );
-		add_action( 'admin_post_pq_email_test', array( self::class, 'test' ) );
-		add_action( 'admin_post_pq_email_send', array( self::class, 'sendNow' ) );
-		add_action( 'admin_post_pq_social_test', array( self::class, 'socialTest' ) );
+		add_action( 'admin_post_pulse_question_email_preview', array( self::class, 'preview' ) );
+		add_action( 'admin_post_pulse_question_email_test', array( self::class, 'test' ) );
+		add_action( 'admin_post_pulse_question_email_send', array( self::class, 'sendNow' ) );
+		add_action( 'admin_post_pulse_question_social_test', array( self::class, 'socialTest' ) );
 		add_action( 'admin_enqueue_scripts', array( self::class, 'assets' ) );
 	}
 
@@ -63,23 +63,23 @@ final class OutreachSettings {
 
 	/** @param array{ok: bool, message: string} $result What happened. */
 	private static function back( array $result, string $anchor ): void {
-		set_transient( 'pq_notice_' . get_current_user_id(), $result, 5 * MINUTE_IN_SECONDS );
+		set_transient( 'pulse_question_notice_' . get_current_user_id(), $result, 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=' . SettingsPage::SLUG ) . '#' . $anchor );
 		exit;
 	}
 
 	/** The result of the last button, at the top of Settings. */
 	public static function notice(): void {
-		$notice = get_transient( 'pq_notice_' . get_current_user_id() );
+		$notice = get_transient( 'pulse_question_notice_' . get_current_user_id() );
 		if ( ! is_array( $notice ) ) {
 			return;
 		}
-		delete_transient( 'pq_notice_' . get_current_user_id() );
+		delete_transient( 'pulse_question_notice_' . get_current_user_id() );
 		printf( '<div class="notice notice-%s is-dismissible"><p>%s</p></div>', $notice['ok'] ? 'success' : 'error', esc_html( (string) $notice['message'] ) );
 	}
 
 	public static function preview(): void {
-		self::check( 'pq_email_preview' );
+		self::check( 'pulse_question_email_preview' );
 		$today = Daily::current();
 		if ( null === $today ) {
 			wp_die( esc_html__( 'There\'s no question of the day yet.', 'pulse-question' ) );
@@ -91,7 +91,7 @@ final class OutreachSettings {
 	}
 
 	public static function test(): void {
-		self::check( 'pq_email_test' );
+		self::check( 'pulse_question_email_test' );
 		$today = Daily::current();
 		$user  = wp_get_current_user();
 		if ( null === $today ) {
@@ -124,12 +124,12 @@ final class OutreachSettings {
 	}
 
 	public static function sendNow(): void {
-		self::check( 'pq_email_send' );
+		self::check( 'pulse_question_email_send' );
 		self::back( DailyEmail::send(), 'pq-email' );
 	}
 
 	public static function socialTest(): void {
-		self::check( 'pq_social_test' );
+		self::check( 'pulse_question_social_test' );
 		self::back( Webhook::post( true ), 'pq-social' );
 	}
 
@@ -233,10 +233,10 @@ final class OutreachSettings {
 					</p>
 				<?php endif; ?>
 				<p>
-					<a class="button" target="_blank" href="<?php echo esc_url( self::actionUrl( 'pq_email_preview' ) ); ?>"><?php esc_html_e( 'Preview', 'pulse-question' ); ?></a>
-					<a class="button" href="<?php echo esc_url( self::actionUrl( 'pq_email_test' ) ); ?>"><?php esc_html_e( 'Send me a test', 'pulse-question' ); ?></a>
+					<a class="button" target="_blank" href="<?php echo esc_url( self::actionUrl( 'pulse_question_email_preview' ) ); ?>"><?php esc_html_e( 'Preview', 'pulse-question' ); ?></a>
+					<a class="button" href="<?php echo esc_url( self::actionUrl( 'pulse_question_email_test' ) ); ?>"><?php esc_html_e( 'Send me a test', 'pulse-question' ); ?></a>
 					<?php if ( null !== $today && ! DailyEmail::doneFor( $today['day'] ) ) : ?>
-						<a class="button" href="<?php echo esc_url( self::actionUrl( 'pq_email_send' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Send today\'s question to the whole mailing list now?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Send today\'s email now', 'pulse-question' ); ?></a>
+						<a class="button" href="<?php echo esc_url( self::actionUrl( 'pulse_question_email_send' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Send today\'s question to the whole mailing list now?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Send today\'s email now', 'pulse-question' ); ?></a>
 					<?php endif; ?>
 				</p>
 				<p class="description"><?php esc_html_e( 'Preview and the test use the saved settings, so save your changes first.', 'pulse-question' ); ?></p>
@@ -302,7 +302,7 @@ final class OutreachSettings {
 			<th scope="row"><?php esc_html_e( 'Check it', 'pulse-question' ); ?></th>
 			<td>
 				<?php if ( '' !== (string) $store->get( 'social_webhook_url' ) ) : ?>
-					<p><a class="button" href="<?php echo esc_url( self::actionUrl( 'pq_social_test' ) ); ?>"><?php esc_html_e( 'Send a test post', 'pulse-question' ); ?></a>
+					<p><a class="button" href="<?php echo esc_url( self::actionUrl( 'pulse_question_social_test' ) ); ?>"><?php esc_html_e( 'Send a test post', 'pulse-question' ); ?></a>
 						<span class="description"><?php esc_html_e( 'Sends today\'s question marked "test": true, so you can map the fields in your automation.', 'pulse-question' ); ?></span></p>
 				<?php endif; ?>
 				<p class="description">
@@ -329,7 +329,7 @@ final class OutreachSettings {
 			<th scope="row"><?php esc_html_e( 'Logo', 'pulse-question' ); ?></th>
 			<td>
 				<fieldset class="pq-logo-choice">
-					<label><input type="radio" name="pq_logo_mode" value="auto" <?php checked( 0, $logo ); ?> />
+					<label><input type="radio" name="pulse_question_logo_mode" value="auto" <?php checked( 0, $logo ); ?> />
 						<?php
 						echo esc_html(
 							match ( $auto ) {
@@ -340,8 +340,8 @@ final class OutreachSettings {
 						);
 						?>
 					</label><br />
-					<label><input type="radio" name="pq_logo_mode" value="bundled" <?php checked( -1, $logo ); ?> /> <?php esc_html_e( 'The Pulse Question logo', 'pulse-question' ); ?></label><br />
-					<label><input type="radio" name="pq_logo_mode" value="image" <?php checked( $logo > 0 ); ?> /> <?php esc_html_e( 'An image:', 'pulse-question' ); ?></label>
+					<label><input type="radio" name="pulse_question_logo_mode" value="bundled" <?php checked( -1, $logo ); ?> /> <?php esc_html_e( 'The Pulse Question logo', 'pulse-question' ); ?></label><br />
+					<label><input type="radio" name="pulse_question_logo_mode" value="image" <?php checked( $logo > 0 ); ?> /> <?php esc_html_e( 'An image:', 'pulse-question' ); ?></label>
 					<button type="button" class="button pq-logo-pick"><?php esc_html_e( 'Choose…', 'pulse-question' ); ?></button>
 					<input type="hidden" class="pq-logo-value" name="<?php echo esc_attr( $field ); ?>" value="<?php echo esc_attr( (string) $logo ); ?>" />
 					<p><img class="pq-logo-preview" src="<?php echo esc_url( (string) $chosen ); ?>" alt="" style="max-height:72px;width:auto;<?php echo $chosen ? '' : 'display:none'; ?>" /></p>

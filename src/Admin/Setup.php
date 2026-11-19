@@ -23,11 +23,11 @@ use PulseQuestion\Settings;
 final class Setup {
 
 	/** Steps the owner marked done, and whether the checklist is hidden. */
-	public const OPTION = 'pq_setup';
+	public const OPTION = 'pulse_question_setup';
 
 	public static function init(): void {
 		add_action( 'admin_notices', array( self::class, 'notice' ) );
-		add_action( 'admin_post_pq_setup', array( self::class, 'handle' ) );
+		add_action( 'admin_post_pulse_question_setup', array( self::class, 'handle' ) );
 	}
 
 	/** @return array{done: list<string>, hidden: bool, seen: bool} */
@@ -63,7 +63,7 @@ final class Setup {
 				'text'     => __( 'Type a few in the Queue, one per line, or let Claude write some.', 'pulse-question' ),
 				'done'     => count( Questions::queue() ) + count( Questions::asked() ) > 0,
 				'optional' => false,
-				'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pq-queue' ),
+				'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pulse-question-queue' ),
 				'action'   => __( 'Open the Queue', 'pulse-question' ),
 				'markable' => false,
 			),
@@ -218,13 +218,13 @@ final class Setup {
 		return wp_nonce_url(
 			add_query_arg(
 				array(
-					'action' => 'pq_setup',
+					'action' => 'pulse_question_setup',
 					'do'     => $what,
 					'step'   => $step,
 				),
 				admin_url( 'admin-post.php' )
 			),
-			'pq_setup'
+			'pulse_question_setup'
 		);
 	}
 
@@ -232,7 +232,7 @@ final class Setup {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to do that.', 'pulse-question' ), 403 );
 		}
-		check_admin_referer( 'pq_setup' );
+		check_admin_referer( 'pulse_question_setup' );
 		$state = self::state();
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- checked above.
 		$do   = isset( $_GET['do'] ) ? sanitize_key( wp_unslash( $_GET['do'] ) ) : '';

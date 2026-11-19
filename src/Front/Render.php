@@ -19,7 +19,7 @@ use PulseQuestion\Settings;
 
 final class Render {
 
-	public const PAGE_VAR = 'pq_page';
+	public const PAGE_VAR = 'pulse_question_page';
 
 	public static function init(): void {
 		add_action( 'wp_enqueue_scripts', array( self::class, 'registerStyle' ) );

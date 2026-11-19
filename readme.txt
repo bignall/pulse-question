@@ -19,7 +19,7 @@ Pulse Question asks your visitors one thought-provoking question each day. Membe
 * Each day at the time you choose, the next approved question becomes the question of the day. When the queue is empty, the question asked longest ago is asked again, so there's always a question.
 * Show it with the "Question of the day" and "Past questions" blocks or the [pulse_question] and [pulse_question_past] shortcodes. Each question has its own page; asked questions are listed at /questions/, and by category.
 * Settings can make a page with both blocks and set it as the home page.
-* Your logo and colours on share images, in the email and on the site. It inherits your theme's fonts and follows Automatic.css; restyle with the --pq-accent, --pq-card-bg, --pq-border and --pq-radius CSS properties, or turn the plugin's styles off and use Etch or another builder (pq_view query argument).
+* Your logo and colours on share images, in the email and on the site. It inherits your theme's fonts and follows Automatic.css; restyle with the --pq-accent, --pq-card-bg, --pq-border and --pq-radius CSS properties, or turn the plugin's styles off and use Etch or another builder (pulse_question_view query argument).
 * A setup checklist walks new sites through everything.
 * Questions written by Claude (optional, with your own Anthropic API key): on demand or to keep the queue topped up, waiting for your approval unless you choose otherwise.
 * Answers from logged-in members, with votes, replies and reports. New members are offered your mailing list (FluentCRM), with the boxes ticked by default.
@@ -60,7 +60,7 @@ It sends each new question, with a ready-written post and its share image, to a 
 
 = Will it work with my theme or page builder? =
 
-It works with block and classic themes, with blocks, shortcodes and its own templates. For Etch and other builders, query questions with the pq_view argument (today or past) and turn the plugin's styles off if you style everything yourself.
+It works with block and classic themes, with blocks, shortcodes and its own templates. For Etch and other builders, query questions with the pulse_question_view argument (today or past) and turn the plugin's styles off if you style everything yourself.
 
 == Screenshots ==
 
@@ -74,7 +74,7 @@ It works with block and classic themes, with blocks, shortcodes and its own temp
 == Upgrade Notice ==
 
 = 0.6.0 =
-Adds branding settings (logo and colours) and a setup checklist.
+Adds branding settings and a setup checklist, and renames the plugin's data to longer, unique names. The data moves by itself; back up first, as with any update. Check any page-builder template you made for questions afterwards.
 
 == External services ==
 
@@ -100,6 +100,7 @@ Share images use the Inter font by The Inter Project Authors, under the SIL Open
 * Tested with WordPress 7.1. Checked with the WordPress coding standards.
 * Uninstalling (with "delete all data" on) also removes members' Pulse Question details.
 * Sites upgrading keep the Pulse Question logo on share images until they choose another.
+* Longer, unique names (wordpress.org asks for prefixes of at least four letters): pq_ becomes pulse_question_, the post type is now pulse_question, the taxonomy pulse_question_category, and the query argument pulse_question_view. Upgrading moves each site's data once, by itself. Queries using the old names (such as Etch loops) keep working, and so do unsubscribe links in emails already sent.
 
 = 0.5.0 =
 * Daily email: each new question goes out about a minute after it's asked, once a day, with yesterday's three most-liked answers. With FluentCRM, it's sent as a campaign to your daily email lists; without it, a built-in sender emails members who chose the daily email, 40 a minute, with unsubscribe links. Settings for the subject, an opening line, the button text and the number of answers, plus Preview, Send me a test and Send now. Failures are retried hourly and get a To-do Hub task.
