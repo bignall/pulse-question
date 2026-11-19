@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 0.4.1
+Stable tag: 0.5.0
 License: GPLv2 or later
 
 A thought-provoking question every day: a queue you control, a daily pick, today's question and cards of past ones.
@@ -20,7 +20,9 @@ A thought-provoking question every day: a queue you control, a daily pick, today
 * Questions written by Claude (optional, with your own Anthropic API key): on demand or to keep the queue topped up, waiting for your approval unless you choose otherwise.
 * Answers from logged-in members, with votes, replies and reports. New members are offered your mailing list (FluentCRM), with the boxes ticked by default.
 * Automatic moderation: Claude checks each answer against your guidelines and publishes it, holds it for you, or keeps it off the site.
-* Works with To-do Hub: a task when the queue gets short, or when questions or answers are waiting for approval.
+* Daily email: each new question, with yesterday's top answers, sent as a FluentCRM campaign (on this site or another) or by a simple built-in sender with unsubscribe links.
+* Social sharing: a share image for each question, share tags for links, share buttons, and automatic posts through a webhook (Zapier, Make, n8n and others).
+* Works with To-do Hub: a task when the queue gets short, when questions or answers are waiting for approval, or when the daily email or a social post fails.
 * Built on WP Foundation (activation, upgrades, uninstall, multisite, deactivation survey).
 
 == External services ==
@@ -29,7 +31,21 @@ When you use "Write questions with Claude" or automatic top-up, the plugin sends
 
 If you connect a FluentCRM site on another domain (Settings → Members), each new member's email address, name, chosen lists and tags are sent to that site's REST API. With FluentCRM on the same site, nothing leaves your site.
 
+If you set a social webhook address (Settings → Social sharing), each new question's text, link, background, category and share image address are sent to that address, which you choose (for example Zapier, Make or n8n). Nothing is sent until you add one.
+
+The daily email, when turned on, goes through FluentCRM (on this site, or the FluentCRM site set under Members, as a campaign to your lists) or through WordPress's own email (wp_mail) to members who chose it.
+
+Share links on question pages are plain links to Facebook, X, LinkedIn, Pinterest and Bluesky's share pages; nothing is loaded from those sites until a visitor clicks one.
+
+Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
+
 == Changelog ==
+
+= 0.5.0 =
+* Daily email: each new question goes out about a minute after it's asked, once a day, with yesterday's three most-liked answers. With FluentCRM, it's sent as a campaign to your daily email lists; without it, a built-in sender emails members who chose the daily email, 40 a minute, with unsubscribe links. Settings for the subject, an opening line, the button text and the number of answers, plus Preview, Send me a test and Send now. Failures are retried hourly and get a To-do Hub task.
+* Social sharing: a 1200×630 share image for each question (or its featured image), share tags for links (handing the image to Yoast SEO or Rank Math when they're active), share links under each question, and automatic posts through a signed webhook, with a test button. Failures are retried and get a To-do Hub task.
+* Fix: with FluentCRM on another site, double opt-in contacts now get FluentCRM's confirmation email. Before, they stayed pending without one.
+* The mailing list settings and Test connection now name the FluentCRM permissions the user needs.
 
 = 0.4.1 =
 * A "Test connection" button for the mailing list (Settings → Members). It checks the saved settings step by step and says which step failed and what to do: a redirect that drops the login, wrong or refused details, a server that drops the login header, a user without FluentCRM permission, FluentCRM not active, or list ids that don't exist.

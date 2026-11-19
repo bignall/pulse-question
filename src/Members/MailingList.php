@@ -121,7 +121,8 @@ final class MailingList {
 					'Authorization' => 'Basic ' . base64_encode( $user . ':' . $pass ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 					'Content-Type'  => 'application/json',
 				),
-				'body'    => (string) wp_json_encode( $contact + array( '__force_update' => 'yes' ) ),
+				// FluentCRM only sends its confirmation email over REST when asked to.
+				'body'    => (string) wp_json_encode( $contact + array( '__force_update' => 'yes', 'double_optin' => 'pending' === $contact['status'] ) ),
 			)
 		);
 		if ( is_wp_error( $response ) ) {

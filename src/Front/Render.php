@@ -97,6 +97,7 @@ final class Render {
 				/* translators: %s: number of answers. */
 				. esc_html( $n ? sprintf( _n( '%s answer so far', '%s answers so far', $n, 'pulse-question' ), number_format_i18n( $n ) ) : __( 'Be the first to answer', 'pulse-question' ) ) . '</span></p>';
 		}
+		$html .= \PulseQuestion\Social\ShareButtons::render( (int) $post->ID );
 		$html .= '</section>';
 		return $html;
 	}
@@ -207,6 +208,7 @@ final class Render {
 			);
 		}
 		$extra .= '</p>' . self::categories( (int) get_the_ID() );
+		$extra .= \PulseQuestion\Social\ShareButtons::render( (int) get_the_ID() );
 		if ( Settings::get( 'answers_open' ) || get_comments_number( (int) get_the_ID() ) ) {
 			$extra .= AnswersView::render( (int) get_the_ID() );
 		}

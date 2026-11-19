@@ -23,6 +23,7 @@ final class SettingsPage {
 		add_action( 'admin_menu', array( self::class, 'menu' ), 20 );
 		add_action( 'admin_post_pq_make_page', array( self::class, 'makePage' ) );
 		add_action( 'admin_post_pq_test_list', array( self::class, 'testList' ) );
+		OutreachSettings::init();
 	}
 
 	public static function menu(): void {
@@ -42,6 +43,7 @@ final class SettingsPage {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Pulse Question Settings', 'pulse-question' ); ?></h1>
+			<?php OutreachSettings::notice(); ?>
 			<?php if ( $made ) : ?>
 				<div class="notice notice-success"><p>
 					<?php esc_html_e( 'Page created.', 'pulse-question' ); ?>
@@ -98,6 +100,8 @@ final class SettingsPage {
 					<?php self::claudeRows( $store, $flag ); ?>
 					<?php self::answerRows( $store, $flag ); ?>
 					<?php self::memberRows( $store, $flag ); ?>
+					<?php OutreachSettings::emailRows( $store, $flag ); ?>
+					<?php OutreachSettings::socialRows( $store, $flag ); ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
 						<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
@@ -335,7 +339,7 @@ final class SettingsPage {
 					<p><label><?php esc_html_e( 'Site address', 'pulse-question' ); ?> <input type="url" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_url' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_url' ) ); ?>" placeholder="https://example.com" /></label></p>
 					<p><label><?php esc_html_e( 'User name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_user' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_user' ) ); ?>" /></label></p>
 					<p><label><?php esc_html_e( 'Application password', 'pulse-question' ); ?> <input type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'list_remote_password' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'list_remote_password' ) ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : '' ); ?>" /></label></p>
-					<p class="description"><?php esc_html_e( 'A user on that site who can manage FluentCRM contacts, with an application password (Users → Profile).', 'pulse-question' ); ?></p>
+					<p class="description"><?php esc_html_e( 'A user on that site with an application password (Users → Profile). An administrator works. Otherwise, under FluentCRM → Settings → Managers, give the user: "Add, update and import contacts", "Create and update tags, lists, companies and segments" and, for the daily email, "Write and send emails".', 'pulse-question' ); ?></p>
 				</div>
 				<p id="pq-list-test" style="margin-top:12px">
 					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=pq_test_list' ), 'pq_test_list' ) ); ?>"><?php esc_html_e( 'Test connection', 'pulse-question' ); ?></a>

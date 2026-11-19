@@ -29,6 +29,9 @@ final class App {
 		Answers\Actions::init();
 		Members\Members::init();
 		Members\MailingList::init();
+		Email\DailyEmail::init();
+		Social\Webhook::init();
+		Social\ShareTags::init();
 		Front\AnswersView::init();
 		Front\Render::init();
 		Front\Shortcodes::init();

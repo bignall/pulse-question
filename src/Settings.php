@@ -65,6 +65,18 @@ final class Settings {
 			'list_remote_password'  => '',
 			'list_label'            => 'Send me the question of the day by email',
 			'marketing_label'       => 'Also send me occasional news and offers',
+			'email_enabled'         => 0,
+			'email_from'            => '',
+			'email_subject'         => '{question}',
+			'email_intro'           => '',
+			'email_button'          => 'Answer today\'s question',
+			'email_top_answers'     => 3,
+			'social_webhook_url'    => '',
+			'social_from'           => '',
+			'social_text'           => "{question}\n\nShare your answer: {url}\n\n{hashtags}",
+			'social_hashtags'       => 'QuestionOfTheDay',
+			'share_buttons'         => 1,
+			'share_tags'            => 1,
 			'remove_data'     => 0,
 		);
 	}
@@ -79,7 +91,11 @@ final class Settings {
 	 * @return array<string, mixed>
 	 */
 	public static function sanitize( array $input, Store $current ): array {
-		$time = (string) ( $input['switch_time'] ?? '00:00' );
+		$time    = (string) ( $input['switch_time'] ?? '00:00' );
+		$email   = empty( $input['email_enabled'] ) ? 0 : 1;
+		$webhook = esc_url_raw( trim( (string) ( $input['social_webhook_url'] ?? '' ) ), array( 'https', 'http' ) );
+		// Automatic sending starts with the next question: nobody gets a surprise email mid-day.
+		$next = static fn (): string => ( new \DateTimeImmutable( Daily::day() . ' 12:00', wp_timezone() ) )->modify( '+1 day' )->format( 'Y-m-d' );
 		return array(
 			'switch_time'    => preg_match( '/^([01]\d|2[0-3]):[0-5]\d$/', $time ) ? $time : '00:00',
 			'approve_mine'   => empty( $input['approve_mine'] ) ? 0 : 1,
@@ -117,6 +133,18 @@ final class Settings {
 			'list_remote_password'  => '' !== trim( (string) ( $input['list_remote_password'] ?? '' ) ) ? preg_replace( '/\s+/', '', (string) $input['list_remote_password'] ) : (string) $current->get( 'list_remote_password' ),
 			'list_label'            => sanitize_text_field( (string) ( $input['list_label'] ?? '' ) ),
 			'marketing_label'       => sanitize_text_field( (string) ( $input['marketing_label'] ?? '' ) ),
+			'email_enabled'         => $email,
+			'email_from'            => ! $email ? '' : ( $current->get( 'email_enabled' ) && '' !== (string) $current->get( 'email_from' ) ? (string) $current->get( 'email_from' ) : $next() ),
+			'email_subject'         => sanitize_text_field( (string) ( $input['email_subject'] ?? '{question}' ) ),
+			'email_intro'           => sanitize_textarea_field( (string) ( $input['email_intro'] ?? '' ) ),
+			'email_button'          => '' !== trim( (string) ( $input['email_button'] ?? '' ) ) ? sanitize_text_field( (string) $input['email_button'] ) : 'Answer today\'s question',
+			'email_top_answers'     => max( 0, min( 10, (int) ( $input['email_top_answers'] ?? 3 ) ) ),
+			'social_webhook_url'    => $webhook,
+			'social_from'           => '' === $webhook ? '' : ( '' !== (string) $current->get( 'social_webhook_url' ) && '' !== (string) $current->get( 'social_from' ) ? (string) $current->get( 'social_from' ) : $next() ),
+			'social_text'           => sanitize_textarea_field( (string) ( $input['social_text'] ?? '' ) ),
+			'social_hashtags'       => sanitize_text_field( (string) ( $input['social_hashtags'] ?? '' ) ),
+			'share_buttons'         => empty( $input['share_buttons'] ) ? 0 : 1,
+			'share_tags'            => empty( $input['share_tags'] ) ? 0 : 1,
 			'remove_data'    => empty( $input['remove_data'] ) ? 0 : 1,
 		);
 	}

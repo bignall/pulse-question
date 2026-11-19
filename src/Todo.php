@@ -30,6 +30,8 @@ final class Todo {
 		add_action( 'wp_insert_comment', array( self::class, 'markDirty' ) );
 		add_action( 'transition_comment_status', array( self::class, 'markDirty' ) );
 		add_action( 'pulse_question_answer_hidden', array( self::class, 'markDirty' ) );
+		add_action( 'pulse_question_email_sent', array( self::class, 'markDirty' ) );
+		add_action( 'pulse_question_social_posted', array( self::class, 'markDirty' ) );
 		add_action( Daily::CRON_HOOK, array( self::class, 'check' ), 20 );
 		add_action( 'shutdown', array( self::class, 'flush' ) );
 	}
@@ -126,6 +128,35 @@ final class Todo {
 				);
 			}
 			$sent['held'] = $held;
+		}
+
+		// The daily email or social post failed (after its last automatic try, or still trying).
+		$failures = array(
+			'email'  => array( \PulseQuestion\Email\DailyEmail::state(), /* translators: %s: what went wrong. */ __( 'Pulse Question daily email failed: %s', 'pulse-question' ), '#pq-email' ),
+			'social' => array( \PulseQuestion\Social\Webhook::state(), /* translators: %s: what went wrong. */ __( 'Pulse Question social post failed: %s', 'pulse-question' ), '#pq-social' ),
+		);
+		$today = Daily::stored();
+		foreach ( $failures as $what => [ $state, $title, $anchor ] ) {
+			$failed = null !== $today && ( $state['day'] ?? '' ) === $today['day'] && 'failed' === ( $state['status'] ?? '' );
+			$sig    = $failed ? $today['day'] . '|' . (string) ( $state['error'] ?? '' ) : '';
+			if ( $sig === (string) ( $sent[ $what ] ?? '' ) ) {
+				continue;
+			}
+			if ( '' === $sig ) {
+				todo_hub_complete( self::SOURCE . ':' . $what . '-failed' );
+			} else {
+				todo_hub_add(
+					array(
+						'title'    => sprintf( $title, wp_html_excerpt( (string) ( $state['error'] ?? '' ), 120, '…' ) ),
+						'category' => 'Pulse Question',
+						'priority' => 'high',
+						'source'   => self::SOURCE,
+						'key'      => self::SOURCE . ':' . $what . '-failed',
+						'link'     => admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=pq-settings' . $anchor ),
+					)
+				);
+			}
+			$sent[ $what ] = $sig;
 		}
 
 		update_option( self::OPTION, $sent, false );

@@ -93,7 +93,7 @@ final class ConnectionTest {
 		}
 		if ( in_array( $lists['code'], array( 401, 403 ), true ) ) {
 			/* translators: %s: user name. */
-			$steps[] = self::step( false, sprintf( __( 'Logged in, but %s isn\'t allowed to use FluentCRM there. Use an administrator, or add the user under FluentCRM → Settings → Managers with permission to manage contacts.', 'pulse-question' ), $user ) );
+			$steps[] = self::step( false, sprintf( __( 'Logged in, but %s isn\'t allowed to use FluentCRM there. Use an administrator, or under FluentCRM → Settings → Managers give the user "Add, update and import contacts" and "Create and update tags, lists, companies and segments" (and "Write and send emails" for the daily email).', 'pulse-question' ), $user ) );
 			return $steps;
 		}
 		if ( 200 !== $lists['code'] || ! is_array( $lists['body'] ) ) {

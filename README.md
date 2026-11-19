@@ -15,7 +15,9 @@ A WordPress plugin for a thought-provoking question every day. Add questions (or
 
 - **Answers from members, checked automatically:** members log in to answer, vote and reply. Every new member is offered the mailing list. Claude checks every answer before it appears, and members can report answers. See below.
 
-Coming next: a daily email and social posts.
+- **Daily email and social posts:** each new question is emailed to the mailing list, as a FluentCRM campaign or by the built-in sender, with yesterday's top answers. Each question gets a share image, share tags and share links, and can be posted automatically through a webhook (Zapier, Make, n8n…). See below.
+
+Coming next: packaging for other sites (branding settings, docs).
 
 ## Questions written by Claude
 
@@ -56,6 +58,26 @@ WordPress's own limit of one comment every 15 seconds per person applies to answ
 
 Filters: `pulse_question_moderation_timeout` (seconds to wait while the member waits, default 25). Actions: `pulse_question_member_joined( $user_id, $marketing, $list )` and `pulse_question_answer_hidden( $comment_id )`. REST: `POST pulse-question/v1/vote` and `/report` (logged in, with a `X-WP-Nonce`).
 
+## Daily email
+
+Turn it on under **Questions → Settings → Daily email**. Each new question is sent about a minute after it goes up, once per question day. Turning it on starts with the next question; **Send today's email now** sends today's.
+
+- **With FluentCRM** (on this site or another, set up under Members): a FluentCRM campaign goes to the daily email lists, to subscribed contacts only. FluentCRM adds its footer and unsubscribe link, does the sending through your email service, and reports opens and clicks. With FluentCRM on another site, the user needs the *Write and send emails* permission, as well as *Add, update and import contacts* and *Create and update tags, lists, companies and segments*.
+- **Without FluentCRM**, the built-in sender emails members who chose the daily email, 40 a minute through `wp_mail` (an SMTP plugin is used if you have one). It includes an unsubscribe link and one-click unsubscribe headers. It's fine for a few hundred members; for more, use FluentCRM and an email service.
+- **The email** has today's question, its background, an Answer button and the three most-liked answers to yesterday's question. The subject (`{question}`, `{date}`, `{site}`), an opening line, the button text and the number of answers are all settings.
+- **Preview** and **Send me a test** in Settings. A failed send is tried again hourly (up to five times), and To-do Hub gets a task until it works.
+
+Filters: `pulse_question_email` (subject, preheader, body), `pulse_question_email_colors`, `pulse_question_email_batch_size`. Actions: `pulse_question_email_sent( $ok, $detail )`, `pulse_question_unsubscribed( $user_id )`.
+
+## Social sharing
+
+- **Share image:** 1200×630 for each question, with the logo, label, question and site address, made with PHP's GD library. A question's featured image is used instead when it has one.
+- **Share tags:** Open Graph and X card tags on question pages, so shared links show the question and image. With Yoast SEO or Rank Math, they write the tags and the plugin gives them the share image.
+- **Share links** under each question: Facebook, X, LinkedIn, Pinterest, Bluesky, email and copy link, plus the phone's share sheet. These are plain links, with no third-party scripts.
+- **Automatic posts:** paste a webhook address from Zapier, Make, n8n, Pabbly or IFTTT. Each new question is sent there as JSON: `question`, `url`, `text` (from your post template), `hashtags`, `image_url`, `background`, `category`, `date` and `test`. Your automation posts it to the networks you connect. Requests are signed: `X-Pulse-Question-Signature: sha256=` followed by the HMAC-SHA256 of the body, keyed with the secret shown in Settings. Use **Send a test post** to map the fields. Failures are retried and get a To-do task.
+
+Filters: `pulse_question_share_image`, `pulse_question_share_image_colors`, `pulse_question_share_image_logo`, `pulse_question_share_image_font`, `pulse_question_share_links`, `pulse_question_social_payload`, `pulse_question_seo_plugin`. Action: `pulse_question_social_posted( $ok, $message )`.
+
 ## Shortcodes
 
 ```
@@ -84,4 +106,4 @@ bin/build-zip.sh      # writes dist/pulse-question-<version>.zip
 
 Pushing a tag such as `v0.1.0` that matches the `Version:` header builds the zip and publishes a GitHub release. Notes come from `release-notes/<tag>.md`.
 
-Built on [WP Foundation](https://bignall.github.io/wp-foundation/). GPL-2.0-or-later.
+Built on [WP Foundation](https://bignall.github.io/wp-foundation/). GPL-2.0-or-later. Share images use the [Inter](https://github.com/rsms/inter) font (SIL Open Font License 1.1, see `assets/fonts/LICENSE-Inter.txt`).
