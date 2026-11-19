@@ -92,6 +92,11 @@ final class SettingsPage {
 						<input type="hidden" name="<?php echo esc_attr( $store->field( 'todo_tasks' ) ); ?>" value="<?php echo esc_attr( (string) (int) $store->get( 'todo_tasks' ) ); ?>" />
 					<?php endif; ?>
 					<tr>
+						<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
+						<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
+							<p class="description"><?php esc_html_e( 'They follow Automatic.css variables when the site has them, and your own styles always win over them. Turn them off to style everything yourself, for example in Etch; the markup uses pq- classes.', 'pulse-question' ); ?></p></td>
+					</tr>
+					<tr>
 						<th scope="row"><?php esc_html_e( 'Uninstall', 'pulse-question' ); ?></th>
 						<td><?php $flag( 'remove_data', __( 'Delete all questions, their categories and these settings when the plugin is deleted', 'pulse-question' ) ); ?></td>
 					</tr>

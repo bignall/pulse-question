@@ -211,20 +211,22 @@ final class Questions {
 		);
 	}
 
-	/** Make a question today's: publish it now and record the day. */
+	/**
+	 * Make a question today's: publish it, record the day, and set its date to now, so a post's
+	 * date is always when it was last asked (builders and themes can sort and show it as usual).
+	 */
 	public static function markAsked( int $id, string $day ): void {
 		self::$asking = true;
-		if ( 'publish' !== get_post_status( $id ) ) {
-			$now = current_time( 'mysql' );
-			wp_update_post(
-				array(
-					'ID'            => $id,
-					'post_status'   => 'publish',
-					'post_date'     => $now,
-					'post_date_gmt' => get_gmt_from_date( $now ),
-				)
-			);
-		}
+		$now          = current_time( 'mysql' );
+		wp_update_post(
+			array(
+				'ID'            => $id,
+				'post_status'   => 'publish',
+				'post_date'     => $now,
+				'post_date_gmt' => get_gmt_from_date( $now ),
+				'edit_date'     => true,
+			)
+		);
 		self::$asking = false;
 		add_post_meta( $id, self::META_ASKED, $day );
 		update_post_meta( $id, self::META_LAST, $day );

@@ -57,6 +57,9 @@ final class Render {
 	}
 
 	private static function style(): void {
+		if ( ! Settings::get( 'load_styles' ) ) {
+			return;
+		}
 		if ( ! wp_style_is( 'pulse-question', 'registered' ) ) {
 			self::registerStyle();
 		}

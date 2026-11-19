@@ -27,6 +27,7 @@ final class App {
 		Front\Shortcodes::init();
 		Front\Blocks::init();
 		Front\Templates::init();
+		Front\QueryViews::init();
 
 		if ( is_admin() ) {
 			Admin\QueuePage::init( $plugin );

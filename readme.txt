@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPLv2 or later
 
 A thought-provoking question every day: a queue you control, a daily pick, today's question and cards of past ones.
@@ -21,6 +21,11 @@ A thought-provoking question every day: a queue you control, a daily pick, today
 * Built on WP Foundation (activation, upgrades, uninstall, multisite, deactivation survey).
 
 == Changelog ==
+
+= 0.2.0 =
+* Styles follow Automatic.css (colours, spacing, type sizes, corners) when the site has it, with the logo's orange and teal as fallbacks, and a pulse line under today's question. A new setting turns the plugin's styles off for sites styled entirely in a builder.
+* New query argument for page builders such as Etch: pq_view = today (the question of the day) or past (asked questions, last asked first).
+* A question's date is now the day it was last asked, so builders and themes can show and sort by it.
 
 = 0.1.0 =
 * First release: questions with approval, the queue, the daily pick (with reuse when the queue is empty), blocks, shortcodes, question pages and categories, and To-do Hub tasks.

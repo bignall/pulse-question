@@ -37,6 +37,7 @@ final class Settings {
 			'label'           => 'Question of the day',
 			'low_queue_days'  => 7,
 			'todo_tasks'      => 1,
+			'load_styles'     => 1,
 			'remove_data'     => 0,
 		);
 	}
@@ -59,6 +60,7 @@ final class Settings {
 			'label'          => sanitize_text_field( (string) ( $input['label'] ?? '' ) ),
 			'low_queue_days' => max( 0, min( 60, (int) ( $input['low_queue_days'] ?? 7 ) ) ),
 			'todo_tasks'     => empty( $input['todo_tasks'] ) ? 0 : 1,
+			'load_styles'    => empty( $input['load_styles'] ) ? 0 : 1,
 			'remove_data'    => empty( $input['remove_data'] ) ? 0 : 1,
 		);
 	}
