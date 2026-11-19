@@ -4,7 +4,7 @@
  * replies and the Comments screen all work as usual. On top of that:
  *
  * - Only members can answer (logged in), and only on questions that have been asked.
- * - A member must have joined the mailing list (see Members) before their first answer.
+ * - A member who hasn't been offered the mailing list yet sees the boxes with their first answer.
  * - Answers have a length limit, and no email goes to you for each answer.
  * - Members can report an answer; after enough reports it's hidden until you look at it.
  *
@@ -52,7 +52,7 @@ final class Answers {
 	}
 
 	/**
-	 * Before an answer is saved: member, mailing list, length.
+	 * Before an answer is saved: member, mailing list choice, length.
 	 *
 	 * @param array<string, mixed> $data Comment data.
 	 * @return array<string, mixed>
@@ -73,19 +73,8 @@ final class Answers {
 				)
 			);
 		}
-		if ( ! Members::hasJoined( $user_id ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- the comment form has WordPress's own checks.
-			if ( empty( $_POST['pq_join'] ) ) {
-				wp_die(
-					esc_html__( 'To answer, tick the box to join the Pulse Question mailing list.', 'pulse-question' ),
-					esc_html__( 'Join to answer', 'pulse-question' ),
-					array(
-						'response'  => 400,
-						'back_link' => true,
-					)
-				);
-			}
-			Members::join( $user_id, ! empty( $_POST['pq_marketing'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! Members::wasAsked( $user_id ) ) {
+			Members::fromForm( $user_id );
 		}
 		$max  = (int) Settings::get( 'answer_max_length' );
 		$text = (string) ( $data['comment_content'] ?? '' );

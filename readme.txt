@@ -18,7 +18,7 @@ A thought-provoking question every day: a queue you control, a daily pick, today
 * Settings can make a page with both blocks and set it as the home page.
 * Inherits your theme's fonts and colours. Restyle with the --pq-accent, --pq-card-bg, --pq-border and --pq-radius CSS properties.
 * Questions written by Claude (optional, with your own Anthropic API key): on demand or to keep the queue topped up, waiting for your approval unless you choose otherwise.
-* Answers from logged-in members, with votes, replies and reports. Members join your mailing list (FluentCRM) when they sign up.
+* Answers from logged-in members, with votes, replies and reports. New members are offered your mailing list (FluentCRM), with the boxes ticked by default.
 * Automatic moderation: Claude checks each answer against your guidelines and publishes it, holds it for you, or keeps it off the site.
 * Works with To-do Hub: a task when the queue gets short, or when questions or answers are waiting for approval.
 * Built on WP Foundation (activation, upgrades, uninstall, multisite, deactivation survey).
@@ -33,7 +33,7 @@ If you connect a FluentCRM site on another domain (Settings → Members), each n
 
 = 0.4.0 =
 * Answers: logged-in members answer each question, vote for good questions, like answers, reply and report. Answers sort by top or newest.
-* Members: joining the mailing list is part of registering, or is asked for at a member's first answer, with an optional box for news and offers. Sign-ups go to FluentCRM on this site or on another site, with double opt-in, and are retried if they fail.
+* Members: the sign-up form offers the daily question email and news and offers. Both boxes are ticked by default (a setting turns this off), and members who signed up earlier see them with their first answer. Sign-ups go to FluentCRM on this site or on another site, with double opt-in, and are retried if they fail.
 * Automatic moderation by Claude against guidelines you can edit: fine answers appear straight away, doubtful ones wait for you, and clearly bad ones are kept off the site. If the check fails, the answer is held and checked again. Other modes: hold everything, or WordPress's own settings.
 * Reported answers are hidden after a number of reports you choose. To-do Hub task for answers waiting for review. A Check column under Comments.
 

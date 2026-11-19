@@ -45,9 +45,9 @@ final class MailingList {
 	}
 
 	/** @return array<string, mixed> */
-	public static function contact( int $user_id, bool $marketing ): array {
+	public static function contact( int $user_id, bool $marketing, bool $list = true ): array {
 		$user  = get_userdata( $user_id );
-		$lists = self::ids( 'list_ids' );
+		$lists = $list ? self::ids( 'list_ids' ) : array();
 		if ( $marketing ) {
 			$lists = array_values( array_unique( array_merge( $lists, self::ids( 'marketing_list_ids' ) ) ) );
 		}
@@ -61,12 +61,12 @@ final class MailingList {
 		);
 	}
 
-	public static function subscribe( int $user_id, bool $marketing ): bool {
+	public static function subscribe( int $user_id, bool $marketing, bool $list = true ): bool {
 		$provider = self::provider();
 		if ( 'none' === $provider ) {
 			return true;
 		}
-		$contact = self::contact( $user_id, $marketing );
+		$contact = self::contact( $user_id, $marketing, $list );
 		if ( '' === $contact['email'] ) {
 			return false;
 		}
@@ -76,7 +76,7 @@ final class MailingList {
 			delete_user_meta( $user_id, self::META_PENDING );
 			return true;
 		}
-		update_user_meta( $user_id, self::META_PENDING, $marketing ? 'marketing' : 'list' );
+		update_user_meta( $user_id, self::META_PENDING, $list ? ( $marketing ? 'marketing' : 'list' ) : 'marketing_only' );
 		return false;
 	}
 
@@ -85,7 +85,7 @@ final class MailingList {
 	 *
 	 * @param array<string, mixed> $contact Contact.
 	 */
-	private static function local( array $contact ): true|string {
+	private static function local( array $contact ): bool|string {
 		if ( ! self::localAvailable() ) {
 			return __( 'FluentCRM isn\'t active on this site.', 'pulse-question' );
 		}
@@ -105,7 +105,7 @@ final class MailingList {
 	 *
 	 * @param array<string, mixed> $contact Contact.
 	 */
-	private static function remote( array $contact ): true|string {
+	private static function remote( array $contact ): bool|string {
 		$url  = untrailingslashit( (string) Settings::get( 'list_remote_url' ) );
 		$user = (string) Settings::get( 'list_remote_user' );
 		$pass = (string) Settings::get( 'list_remote_password' );
@@ -153,7 +153,8 @@ final class MailingList {
 			)
 		);
 		foreach ( $users as $user_id ) {
-			self::subscribe( (int) $user_id, 'marketing' === get_user_meta( (int) $user_id, self::META_PENDING, true ) );
+			$pending = (string) get_user_meta( (int) $user_id, self::META_PENDING, true );
+			self::subscribe( (int) $user_id, 'list' !== $pending, 'marketing_only' !== $pending );
 		}
 	}
 
@@ -163,7 +164,7 @@ final class MailingList {
 		return is_array( $log ) ? array_values( $log ) : array();
 	}
 
-	private static function log( int $user_id, true|string $result ): void {
+	private static function log( int $user_id, bool|string $result ): void {
 		$log = self::history();
 		array_unshift(
 			$log,

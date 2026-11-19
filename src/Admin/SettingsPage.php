@@ -305,10 +305,12 @@ final class SettingsPage {
 				<?php if ( ! get_option( 'users_can_register' ) ) : ?>
 					<p style="color:#b32d2e"><?php echo wp_kses_post( __( 'Visitors can\'t sign up yet. Turn on <strong>Anyone can register</strong> (as Subscriber) under Settings → General.', 'pulse-question' ) ); ?></p>
 				<?php else : ?>
-					<p><?php esc_html_e( 'Visitors sign up on the WordPress sign-up page, which gets the mailing list boxes below. Members who signed up earlier tick them with their first answer.', 'pulse-question' ); ?></p>
+					<p><?php esc_html_e( 'Visitors sign up on the WordPress sign-up page, which gets the mailing list boxes below. Both are optional. Members who signed up earlier see them once, with their first answer.', 'pulse-question' ); ?></p>
 				<?php endif; ?>
-				<p><label><?php esc_html_e( 'Required box', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'list_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_label' ) ); ?>" /></label></p>
-				<p><label><?php esc_html_e( 'Optional marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
+				<p><label><?php esc_html_e( 'Daily email box', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'list_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_label' ) ); ?>" /></label></p>
+				<p><label><?php esc_html_e( 'Marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
+				<?php $flag( 'join_prechecked', __( 'Tick both boxes to begin with', 'pulse-question' ) ); ?>
+				<p class="description"><?php esc_html_e( 'In the EU and UK, a ticked box doesn\'t count as consent, so turn this off if you have visitors there. Double opt-in (below) helps either way.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>
 		<tr>

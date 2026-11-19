@@ -13,7 +13,7 @@ A WordPress plugin for a thought-provoking question every day. Add questions (or
 
 - **Questions written by Claude:** press **Write questions** in the Queue (with an optional theme), or turn on automatic top-up so Claude writes a batch whenever the queue gets short. They wait for your approval unless you turn on auto-approve. See below.
 
-- **Answers from members, checked automatically:** members log in to answer, vote and reply. Joining the mailing list is part of becoming a member. Claude checks every answer before it appears, and members can report answers. See below.
+- **Answers from members, checked automatically:** members log in to answer, vote and reply. Every new member is offered the mailing list. Claude checks every answer before it appears, and members can report answers. See below.
 
 Coming next: a daily email and social posts.
 
@@ -39,7 +39,7 @@ Filters: `pulse_question_claude_base_url` (a proxy or gateway address), `pulse_q
 Answers are WordPress comments on questions, so replies, Akismet (if active) and **Comments** in the admin all work as usual.
 
 - **Members only:** you have to be logged in to answer, vote or report. Guests see the answers, a *Log in to answer* button and a *Join* button. *Join* appears when **Settings → General → Anyone can register** is on; use *Subscriber* as the new user role.
-- **Mailing list:** registering, or answering for the first time, needs the box *Send me the question of the day by email* to be ticked. A second, optional box covers news and offers. Members are added to FluentCRM on the same site or on another site; see Settings → Members. With double opt-in, FluentCRM sends its confirmation email. If a sign-up fails, it's tried again every hour. Recent sign-ups are listed in Settings.
+- **Mailing list:** the sign-up form has two boxes, *Send me the question of the day by email* and *Also send me occasional news and offers*. Both are ticked to begin with and neither is required. Members who signed up some other way see the boxes once, with their first answer. A setting turns off the pre-ticking. In the EU and UK, a pre-ticked box doesn't count as consent. Members are added to FluentCRM on the same site or on another site; see Settings → Members. With double opt-in, FluentCRM sends its confirmation email. If a sign-up fails, it's tried again every hour. Recent sign-ups are listed in Settings.
 - **Votes:** members can mark a question as *Good question* and like answers (not their own). Answers sort by *Top* or *Newest*. Replies go one level deep.
 - **Automatic moderation (default):** Claude checks each answer as it's posted, against guidelines you can edit:
   - fine → published straight away;
@@ -54,7 +54,7 @@ Answers are WordPress comments on questions, so replies, Akismet (if active) and
 
 WordPress's own limit of one comment every 15 seconds per person applies to answers too.
 
-Filters: `pulse_question_moderation_timeout` (seconds to wait while the member waits, default 25). Actions: `pulse_question_member_joined( $user_id, $marketing )` and `pulse_question_answer_hidden( $comment_id )`. REST: `POST pulse-question/v1/vote` and `/report` (logged in, with a `X-WP-Nonce`).
+Filters: `pulse_question_moderation_timeout` (seconds to wait while the member waits, default 25). Actions: `pulse_question_member_joined( $user_id, $marketing, $list )` and `pulse_question_answer_hidden( $comment_id )`. REST: `POST pulse-question/v1/vote` and `/report` (logged in, with a `X-WP-Nonce`).
 
 ## Shortcodes
 

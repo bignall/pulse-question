@@ -59,10 +59,11 @@ final class Settings {
 			'marketing_list_ids'    => '',
 			'list_tag_ids'          => '',
 			'list_double_optin'     => 1,
+			'join_prechecked'       => 1,
 			'list_remote_url'       => '',
 			'list_remote_user'      => '',
 			'list_remote_password'  => '',
-			'list_label'            => 'Send me the question of the day by email (members need this to answer)',
+			'list_label'            => 'Send me the question of the day by email',
 			'marketing_label'       => 'Also send me occasional news and offers',
 			'remove_data'     => 0,
 		);
@@ -109,6 +110,7 @@ final class Settings {
 			'marketing_list_ids'    => preg_replace( '/[^0-9, ]/', '', (string) ( $input['marketing_list_ids'] ?? '' ) ),
 			'list_tag_ids'          => preg_replace( '/[^0-9, ]/', '', (string) ( $input['list_tag_ids'] ?? '' ) ),
 			'list_double_optin'     => empty( $input['list_double_optin'] ) ? 0 : 1,
+			'join_prechecked'       => empty( $input['join_prechecked'] ) ? 0 : 1,
 			'list_remote_url'       => untrailingslashit( esc_url_raw( trim( (string) ( $input['list_remote_url'] ?? '' ) ), array( 'https', 'http' ) ) ),
 			'list_remote_user'      => sanitize_user( (string) ( $input['list_remote_user'] ?? '' ) ),
 			// A blank password field keeps the saved one.

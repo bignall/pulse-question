@@ -121,7 +121,7 @@ final class AnswersView {
 		$out .= '<textarea id="pq-answer-text" name="comment" rows="4" required' . ( $max > 0 ? ' maxlength="' . esc_attr( (string) $max ) . '"' : '' ) . '></textarea>';
 		$out .= '<input type="hidden" name="comment_post_ID" value="' . esc_attr( (string) $post_id ) . '" />';
 		$out .= '<input type="hidden" name="comment_parent" value="0" />';
-		if ( ! Members::hasJoined( $user ) ) {
+		if ( ! Members::wasAsked( $user ) ) {
 			$out .= Members::fields();
 		}
 		ob_start();
