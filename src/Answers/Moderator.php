@@ -65,7 +65,7 @@ final class Moderator {
 			return $approved; // Already caught (Akismet, disallowed words).
 		}
 		$mode = self::mode();
-		if ( 'wordpress' === $mode ) {
+		if ( 'wordpress' === $mode ) { // phpcs:ignore WordPress.WP.CapitalPDangit -- a setting value.
 			return $approved;
 		}
 		if ( 'hold' === $mode ) {
@@ -217,7 +217,7 @@ final class Moderator {
 	}
 
 	public static function userPrompt( string $answer, string $question ): string {
-		return "Question of the day: " . $question . "\n\nThe member's answer is between the markers below.\n<answer>\n" . str_replace( array( '<answer>', '</answer>' ), '', $answer ) . "\n</answer>";
+		return 'Question of the day: ' . $question . "\n\nThe member's answer is between the markers below.\n<answer>\n" . str_replace( array( '<answer>', '</answer>' ), '', $answer ) . "\n</answer>";
 	}
 
 	/** @return array<string, mixed> */

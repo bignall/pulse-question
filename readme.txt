@@ -2,21 +2,25 @@
 Contributors: arbe
 Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
-Tested up to: 6.8
+Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPLv2 or later
 
-A thought-provoking question every day: a queue you control, a daily pick, today's question and cards of past ones.
+A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
 
 == Description ==
+
+Pulse Question asks your visitors one thought-provoking question each day. Members answer, vote and reply. Claude can write the questions and check every answer before it appears. Each new question goes out by email and to social media. Guides: https://bignall.github.io/pulse-question/
+
 
 * Questions → Queue: add questions one per line, approve the ones waiting for approval, drag to set the order and see the day each will be asked. "Ask now" makes a question today's.
 * Questions move from draft to waiting for approval to approved (in the queue) to asked. Your own questions can be approved straight away. A question only appears on the site once it has been asked.
 * Each day at the time you choose, the next approved question becomes the question of the day. When the queue is empty, the question asked longest ago is asked again, so there's always a question.
 * Show it with the "Question of the day" and "Past questions" blocks or the [pulse_question] and [pulse_question_past] shortcodes. Each question has its own page; asked questions are listed at /questions/, and by category.
 * Settings can make a page with both blocks and set it as the home page.
-* Inherits your theme's fonts and colours. Restyle with the --pq-accent, --pq-card-bg, --pq-border and --pq-radius CSS properties.
+* Your logo and colours on share images, in the email and on the site. It inherits your theme's fonts and follows Automatic.css; restyle with the --pq-accent, --pq-card-bg, --pq-border and --pq-radius CSS properties, or turn the plugin's styles off and use Etch or another builder (pq_view query argument).
+* A setup checklist walks new sites through everything.
 * Questions written by Claude (optional, with your own Anthropic API key): on demand or to keep the queue topped up, waiting for your approval unless you choose otherwise.
 * Answers from logged-in members, with votes, replies and reports. New members are offered your mailing list (FluentCRM), with the boxes ticked by default.
 * Automatic moderation: Claude checks each answer against your guidelines and publishes it, holds it for you, or keeps it off the site.
@@ -24,6 +28,53 @@ A thought-provoking question every day: a queue you control, a daily pick, today
 * Social sharing: a share image for each question, share tags for links, share buttons, and automatic posts through a webhook (Zapier, Make, n8n and others).
 * Works with To-do Hub: a task when the queue gets short, when questions or answers are waiting for approval, or when the daily email or a social post fails.
 * Built on WP Foundation (activation, upgrades, uninstall, multisite, deactivation survey).
+
+== Installation ==
+
+1. Upload the plugin and activate it, or install it from the Plugins screen.
+2. Open Questions → Settings and follow the setup checklist at the top.
+3. To let visitors answer, turn on "Anyone can register" (role: Subscriber) under Settings → General.
+4. Optional: add an Anthropic API key for questions written by Claude and automatic moderation, and connect FluentCRM for the mailing list.
+
+== Frequently Asked Questions ==
+
+= Do I need a Claude (Anthropic) API key? =
+
+No. Without one, you write the questions and every answer waits for you to approve it. With one, Claude can write questions for your approval and check each answer as it's posted. You pay Anthropic for what you use: checking an answer costs roughly half a cent with the default model.
+
+= Can people answer without an account? =
+
+No. Answering, voting and reporting need a free account, which keeps spam down and lets members get the daily email. Guests can read everything.
+
+= Do I need FluentCRM? =
+
+No. Without it, members' choices are kept on your site and the built-in sender emails the daily question (fine for a few hundred members). With FluentCRM, on the same site or another, the email is sent as a FluentCRM campaign through your email service.
+
+= What happens when I run out of questions? =
+
+The question asked longest ago is asked again, so there's always a question. You also get a To-do Hub task, if you use it, and Claude can top up the queue automatically.
+
+= Does it post to Facebook, Instagram or X directly? =
+
+It sends each new question, with a ready-written post and its share image, to a webhook address from Zapier, Make, n8n, Pabbly or IFTTT. Your automation posts it to whichever networks you connect there.
+
+= Will it work with my theme or page builder? =
+
+It works with block and classic themes, with blocks, shortcodes and its own templates. For Etch and other builders, query questions with the pq_view argument (today or past) and turn the plugin's styles off if you style everything yourself.
+
+== Screenshots ==
+
+1. Today's question, with the Answer button, share links and past questions.
+2. Answers: members answer, like, reply and report. A held answer is shown only to its author.
+3. The Queue: today's question, adding questions, Claude, and questions waiting for approval.
+4. The daily email, with yesterday's top answers.
+5. A share image, made for every question.
+6. The setup checklist.
+
+== Upgrade Notice ==
+
+= 0.6.0 =
+Adds branding settings (logo and colours) and a setup checklist.
 
 == External services ==
 
@@ -40,6 +91,15 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.6.0 =
+* Branding: choose the logo for share images (your site's logo or icon, the Pulse Question logo, or any image) and your two colours, used on the site, in the daily email and on share images.
+* A From name and address for the built-in daily email.
+* A setup checklist at the top of Settings, and a notice after activation that leads to it.
+* Guides at https://bignall.github.io/pulse-question/
+* Tested with WordPress 7.1. Checked with the WordPress coding standards.
+* Uninstalling (with "delete all data" on) also removes members' Pulse Question details.
+* Sites upgrading keep the Pulse Question logo on share images until they choose another.
 
 = 0.5.0 =
 * Daily email: each new question goes out about a minute after it's asked, once a day, with yesterday's three most-liked answers. With FluentCRM, it's sent as a campaign to your daily email lists; without it, a built-in sender emails members who chose the daily email, 40 a minute, with unsubscribe links. Settings for the subject, an opening line, the button text and the number of answers, plus Preview, Send me a test and Send now. Failures are retried hourly and get a To-do Hub task.

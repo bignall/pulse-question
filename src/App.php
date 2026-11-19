@@ -43,12 +43,13 @@ final class App {
 			Admin\QueuePage::init( $plugin );
 			Admin\QuestionEditor::init();
 			Admin\SettingsPage::init();
+			Admin\Setup::init();
 			Admin\AnswersAdmin::init();
 		}
 	}
 
 	public static function url( string $path = '' ): string {
-		return plugins_url( $path, PQ_FILE );
+		return plugins_url( $path, PULSE_QUESTION_FILE );
 	}
 
 	public static function version(): string {

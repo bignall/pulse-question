@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<ruleset name="Pulse Question">
+	<description>WordPress coding standards, the checks wordpress.org's Plugin Check runs most, and PHP 8.1 compatibility.</description>
+	<file>pulse-question.php</file>
+	<file>src</file>
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>vendor-prefixed/*</exclude-pattern>
+	<arg name="extensions" value="php"/>
+	<arg value="sp"/>
+	<arg name="cache"/>
+
+	<config name="minimum_wp_version" value="6.4"/>
+	<config name="testVersion" value="8.1-"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress">
+		<!-- PSR-4 class files (src/Answers/Votes.php), not class-votes.php. -->
+		<exclude name="WordPress.Files.FileName"/>
+		<!-- camelCase methods, as in WP Foundation. -->
+		<exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid"/>
+		<exclude name="WordPress.NamingConventions.ValidVariableName"/>
+		<!-- Short array syntax and alignment are style, not safety. -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+		<exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+		<exclude name="Squiz.Commenting"/>
+		<exclude name="Generic.Commenting.DocComment"/>
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+		<exclude name="Universal.Operators.DisallowStandalonePostIncrementDecrement"/>
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+	</rule>
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array"><element value="pulse-question"/></property>
+		</properties>
+	</rule>
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="PulseQuestion"/>
+				<element value="pulse_question"/>
+				<element value="pq"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

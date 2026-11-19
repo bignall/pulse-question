@@ -77,6 +77,11 @@ final class Settings {
 			'social_hashtags'       => 'QuestionOfTheDay',
 			'share_buttons'         => 1,
 			'share_tags'            => 1,
+			'email_from_name'       => '',
+			'email_from_address'    => '',
+			'brand_logo'            => 0,
+			'brand_accent'          => '',
+			'brand_accent_2'        => '',
 			'remove_data'     => 0,
 		);
 	}
@@ -145,6 +150,11 @@ final class Settings {
 			'social_hashtags'       => sanitize_text_field( (string) ( $input['social_hashtags'] ?? '' ) ),
 			'share_buttons'         => empty( $input['share_buttons'] ) ? 0 : 1,
 			'share_tags'            => empty( $input['share_tags'] ) ? 0 : 1,
+			'email_from_name'       => sanitize_text_field( (string) ( $input['email_from_name'] ?? '' ) ),
+			'email_from_address'    => sanitize_email( (string) ( $input['email_from_address'] ?? '' ) ),
+			'brand_logo'            => max( -1, (int) ( $input['brand_logo'] ?? 0 ) ),
+			'brand_accent'          => (string) Branding::hex( (string) ( $input['brand_accent'] ?? '' ) ),
+			'brand_accent_2'        => (string) Branding::hex( (string) ( $input['brand_accent_2'] ?? '' ) ),
 			'remove_data'    => empty( $input['remove_data'] ) ? 0 : 1,
 		);
 	}

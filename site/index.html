@@ -1,0 +1,73 @@
+<section class="hero">
+	<div class="wrap hero-inner">
+		<div class="hero-copy">
+			<p class="eyebrow">WordPress plugin · v{{version}}</p>
+			<h1>A question a day that brings people back.</h1>
+			<p class="lead">Pulse Question asks your visitors one thought-provoking question each day. Members answer, vote and reply, Claude checks every answer before it appears, and each new question goes out by email and to social media.</p>
+			<p class="hero-actions">
+				<a class="btn btn-primary" href="{{repo}}/releases/latest" rel="noopener">Download the plugin</a>
+				<a class="btn" href="getting-started.html">Read the guide</a>
+			</p>
+			<p class="meta">PHP 8.1+ · WordPress 6.4+ · Free, GPL-2.0-or-later · See it live at <a href="https://pulsequestion.com" rel="noopener">pulsequestion.com</a></p>
+		</div>
+		<div class="hero-shot">
+			<img src="images/home.png" alt="Today's question on a site, with an Answer button, share links and cards of past questions" width="1400" height="1050">
+		</div>
+	</div>
+</section>
+
+<section class="section" aria-labelledby="day-title">
+	<div class="wrap">
+		<h2 id="day-title">Every day takes care of itself</h2>
+		<p class="section-lead">Fill the queue once in a while. Everything else happens on its own, and you only hear about it when something needs you.</p>
+		<ol class="stages">
+			<li>
+				<h3>A new question goes up</h3>
+				<p>At the time you choose, the next approved question becomes the question of the day. When the queue runs out, the question asked longest ago comes back, so there's always one.</p>
+			</li>
+			<li>
+				<h3>Members answer</h3>
+				<p>Logged-in members answer, reply to each other, like answers and vote for good questions. Joining offers them the daily email.</p>
+			</li>
+			<li>
+				<h3>Claude checks each answer</h3>
+				<p>Clean answers appear at once. Doubtful ones wait for you, and swearing, spam and harassment never appear. Members can report anything that slips through.</p>
+			</li>
+			<li>
+				<h3>Email and social posts go out</h3>
+				<p>The new question is emailed to your list with yesterday's top answers, and posted through Zapier, Make or n8n with its share image.</p>
+			</li>
+			<li>
+				<h3>The queue tops itself up</h3>
+				<p>When it gets short, Claude writes a batch of new questions for your approval. Or you write them all yourself.</p>
+			</li>
+		</ol>
+	</div>
+</section>
+
+<section class="section section-alt" aria-labelledby="features-title">
+	<div class="wrap">
+		<h2 id="features-title">What's in it</h2>
+		<ul class="features">
+			<li><h3>A queue you control</h3><p>Add questions one per line, drag to reorder, approve or reject, and see the day each will be asked.</p></li>
+			<li><h3>Questions written by Claude</h3><p>On demand or automatically, with guidance you edit. A big variety by default, and politics only rarely.</p></li>
+			<li><h3>Answers, votes and replies</h3><p>Built on WordPress comments, so Akismet, the Comments screen and your moderation tools all work.</p></li>
+			<li><h3>Automatic moderation</h3><p>Every answer is checked against your guidelines. Nothing appears unchecked, even if the check can't run.</p></li>
+			<li><h3>Your mailing list</h3><p>Members join FluentCRM on this site or another, with double opt-in and a connection test.</p></li>
+			<li><h3>The daily email</h3><p>Sent as a FluentCRM campaign, or by a simple built-in sender with unsubscribe links.</p></li>
+			<li><h3>Share images and links</h3><p>A 1200×630 image for every question, share tags, share links and signed webhook posts.</p></li>
+			<li><h3>Fits your site</h3><p>Your logo and colours, Automatic.css, blocks, shortcodes, and query arguments for Etch and other builders.</p></li>
+			<li><h3>Works with To-do Hub</h3><p>A task when the queue runs low, answers wait for review, or the email or a post fails.</p></li>
+		</ul>
+	</div>
+</section>
+
+<section class="section" aria-labelledby="docs-title">
+	<div class="wrap">
+		<h2 id="docs-title">Guides</h2>
+		<ul class="doc-cards">
+{{docCards}}
+		</ul>
+		<p class="tested">Tested in CI on PHP 8.1 to 8.4. Questions by Claude and automatic moderation need your own Anthropic API key.</p>
+	</div>
+</section>

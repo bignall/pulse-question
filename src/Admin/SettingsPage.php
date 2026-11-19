@@ -44,6 +44,7 @@ final class SettingsPage {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Pulse Question Settings', 'pulse-question' ); ?></h1>
 			<?php OutreachSettings::notice(); ?>
+			<?php Setup::render(); ?>
 			<?php if ( $made ) : ?>
 				<div class="notice notice-success"><p>
 					<?php esc_html_e( 'Page created.', 'pulse-question' ); ?>
@@ -102,6 +103,7 @@ final class SettingsPage {
 					<?php self::memberRows( $store, $flag ); ?>
 					<?php OutreachSettings::emailRows( $store, $flag ); ?>
 					<?php OutreachSettings::socialRows( $store, $flag ); ?>
+					<?php OutreachSettings::brandRows( $store ); ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
 						<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
@@ -115,7 +117,7 @@ final class SettingsPage {
 				<?php submit_button(); ?>
 			</form>
 
-			<h2><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h2>
+			<h2 id="pq-show"><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h2>
 			<p><?php esc_html_e( 'Add the "Question of the day" and "Past questions" blocks to any page or template, or use the shortcodes [pulse_question] and [pulse_question_past]. Each question also has its own page, and all asked questions are listed at /questions/.', 'pulse-question' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="pq_make_page" />
@@ -136,7 +138,7 @@ final class SettingsPage {
 		$constant = Generator::keyFromConstant();
 		$saved    = '' !== (string) $store->get( 'claude_api_key' );
 		?>
-		<tr>
+		<tr id="pq-claude">
 			<th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Questions written by Claude', 'pulse-question' ); ?></h2></th>
 		</tr>
 		<tr>
@@ -241,7 +243,7 @@ final class SettingsPage {
 	private static function answerRows( $store, callable $flag ): void {
 		$mode = (string) $store->get( 'moderation' );
 		?>
-		<tr><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Answers and moderation', 'pulse-question' ); ?></h2></th></tr>
+		<tr id="pq-answers-settings"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Answers and moderation', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Answers', 'pulse-question' ); ?></th>
 			<td>
@@ -261,7 +263,7 @@ final class SettingsPage {
 				<fieldset>
 					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="claude" <?php checked( 'claude', $mode ); ?> /> <strong><?php esc_html_e( 'Automatic, with Claude', 'pulse-question' ); ?></strong> <?php esc_html_e( '(recommended): clean answers appear straight away, unclear ones wait for you, clear violations are kept off the site', 'pulse-question' ); ?></label><br />
 					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="hold" <?php checked( 'hold', $mode ); ?> /> <?php esc_html_e( 'Hold every answer for me', 'pulse-question' ); ?></label><br />
-					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="wordpress" <?php checked( 'wordpress', $mode ); ?> /> <?php esc_html_e( 'WordPress\'s own moderation settings only (Settings → Discussion)', 'pulse-question' ); ?></label>
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="wordpress" <?php checked( 'wordpress', $mode ); // phpcs:ignore WordPress.WP.CapitalPDangit -- a setting value. ?> /> <?php esc_html_e( 'WordPress\'s own moderation settings only (Settings → Discussion)', 'pulse-question' ); ?></label>
 				</fieldset>
 				<?php if ( 'claude' === $mode && ! Generator::isConfigured() ) : ?>
 					<p style="color:#b32d2e"><?php esc_html_e( 'No Anthropic API key yet, so every answer is held until you add one (under "Questions written by Claude").', 'pulse-question' ); ?></p>
@@ -304,7 +306,7 @@ final class SettingsPage {
 	private static function memberRows( $store, callable $flag ): void {
 		$provider = (string) $store->get( 'list_provider' );
 		?>
-		<tr><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Members and mailing list', 'pulse-question' ); ?></h2></th></tr>
+		<tr id="pq-members"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Members and mailing list', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Signing up', 'pulse-question' ); ?></th>
 			<td>

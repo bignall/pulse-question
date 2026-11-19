@@ -41,7 +41,7 @@ final class WpHttpClient implements ClientInterface {
 			)
 		);
 		if ( is_wp_error( $response ) ) {
-			throw new WpHttpException( $response->get_error_message(), $request );
+			throw new WpHttpException( $response->get_error_message(), $request ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- not output; shown escaped where caught.
 		}
 
 		$factory = new Psr17Factory();

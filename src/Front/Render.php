@@ -45,6 +45,10 @@ final class Render {
 
 	public static function registerStyle(): void {
 		wp_register_style( 'pulse-question', App::url( 'assets/front.css' ), array(), App::version() );
+		$css = \PulseQuestion\Branding::inlineCss();
+		if ( '' !== $css ) {
+			wp_add_inline_style( 'pulse-question', $css );
+		}
 	}
 
 	/**

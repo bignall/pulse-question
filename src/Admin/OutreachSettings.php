@@ -29,6 +29,25 @@ final class OutreachSettings {
 		add_action( 'admin_post_pq_email_test', array( self::class, 'test' ) );
 		add_action( 'admin_post_pq_email_send', array( self::class, 'sendNow' ) );
 		add_action( 'admin_post_pq_social_test', array( self::class, 'socialTest' ) );
+		add_action( 'admin_enqueue_scripts', array( self::class, 'assets' ) );
+	}
+
+	/** The media picker and colour pickers, on the Settings page only. */
+	public static function assets( string $hook ): void {
+		if ( ! str_ends_with( $hook, '_page_' . SettingsPage::SLUG ) ) {
+			return;
+		}
+		wp_enqueue_media();
+		wp_enqueue_style( 'wp-color-picker' );
+		wp_enqueue_script( 'pulse-question-settings', \PulseQuestion\App::url( 'assets/admin-settings.js' ), array( 'jquery', 'wp-color-picker' ), \PulseQuestion\App::version(), true );
+		wp_localize_script(
+			'pulse-question-settings',
+			'pulseQuestionSettings',
+			array(
+				'chooseLogo' => __( 'Choose a logo', 'pulse-question' ),
+				'useLogo'    => __( 'Use this logo', 'pulse-question' ),
+			)
+		);
 	}
 
 	private static function actionUrl( string $action ): string {
@@ -90,7 +109,7 @@ final class OutreachSettings {
 			/* translators: %s: subject. */
 			sprintf( __( '[Test] %s', 'pulse-question' ), $email['subject'] ),
 			DailyEmail::wrap( $email, '#' ),
-			array( 'Content-Type: text/html; charset=UTF-8' )
+			DailyEmail::headers()
 		);
 		self::back(
 			array(
@@ -175,6 +194,14 @@ final class OutreachSettings {
 		<tr>
 			<th scope="row"><label for="pq-email-button"><?php esc_html_e( 'Button', 'pulse-question' ); ?></label></th>
 			<td><input id="pq-email-button" type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_button' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_button' ) ); ?>" /></td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'From', 'pulse-question' ); ?></th>
+			<td>
+				<label><?php esc_html_e( 'Name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_name' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_name' ) ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>" /></label>
+				<label><?php esc_html_e( 'Address', 'pulse-question' ); ?> <input type="email" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_address' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_address' ) ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" /></label>
+				<p class="description"><?php esc_html_e( 'For the built-in sender and test emails. Leave empty to use WordPress\'s (or your SMTP plugin\'s) sender. FluentCRM uses its own settings. Use an address on your own domain so the email isn\'t marked as spam.', 'pulse-question' ); ?></p>
+			</td>
 		</tr>
 		<tr>
 			<th scope="row"><label for="pq-email-top"><?php esc_html_e( 'Yesterday\'s answers', 'pulse-question' ); ?></label></th>
@@ -283,6 +310,53 @@ final class OutreachSettings {
 					<code><?php echo esc_html( Webhook::secret() ); ?></code>
 				</p>
 				<?php self::history( Webhook::history() ); ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * @param \PulseQuestion\Vendor\Bignall\WPFoundation\Settings\Settings $store Settings.
+	 */
+	public static function brandRows( $store ): void {
+		$logo   = (int) $store->get( 'brand_logo' );
+		$auto   = \PulseQuestion\Branding::automaticSource();
+		$chosen = $logo > 0 ? wp_get_attachment_image_url( $logo, 'medium' ) : '';
+		$field  = $store->field( 'brand_logo' );
+		?>
+		<tr id="pq-brand"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Branding', 'pulse-question' ); ?></h2></th></tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Logo', 'pulse-question' ); ?></th>
+			<td>
+				<fieldset class="pq-logo-choice">
+					<label><input type="radio" name="pq_logo_mode" value="auto" <?php checked( 0, $logo ); ?> />
+						<?php
+						echo esc_html(
+							match ( $auto ) {
+								'logo'  => __( 'Automatic: your site\'s logo', 'pulse-question' ),
+								'icon'  => __( 'Automatic: your site icon (no site logo is set)', 'pulse-question' ),
+								default => __( 'Automatic: your site\'s logo or site icon (neither is set yet, so no logo)', 'pulse-question' ),
+							}
+						);
+						?>
+					</label><br />
+					<label><input type="radio" name="pq_logo_mode" value="bundled" <?php checked( -1, $logo ); ?> /> <?php esc_html_e( 'The Pulse Question logo', 'pulse-question' ); ?></label><br />
+					<label><input type="radio" name="pq_logo_mode" value="image" <?php checked( $logo > 0 ); ?> /> <?php esc_html_e( 'An image:', 'pulse-question' ); ?></label>
+					<button type="button" class="button pq-logo-pick"><?php esc_html_e( 'Choose…', 'pulse-question' ); ?></button>
+					<input type="hidden" class="pq-logo-value" name="<?php echo esc_attr( $field ); ?>" value="<?php echo esc_attr( (string) $logo ); ?>" />
+					<p><img class="pq-logo-preview" src="<?php echo esc_url( (string) $chosen ); ?>" alt="" style="max-height:72px;width:auto;<?php echo $chosen ? '' : 'display:none'; ?>" /></p>
+				</fieldset>
+				<p class="description"><?php esc_html_e( 'Shown on share images. A wide logo with a transparent background works best.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Colours', 'pulse-question' ); ?></th>
+			<td>
+				<p><label><?php esc_html_e( 'Main colour (buttons, links)', 'pulse-question' ); ?><br />
+					<input type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent' ) ); ?>" /></label></p>
+				<p><label><?php esc_html_e( 'Second colour (labels, the pulse line)', 'pulse-question' ); ?><br />
+					<input type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT_2 ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent_2' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent_2' ) ); ?>" /></label></p>
+				<p class="description"><?php esc_html_e( 'Used on the site, in the daily email and on share images. Leave them empty to follow your theme\'s Automatic.css colours on the site, with orange and teal elsewhere.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>
 		<?php

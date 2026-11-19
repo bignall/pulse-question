@@ -1,0 +1,13 @@
+{
+	"name": "pulse-question",
+	"private": true,
+	"description": "Docs site build for bignall/pulse-question.",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"site:build": "node site/build.mjs"
+	},
+	"devDependencies": {
+		"highlight.js": "^11.12.0",
+		"marked": "^18.1.3"
+	}
+}

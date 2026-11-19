@@ -228,7 +228,7 @@ final class Generator {
 			$text .= ' Theme for this batch: ' . trim( sanitize_text_field( $theme ) ) . '. Keep variety within the theme.';
 		}
 		$text .= "\n\n" . ( $categories
-			? "Categories in use (reuse one when it fits; otherwise make a new short one): " . implode( ', ', $categories ) . '.'
+			? 'Categories in use (reuse one when it fits; otherwise make a new short one): ' . implode( ', ', $categories ) . '.'
 			: 'No categories exist yet: make short, reusable ones.' );
 		if ( $recent ) {
 			$text .= "\n\nQuestions the site already has. Don't repeat or closely paraphrase any of them:\n- " . implode( "\n- ", $recent );

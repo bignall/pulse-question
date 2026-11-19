@@ -137,6 +137,12 @@ final class Votes {
 	/** Drop the votes of a deleted answer or question. */
 	public static function forget( string $type, int $id ): void {
 		global $wpdb;
-		$wpdb->delete( self::table(), array( 'object_type' => $type, 'object_id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->delete( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table; counts are cached in meta.
+			self::table(),
+			array(
+				'object_type' => $type,
+				'object_id'   => $id,
+			)
+		);
 	}
 }

@@ -383,10 +383,30 @@ final class DailyEmail {
 			. '</td></tr></table></body></html>';
 	}
 
+	/**
+	 * Headers for the built-in sender and test emails: HTML, and the From in Settings if set.
+	 *
+	 * @return list<string>
+	 */
+	public static function headers( string $unsubscribe = '' ): array {
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		$address = sanitize_email( (string) Settings::get( 'email_from_address' ) );
+		if ( '' !== $address ) {
+			$name      = trim( (string) Settings::get( 'email_from_name' ) );
+			$name      = '' !== $name ? $name : wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+			$headers[] = 'From: ' . str_replace( array( '"', "\r", "\n" ), '', $name ) . ' <' . $address . '>';
+		}
+		if ( '' !== $unsubscribe ) {
+			$headers[] = 'List-Unsubscribe: <' . $unsubscribe . '>';
+			$headers[] = 'List-Unsubscribe-Post: List-Unsubscribe=One-Click';
+		}
+		return $headers;
+	}
+
 	/** Email colours; filter pulse_question_email_colors to change them. */
 	public static function color( string $key ): string {
 		$colors = array(
-			'accent' => '#e23a03',
+			'accent' => \PulseQuestion\Branding::darken( \PulseQuestion\Branding::accent(), 0.1 ),
 			'text'   => '#1d1d1f',
 			'muted'  => '#6b6b70',
 		);

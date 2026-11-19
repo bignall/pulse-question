@@ -63,14 +63,21 @@ final class AnswersView {
 					'nonce'        => wp_create_nonce( 'wp_rest' ),
 					'reportAsk'    => __( 'Report this answer to the moderators?', 'pulse-question' ),
 					'reportThanks' => __( 'Thanks, the moderators will take a look.', 'pulse-question' ),
+					/* translators: %s: the name of the member being replied to. */
 					'replyingTo'   => __( 'Replying to %s', 'pulse-question' ),
 				)
 			);
 		}
 
-		$html  = '<section class="pq-answers" id="pq-answers" aria-labelledby="pq-answers-title">';
+		$html  = '<section class="pq-answers" id="pq-answers" aria-labelledby="pq-answers-title">';  // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found -- a false positive on this line.
 		$html .= '<div class="pq-answers__head">';
-		$html .= '<h2 class="pq-answers__title" id="pq-answers-title">' . esc_html( sprintf( _n( '%s answer', '%s answers', $count, 'pulse-question' ), number_format_i18n( $count ) ) ) . '</h2>';
+		$html .= '<h2 class="pq-answers__title" id="pq-answers-title">' . esc_html(
+			sprintf(
+				/* translators: %s: number of answers. */
+				_n( '%s answer', '%s answers', $count, 'pulse-question' ),
+				number_format_i18n( $count )
+			)
+		) . '</h2>';
 		$html .= self::voteButton( 'question', $post_id, $user, __( 'Good question', 'pulse-question' ) );
 		if ( $count > 1 ) {
 			$base  = get_permalink( $post_id );
@@ -84,7 +91,7 @@ final class AnswersView {
 			$html .= '<p class="pq-answers__note">' . esc_html__( 'Thanks, the moderators will take a look.', 'pulse-question' ) . '</p>';
 		}
 		$html .= self::form( $post_id, $user, $held );
-		$html .= self::list( $post_id, $user, $sort, $page, $count );
+		$html .= self::list( $post_id, $user, $sort, $page );
 		$html .= '</section>';
 		return $html;
 	}
@@ -126,7 +133,7 @@ final class AnswersView {
 		}
 		ob_start();
 		/** Comment plugins (such as Akismet) add their fields here. */
-		do_action( 'comment_form', $post_id );
+		do_action( 'comment_form', $post_id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress's own hook.
 		$out .= (string) ob_get_clean();
 		$out .= '<p class="pq-answer-form__actions"><button type="submit" class="pq-button pq-button--primary">' . esc_html__( 'Post answer', 'pulse-question' ) . '</button> ';
 		$out .= '<span class="pq-answer-form__hint">' . esc_html__( 'Answers are checked before they appear. Be kind; keep it clean.', 'pulse-question' ) . '</span></p>';
@@ -134,7 +141,7 @@ final class AnswersView {
 		return $out;
 	}
 
-	private static function list( int $post_id, int $user, string $sort, int $page, int $count ): string {
+	private static function list( int $post_id, int $user, string $sort, int $page ): string {
 		$args = array(
 			'post_id' => $post_id,
 			'status'  => 'approve',
@@ -199,7 +206,13 @@ final class AnswersView {
 		if ( $pages > 1 ) {
 			$links = paginate_links(
 				array(
-					'base'      => add_query_arg( array( 'pq_ap' => '%#%', 'pq_sort' => $sort ), (string) get_permalink( $post_id ) ) . '#pq-answers',
+					'base'      => add_query_arg(
+						array(
+							'pq_ap' => '%#%',
+							'pq_sort' => $sort,
+						),
+						(string) get_permalink( $post_id )
+					) . '#pq-answers',
 					'format'    => '',
 					'current'   => $page,
 					'total'     => $pages,

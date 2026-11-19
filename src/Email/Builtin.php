@@ -113,11 +113,7 @@ final class Builtin {
 				(string) $user->user_email,
 				(string) $job['subject'],
 				DailyEmail::wrap( $job, $unsub ),
-				array(
-					'Content-Type: text/html; charset=UTF-8',
-					'List-Unsubscribe: <' . $unsub . '>',
-					'List-Unsubscribe-Post: List-Unsubscribe=One-Click',
-				)
+				DailyEmail::headers( $unsub )
 			);
 			$state['last_user'] = (int) $user->ID;
 			if ( $ok ) {

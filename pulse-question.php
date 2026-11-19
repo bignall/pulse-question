@@ -3,7 +3,7 @@
  * Plugin Name:       Pulse Question
  * Plugin URI:        https://github.com/bignall/pulse-question
  * Description:       A thought-provoking question every day. Add questions (or approve suggested ones), and each day the next one in the queue becomes the question of the day, with cards of past questions below it.
- * Version:           0.5.0
+ * Version:           0.6.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Arbe
@@ -42,6 +42,6 @@ if ( file_exists( __DIR__ . '/vendor-prefixed/autoload.php' ) ) {
 }
 require_once __DIR__ . '/vendor/autoload.php';
 
-define( 'PQ_FILE', __FILE__ );
+define( 'PULSE_QUESTION_FILE', __FILE__ );
 
 PulseQuestion\Bootstrap::plugin( __FILE__ )->boot();

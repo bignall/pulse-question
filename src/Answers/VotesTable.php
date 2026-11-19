@@ -18,13 +18,13 @@ final class VotesTable extends Table {
 	}
 
 	public function columns(): string {
-		return "id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		return 'id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 object_type varchar(10) NOT NULL,
 object_id bigint(20) unsigned NOT NULL,
 user_id bigint(20) unsigned NOT NULL,
 created_at datetime NOT NULL,
 PRIMARY KEY  (id),
 UNIQUE KEY one_vote (object_type,object_id,user_id),
-KEY object (object_type,object_id)";
+KEY object (object_type,object_id)';
 	}
 }

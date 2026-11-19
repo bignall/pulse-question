@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace PulseQuestion\Social;
 
+use PulseQuestion\Branding;
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
 
@@ -82,7 +83,8 @@ final class ShareImage {
 		$title = self::cleanText( get_the_title( $post ) );
 		$label = self::cleanText( (string) Settings::get( 'label' ) );
 		$host  = (string) wp_parse_url( home_url(), PHP_URL_HOST );
-		$hash  = substr( md5( self::DESIGN . '|' . $title . '|' . $label . '|' . $host . '|' . wp_json_encode( self::colors() ) ), 0, 10 );
+		$logo  = self::logo();
+		$hash  = substr( md5( self::DESIGN . '|' . $title . '|' . $label . '|' . $host . '|' . wp_json_encode( self::colors() ) . '|' . $logo . '|' . ( '' !== $logo ? (string) @filemtime( $logo ) : '' ) ), 0, 10 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		$name  = 'q' . $post_id . '-' . $hash . '.png';
 		$path  = $dir['path'] . '/' . $name;
 		if ( ! file_exists( $path ) ) {
@@ -132,9 +134,10 @@ final class ShareImage {
 		$colors = array(
 			'background' => '#fff8f3',
 			'text'       => '#1d1d1f',
-			'label'      => '#028c86',
-			'accent'     => '#e23a03',
-			'line'       => '#03c0b8',
+			// Darker shades of your colours, so the text reads well on the light background.
+			'label'      => Branding::darken( Branding::accent2(), 0.27 ),
+			'accent'     => Branding::darken( Branding::accent(), 0.1 ),
+			'line'       => Branding::accent2(),
 		);
 		/**
 		 * Share image colours (hex).
@@ -143,6 +146,12 @@ final class ShareImage {
 		 */
 		$filtered = apply_filters( 'pulse_question_share_image_colors', $colors );
 		return is_array( $filtered ) ? array_merge( $colors, array_filter( $filtered, 'is_string' ) ) : $colors;
+	}
+
+	/** The logo file for share images: Settings → Branding, or the filter. */
+	private static function logo(): string {
+		/** @param string $logo Path to a PNG, JPEG, GIF or WebP logo, or '' for none. */
+		return (string) apply_filters( 'pulse_question_share_image_logo', Branding::logoPath() );
 	}
 
 	/** Remove what the font can't draw (emoji and other symbols) and tidy the spaces. */
@@ -155,8 +164,7 @@ final class ShareImage {
 	private static function draw( string $title, string $label, string $host, string $path ): bool {
 		/** @param string $font Path to a TTF or OTF font. */
 		$font = (string) apply_filters( 'pulse_question_share_image_font', dirname( __DIR__, 2 ) . '/assets/fonts/Inter-SemiBold.otf' );
-		/** @param string $logo Path to a PNG logo, or '' for none. */
-		$logo = (string) apply_filters( 'pulse_question_share_image_logo', dirname( __DIR__, 2 ) . '/assets/img/logo.png' );
+		$logo = self::logo();
 		if ( ! is_readable( $font ) ) {
 			return false;
 		}
@@ -178,7 +186,8 @@ final class ShareImage {
 		// Logo, top left.
 		$top = $pad;
 		if ( '' !== $logo && is_readable( $logo ) ) {
-			$src = @imagecreatefrompng( $logo ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- a bad logo file just means no logo.
+			$data = (string) file_get_contents( $logo ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file.
+			$src  = '' !== $data ? @imagecreatefromstring( $data ) : false; // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- a bad logo file just means no logo.
 			if ( false !== $src ) {
 				$lw = imagesx( $src );
 				$lh = imagesy( $src );

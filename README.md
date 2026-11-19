@@ -17,7 +17,9 @@ A WordPress plugin for a thought-provoking question every day. Add questions (or
 
 - **Daily email and social posts:** each new question is emailed to the mailing list, as a FluentCRM campaign or by the built-in sender, with yesterday's top answers. Each question gets a share image, share tags and share links, and can be posted automatically through a webhook (Zapier, Make, n8n…). See below.
 
-Coming next: packaging for other sites (branding settings, docs).
+- **Ready for other sites:** your logo and colours (Settings → Branding), a setup checklist for new sites, and [guides](https://bignall.github.io/pulse-question/).
+
+**Guides:** https://bignall.github.io/pulse-question/ (built from `docs/` and `site/` by `.github/workflows/pages.yml`).
 
 ## Questions written by Claude
 
@@ -101,6 +103,8 @@ Download `pulse-question-x.y.z.zip` from the [latest release](https://github.com
 ```bash
 composer install      # installs WP Foundation and prefixes it with Strauss
 composer test         # runs the unit tests (PHPUnit)
+vendor/bin/phpcs      # WordPress coding standards and PHP 8.1 compatibility
+npm install && npm run site:build   # the guides site, into _site/
 bin/build-zip.sh      # writes dist/pulse-question-<version>.zip
 ```
 

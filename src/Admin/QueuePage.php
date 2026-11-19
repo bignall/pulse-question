@@ -292,7 +292,7 @@ final class QueuePage {
 			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html(
 				$skipped
 					/* translators: %s: number of questions. */
-					? sprintf( _n( 'Claude\'s question was a repeat of one you already have, so nothing was added. Try a theme.', 'Claude\'s %s questions were all repeats of ones you already have, so nothing was added. Try a theme.', $skipped, 'pulse-question' ), number_format_i18n( $skipped ) )
+					? sprintf( _n( 'Claude\'s %s question was a repeat of one you already have, so nothing was added. Try a theme.', 'Claude\'s %s questions were all repeats of ones you already have, so nothing was added. Try a theme.', $skipped, 'pulse-question' ), number_format_i18n( $skipped ) )
 					: __( 'Claude didn\'t write any questions this time. Try again, or try a theme.', 'pulse-question' )
 			) . '</p></div>';
 			return;
