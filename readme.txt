@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 6.8
 Requires PHP: 8.1
-Stable tag: 0.4.0
+Stable tag: 0.4.1
 License: GPLv2 or later
 
 A thought-provoking question every day: a queue you control, a daily pick, today's question and cards of past ones.
@@ -30,6 +30,9 @@ When you use "Write questions with Claude" or automatic top-up, the plugin sends
 If you connect a FluentCRM site on another domain (Settings → Members), each new member's email address, name, chosen lists and tags are sent to that site's REST API. With FluentCRM on the same site, nothing leaves your site.
 
 == Changelog ==
+
+= 0.4.1 =
+* A "Test connection" button for the mailing list (Settings → Members). It checks the saved settings step by step and says which step failed and what to do: a redirect that drops the login, wrong or refused details, a server that drops the login header, a user without FluentCRM permission, FluentCRM not active, or list ids that don't exist.
 
 = 0.4.0 =
 * Answers: logged-in members answer each question, vote for good questions, like answers, reply and report. Answers sort by top or newest.

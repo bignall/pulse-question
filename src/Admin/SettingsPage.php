@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace PulseQuestion\Admin;
 
 use PulseQuestion\Claude\Generator;
+use PulseQuestion\Members\ConnectionTest;
 use PulseQuestion\Members\MailingList;
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
@@ -21,6 +22,7 @@ final class SettingsPage {
 	public static function init(): void {
 		add_action( 'admin_menu', array( self::class, 'menu' ), 20 );
 		add_action( 'admin_post_pq_make_page', array( self::class, 'makePage' ) );
+		add_action( 'admin_post_pq_test_list', array( self::class, 'testList' ) );
 	}
 
 	public static function menu(): void {
@@ -335,7 +337,22 @@ final class SettingsPage {
 					<p><label><?php esc_html_e( 'Application password', 'pulse-question' ); ?> <input type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'list_remote_password' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'list_remote_password' ) ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : '' ); ?>" /></label></p>
 					<p class="description"><?php esc_html_e( 'A user on that site who can manage FluentCRM contacts, with an application password (Users → Profile).', 'pulse-question' ); ?></p>
 				</div>
+				<p id="pq-list-test" style="margin-top:12px">
+					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=pq_test_list' ), 'pq_test_list' ) ); ?>"><?php esc_html_e( 'Test connection', 'pulse-question' ); ?></a>
+					<span class="description"><?php esc_html_e( 'Checks the saved settings, so save your changes first. Nobody is added to the list.', 'pulse-question' ); ?></span>
+				</p>
 				<?php
+				$test = get_transient( 'pq_list_test_' . get_current_user_id() );
+				if ( is_array( $test ) ) {
+					delete_transient( 'pq_list_test_' . get_current_user_id() );
+					echo '<ul class="pq-list-test">';
+					foreach ( $test as $step ) {
+						$mark  = true === $step['ok'] ? '✓' : ( false === $step['ok'] ? '✗' : '!' );
+						$color = true === $step['ok'] ? '#00a32a' : ( false === $step['ok'] ? '#b32d2e' : '#996800' );
+						echo '<li><span style="display:inline-block;width:1.2em;font-weight:600;color:' . esc_attr( $color ) . '">' . esc_html( $mark ) . '</span>' . esc_html( (string) $step['text'] ) . '</li>';
+					}
+					echo '</ul>';
+				}
 				$log = array_slice( MailingList::history(), 0, 5 );
 				if ( $log ) {
 					echo '<p><strong>' . esc_html__( 'Latest subscriptions', 'pulse-question' ) . '</strong></p><ul>';
@@ -349,6 +366,17 @@ final class SettingsPage {
 			</td>
 		</tr>
 		<?php
+	}
+
+	/** Run the mailing list connection test and show the result under the button. */
+	public static function testList(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have permission to do that.', 'pulse-question' ), 403 );
+		}
+		check_admin_referer( 'pq_test_list' );
+		set_transient( 'pq_list_test_' . get_current_user_id(), ConnectionTest::run(), 5 * MINUTE_IN_SECONDS );
+		wp_safe_redirect( admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=' . self::SLUG ) . '#pq-list-test' );
+		exit;
 	}
 
 	public static function makePage(): void {

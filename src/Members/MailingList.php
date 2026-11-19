@@ -136,8 +136,16 @@ final class MailingList {
 		if ( $code >= 200 && $code < 300 ) {
 			return __( 'The other site answered, but not like FluentCRM. Check the address and that FluentCRM is active there.', 'pulse-question' );
 		}
-		/* translators: 1: HTTP status code, 2: message. */
-		return sprintf( __( 'The other site answered HTTP %1$d: %2$s', 'pulse-question' ), $code, is_array( $body ) && isset( $body['message'] ) ? (string) $body['message'] : '' );
+		$why = sprintf(
+			/* translators: 1: HTTP status code, 2: message. */
+			__( 'The other site answered HTTP %1$d: %2$s', 'pulse-question' ),
+			$code,
+			is_array( $body ) && isset( $body['message'] ) ? (string) $body['message'] : ''
+		);
+		if ( 401 === $code || 403 === $code ) {
+			$why .= ' ' . __( '(Test connection, above, finds out why.)', 'pulse-question' );
+		}
+		return $why;
 	}
 
 	/** Send subscriptions that failed before. */
