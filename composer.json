@@ -1,0 +1,50 @@
+{
+	"name": "arbe/pulse-question",
+	"description": "A thought-provoking question every day: an approval queue, a daily pick, today's question and cards of past ones.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=8.1",
+		"bignall/wp-foundation": "^0.1.4"
+	},
+	"require-dev": {
+		"brianhenryie/strauss": "^0.19",
+		"phpunit/phpunit": "^10.5"
+	},
+	"autoload": {
+		"psr-4": {
+			"PulseQuestion\\": "src/"
+		}
+	},
+	"extra": {
+		"strauss": {
+			"target_directory": "vendor-prefixed",
+			"namespace_prefix": "PulseQuestion\\Vendor\\",
+			"classmap_prefix": "PulseQuestion_Vendor_",
+			"packages": [
+				"bignall/wp-foundation"
+			],
+			"delete_vendor_packages": true
+		}
+	},
+	"scripts": {
+		"prefix-namespaces": [
+			"strauss",
+			"@composer dump-autoload"
+		],
+		"post-install-cmd": [
+			"@prefix-namespaces"
+		],
+		"post-update-cmd": [
+			"@prefix-namespaces"
+		],
+		"test": "phpunit"
+	},
+	"config": {
+		"platform": {
+			"php": "8.1.0"
+		},
+		"platform-check": false,
+		"sort-packages": true
+	}
+}

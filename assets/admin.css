@@ -1,0 +1,93 @@
+/* Pulse Question admin. */
+.pq-admin .pq-panel {
+	max-width: 900px;
+	margin: 16px 0;
+	padding: 4px 20px 16px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+.pq-admin .pq-panel h2 {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 15px;
+}
+.pq-panel--today .pq-panel__question {
+	margin: 0 0 4px;
+	font-size: 20px;
+	line-height: 1.3;
+}
+.pq-panel--today .pq-panel__question a {
+	text-decoration: none;
+}
+.pq-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.pq-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0;
+	padding: 8px 4px;
+	border-bottom: 1px solid #f0f0f1;
+	background: #fff;
+}
+.pq-row:last-child {
+	border-bottom: 0;
+}
+.pq-row__title {
+	flex: 1;
+	font-size: 14px;
+}
+.pq-row__day {
+	flex: none;
+	width: 120px;
+	white-space: nowrap;
+	color: #646970;
+	font-size: 12px;
+}
+.pq-row__handle {
+	flex: none;
+	color: #8c8f94;
+	cursor: move;
+}
+.pq-row__actions {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	flex: none;
+}
+.pq-row__actions a {
+	text-decoration: none;
+}
+.pq-delete {
+	color: #b32d2e;
+}
+.pq-row--placeholder {
+	height: 36px;
+	background: #f6f7f7;
+	border: 1px dashed #c3c4c7;
+}
+.pq-queue--changed + .button {
+	border-color: #2271b1;
+	color: #2271b1;
+	font-weight: 600;
+}
+
+/* The question editor: no publish date or visibility; the Status box decides. */
+.post-type-pq_question #minor-publishing-actions,
+.post-type-pq_question #misc-publishing-actions {
+	display: none;
+}
+
+@media (max-width: 600px) {
+	.pq-row {
+		flex-wrap: wrap;
+	}
+	.pq-row__title {
+		flex-basis: calc(100% - 40px);
+	}
+}

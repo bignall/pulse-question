@@ -1,0 +1,187 @@
+/*
+ * Pulse Question. Inherits the theme's fonts and text colour; change these to restyle:
+ *   --pq-accent        label, links on hover, category pills
+ *   --pq-card-bg       card background
+ *   --pq-border        card and divider lines
+ *   --pq-radius        card corners
+ */
+.pq-today,
+.pq-past,
+.pq-asked,
+.pq-cats {
+	--pq-accent: var(--wp--preset--color--primary, #6b4fbb);
+	--pq-card-bg: color-mix(in srgb, currentColor 4%, transparent);
+	--pq-border: color-mix(in srgb, currentColor 14%, transparent);
+	--pq-radius: 12px;
+}
+
+/* Today's question. */
+.pq-today {
+	margin: 0 0 2.5rem;
+	padding: clamp(1.5rem, 5vw, 3rem) 0;
+	border-bottom: 1px solid var(--pq-border);
+}
+.pq-today__label {
+	margin: 0 0 0.75rem;
+	font-size: 0.85rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	opacity: 0.8;
+}
+.pq-today__label span {
+	color: var(--pq-accent);
+	font-weight: 700;
+	margin-right: 0.5em;
+}
+.pq-today__question {
+	margin: 0;
+	font-size: clamp(1.75rem, 4.5vw, 3rem);
+	line-height: 1.15;
+	text-wrap: balance;
+}
+.pq-today__question a {
+	color: inherit;
+	text-decoration: none;
+}
+.pq-today__question a:hover,
+.pq-today__question a:focus-visible {
+	color: var(--pq-accent);
+}
+.pq-today__background {
+	max-width: 40em;
+	margin-top: 1rem;
+	font-size: 1.05rem;
+	opacity: 0.85;
+}
+.pq-today--empty {
+	opacity: 0.7;
+}
+
+/* Past questions. */
+.pq-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+	gap: 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.pq-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 1.25rem;
+	background: var(--pq-card-bg);
+	border: 1px solid var(--pq-border);
+	border-radius: var(--pq-radius);
+	transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.pq-card:hover,
+.pq-card:focus-within {
+	border-color: var(--pq-accent);
+	transform: translateY(-2px);
+}
+.pq-card__day {
+	font-size: 0.8rem;
+	opacity: 0.7;
+}
+.pq-card__question {
+	margin: 0;
+	font-size: 1.1rem;
+	line-height: 1.3;
+}
+.pq-card__question a {
+	color: inherit;
+	text-decoration: none;
+}
+/* The whole card is clickable. */
+.pq-card__question a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+.pq-card .pq-cats {
+	margin-top: auto;
+	position: relative;
+	z-index: 1;
+}
+
+/* Category pills. */
+.pq-cats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin: 0.75rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+.pq-cats li {
+	margin: 0;
+}
+.pq-cats a {
+	display: inline-block;
+	padding: 0.15rem 0.6rem;
+	font-size: 0.8rem;
+	border: 1px solid var(--pq-border);
+	border-radius: 999px;
+	color: inherit;
+	text-decoration: none;
+}
+.pq-cats a:hover,
+.pq-cats a:focus-visible {
+	border-color: var(--pq-accent);
+	color: var(--pq-accent);
+}
+
+/* Page links. */
+.pq-pages {
+	margin-top: 1.5rem;
+}
+.pq-pages ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.pq-pages .page-numbers {
+	display: inline-block;
+	padding: 0.3rem 0.75rem;
+	border: 1px solid var(--pq-border);
+	border-radius: 8px;
+	text-decoration: none;
+}
+.pq-pages .current {
+	border-color: var(--pq-accent);
+	color: var(--pq-accent);
+	font-weight: 700;
+}
+
+/* On a question's own page. */
+.pq-asked {
+	margin-top: 2rem;
+	font-size: 0.9rem;
+	opacity: 0.8;
+}
+.pq-past--empty {
+	opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pq-card {
+		transition: none;
+	}
+	.pq-card:hover,
+	.pq-card:focus-within {
+		transform: none;
+	}
+}
+
+/* The plugin's block templates (question page, /questions/, categories). */
+.pq-template {
+	padding-block: clamp(2rem, 6vw, 4rem);
+}
