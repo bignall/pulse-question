@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace PulseQuestion\Admin;
 
 use PulseQuestion\Claude\Generator;
+use PulseQuestion\Members\MailingList;
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
 
@@ -93,6 +94,8 @@ final class SettingsPage {
 						<input type="hidden" name="<?php echo esc_attr( $store->field( 'todo_tasks' ) ); ?>" value="<?php echo esc_attr( (string) (int) $store->get( 'todo_tasks' ) ); ?>" />
 					<?php endif; ?>
 					<?php self::claudeRows( $store, $flag ); ?>
+					<?php self::answerRows( $store, $flag ); ?>
+					<?php self::memberRows( $store, $flag ); ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
 						<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
@@ -221,6 +224,128 @@ final class SettingsPage {
 				</td>
 			</tr>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Answers and moderation.
+	 *
+	 * @param callable(string, string): void $flag Checkbox printer.
+	 */
+	private static function answerRows( $store, callable $flag ): void {
+		$mode = (string) $store->get( 'moderation' );
+		?>
+		<tr><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Answers and moderation', 'pulse-question' ); ?></h2></th></tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Answers', 'pulse-question' ); ?></th>
+			<td>
+				<?php $flag( 'answers_open', __( 'Members can answer, vote and reply on asked questions', 'pulse-question' ) ); ?>
+				<p>
+					<?php esc_html_e( 'Longest answer:', 'pulse-question' ); ?>
+					<input type="number" min="0" max="10000" class="small-text" name="<?php echo esc_attr( $store->field( 'answer_max_length' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'answer_max_length' ) ); ?>" />
+					<?php esc_html_e( 'characters (0 = no limit)', 'pulse-question' ); ?>
+				</p>
+				<?php $flag( 'answer_emails', __( 'Email me about every new answer', 'pulse-question' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Off by default. Held answers still follow WordPress\'s "email me when a comment is held" setting (Settings → Discussion).', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Moderation', 'pulse-question' ); ?></th>
+			<td>
+				<fieldset>
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="claude" <?php checked( 'claude', $mode ); ?> /> <strong><?php esc_html_e( 'Automatic, with Claude', 'pulse-question' ); ?></strong> <?php esc_html_e( '(recommended): clean answers appear straight away, unclear ones wait for you, clear violations are kept off the site', 'pulse-question' ); ?></label><br />
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="hold" <?php checked( 'hold', $mode ); ?> /> <?php esc_html_e( 'Hold every answer for me', 'pulse-question' ); ?></label><br />
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'moderation' ) ); ?>" value="wordpress" <?php checked( 'wordpress', $mode ); ?> /> <?php esc_html_e( 'WordPress\'s own moderation settings only (Settings → Discussion)', 'pulse-question' ); ?></label>
+				</fieldset>
+				<?php if ( 'claude' === $mode && ! Generator::isConfigured() ) : ?>
+					<p style="color:#b32d2e"><?php esc_html_e( 'No Anthropic API key yet, so every answer is held until you add one (under "Questions written by Claude").', 'pulse-question' ); ?></p>
+				<?php endif; ?>
+				<p class="description"><?php esc_html_e( 'Each answer takes a few seconds to check. If the check can\'t run, the answer is held and checked again later. Akismet, if active, still catches spam first.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="pq-guidelines"><?php esc_html_e( 'Community guidelines', 'pulse-question' ); ?></label></th>
+			<td>
+				<textarea id="pq-guidelines" class="large-text" rows="6" name="<?php echo esc_attr( $store->field( 'moderation_guidelines' ) ); ?>"><?php echo esc_textarea( (string) $store->get( 'moderation_guidelines' ) ); ?></textarea>
+				<p class="description"><?php esc_html_e( 'What the automatic check allows, removes and sends to you. Leave empty for the built-in guidelines (no swearing, insults, hate, sexual content, spam or personal details; anything unsure, any links and mentions of self-harm go to you).', 'pulse-question' ); ?></p>
+				<p>
+					<label><?php esc_html_e( 'Model', 'pulse-question' ); ?> <input type="text" class="regular-text code" name="<?php echo esc_attr( $store->field( 'moderation_model' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'moderation_model' ) ); ?>" /></label>
+					<select name="<?php echo esc_attr( $store->field( 'moderation_effort' ) ); ?>">
+						<?php foreach ( array( 'low', 'medium', 'high' ) as $effort ) : ?>
+							<option value="<?php echo esc_attr( $effort ); ?>" <?php selected( $store->get( 'moderation_effort' ), $effort ); ?>><?php echo esc_html( ucfirst( $effort ) ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</p>
+				<p class="description"><?php esc_html_e( 'Claude Opus 5.5 at low effort is the default: about half a cent per answer. A smaller model such as claude-haiku-5-5 costs much less per answer.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="pq-reports"><?php esc_html_e( 'Reports', 'pulse-question' ); ?></label></th>
+			<td>
+				<?php esc_html_e( 'Hide an answer for review after', 'pulse-question' ); ?>
+				<input id="pq-reports" type="number" min="0" max="50" class="small-text" name="<?php echo esc_attr( $store->field( 'report_threshold' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'report_threshold' ) ); ?>" />
+				<?php esc_html_e( 'members report it (0 = never hide)', 'pulse-question' ); ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Members and the mailing list.
+	 *
+	 * @param callable(string, string): void $flag Checkbox printer.
+	 */
+	private static function memberRows( $store, callable $flag ): void {
+		$provider = (string) $store->get( 'list_provider' );
+		?>
+		<tr><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Members and mailing list', 'pulse-question' ); ?></h2></th></tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Signing up', 'pulse-question' ); ?></th>
+			<td>
+				<?php if ( ! get_option( 'users_can_register' ) ) : ?>
+					<p style="color:#b32d2e"><?php echo wp_kses_post( __( 'Visitors can\'t sign up yet. Turn on <strong>Anyone can register</strong> (as Subscriber) under Settings → General.', 'pulse-question' ) ); ?></p>
+				<?php else : ?>
+					<p><?php esc_html_e( 'Visitors sign up on the WordPress sign-up page, which gets the mailing list boxes below. Members who signed up earlier tick them with their first answer.', 'pulse-question' ); ?></p>
+				<?php endif; ?>
+				<p><label><?php esc_html_e( 'Required box', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'list_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_label' ) ); ?>" /></label></p>
+				<p><label><?php esc_html_e( 'Optional marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Mailing list', 'pulse-question' ); ?></th>
+			<td>
+				<fieldset>
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="none" <?php checked( 'none', $provider ); ?> /> <?php esc_html_e( 'Not connected yet (joining is recorded on each member)', 'pulse-question' ); ?></label><br />
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="fluentcrm" <?php checked( 'fluentcrm', $provider ); ?> /> <?php esc_html_e( 'FluentCRM on this site', 'pulse-question' ); ?><?php echo MailingList::localAvailable() ? '' : ' <em>(' . esc_html__( 'not active here', 'pulse-question' ) . ')</em>'; ?></label><br />
+					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="fluentcrm_remote" <?php checked( 'fluentcrm_remote', $provider ); ?> /> <?php esc_html_e( 'FluentCRM on another site', 'pulse-question' ); ?></label>
+				</fieldset>
+				<p>
+					<label><?php esc_html_e( 'List ids', 'pulse-question' ); ?> <input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $store->field( 'list_ids' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_ids' ) ); ?>" placeholder="3" /></label>
+					<label><?php esc_html_e( 'Marketing list ids', 'pulse-question' ); ?> <input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $store->field( 'marketing_list_ids' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_list_ids' ) ); ?>" placeholder="1" /></label>
+					<label><?php esc_html_e( 'Tag ids', 'pulse-question' ); ?> <input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $store->field( 'list_tag_ids' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_tag_ids' ) ); ?>" /></label>
+				</p>
+				<p class="description"><?php esc_html_e( 'The numbers FluentCRM shows for each list and tag (FluentCRM → Lists). Separate several with commas.', 'pulse-question' ); ?></p>
+				<?php $flag( 'list_double_optin', __( 'Send FluentCRM\'s confirmation email (double opt-in)', 'pulse-question' ) ); ?>
+				<div style="margin-top:12px">
+					<p><strong><?php esc_html_e( 'FluentCRM on another site', 'pulse-question' ); ?></strong></p>
+					<p><label><?php esc_html_e( 'Site address', 'pulse-question' ); ?> <input type="url" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_url' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_url' ) ); ?>" placeholder="https://example.com" /></label></p>
+					<p><label><?php esc_html_e( 'User name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_user' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_user' ) ); ?>" /></label></p>
+					<p><label><?php esc_html_e( 'Application password', 'pulse-question' ); ?> <input type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'list_remote_password' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'list_remote_password' ) ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : '' ); ?>" /></label></p>
+					<p class="description"><?php esc_html_e( 'A user on that site who can manage FluentCRM contacts, with an application password (Users → Profile).', 'pulse-question' ); ?></p>
+				</div>
+				<?php
+				$log = array_slice( MailingList::history(), 0, 5 );
+				if ( $log ) {
+					echo '<p><strong>' . esc_html__( 'Latest subscriptions', 'pulse-question' ) . '</strong></p><ul>';
+					foreach ( $log as $row ) {
+						$who = get_userdata( (int) $row['user'] );
+						echo '<li>' . esc_html( wp_date( (string) get_option( 'date_format' ), (int) $row['time'] ) . ' · ' . ( $who ? $who->user_login : '#' . (int) $row['user'] ) . ' · ' ) . ( $row['ok'] ? esc_html__( 'added', 'pulse-question' ) : '<span style="color:#b32d2e">' . esc_html( (string) $row['error'] ) . '</span>' ) . '</li>';
+					}
+					echo '</ul>';
+				}
+				?>
+			</td>
+		</tr>
 		<?php
 	}
 

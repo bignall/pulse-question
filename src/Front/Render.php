@@ -91,6 +91,12 @@ final class Render {
 			$html .= '<div class="pq-today__background">' . wp_kses_post( wpautop( $post->post_content ) ) . '</div>';
 		}
 		$html .= self::categories( $post->ID );
+		if ( Settings::get( 'answers_open' ) ) {
+			$n     = (int) get_comments_number( $post->ID );
+			$html .= '<p class="pq-today__answers"><a class="pq-button pq-button--primary" href="' . esc_url( get_permalink( $post ) . '#pq-answers' ) . '">' . esc_html__( 'Answer', 'pulse-question' ) . '</a> <span>'
+				/* translators: %s: number of answers. */
+				. esc_html( $n ? sprintf( _n( '%s answer so far', '%s answers so far', $n, 'pulse-question' ), number_format_i18n( $n ) ) : __( 'Be the first to answer', 'pulse-question' ) ) . '</span></p>';
+		}
 		$html .= '</section>';
 		return $html;
 	}
@@ -140,6 +146,11 @@ final class Render {
 			$html .= '<time class="pq-card__day" datetime="' . esc_attr( $day ) . '">' . esc_html( self::dayLabel( $day, false ) ) . '</time>';
 			$html .= '<h3 class="pq-card__question"><a href="' . esc_url( get_permalink( $post ) ) . '">' . esc_html( get_the_title( $post ) ) . '</a></h3>';
 			$html .= self::categories( $post->ID );
+			$n     = (int) get_comments_number( $post->ID );
+			if ( $n ) {
+				/* translators: %s: number of answers. */
+				$html .= '<span class="pq-card__answers">' . esc_html( sprintf( _n( '%s answer', '%s answers', $n, 'pulse-question' ), number_format_i18n( $n ) ) ) . '</span>';
+			}
 			$html .= '</li>';
 		}
 		$html .= '</ul>';
@@ -196,6 +207,9 @@ final class Render {
 			);
 		}
 		$extra .= '</p>' . self::categories( (int) get_the_ID() );
+		if ( Settings::get( 'answers_open' ) || get_comments_number( (int) get_the_ID() ) ) {
+			$extra .= AnswersView::render( (int) get_the_ID() );
+		}
 		$archive = get_post_type_archive_link( Questions::POST_TYPE );
 		if ( $archive ) {
 			$extra .= '<p class="pq-more"><a href="' . esc_url( $archive ) . '">' . esc_html__( 'More questions', 'pulse-question' ) . ' &rarr;</a></p>';

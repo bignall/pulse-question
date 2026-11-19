@@ -20,7 +20,6 @@ namespace PulseQuestion\Claude;
 
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
-use PulseQuestion\Vendor\Anthropic\Client;
 use PulseQuestion\Vendor\Anthropic\Core\Exceptions\APIConnectionException;
 use PulseQuestion\Vendor\Anthropic\Core\Exceptions\APIStatusException;
 use PulseQuestion\Vendor\Anthropic\Core\Exceptions\AuthenticationException;
@@ -72,20 +71,7 @@ final class Generator {
 
 		$model = (string) Settings::get( 'claude_model' );
 		try {
-			Discovery::register();
-			$client  = new Client(
-				apiKey: self::apiKey(),
-				/**
-				 * The Anthropic API address (for a proxy or gateway). Null for the default.
-				 *
-				 * @param string|null $url Default null.
-				 */
-				baseUrl: apply_filters( 'pulse_question_claude_base_url', null ),
-				requestOptions: array(
-					'timeout'    => 180.0,
-					'maxRetries' => 2,
-				)
-			);
+			$client  = Api::client( 180.0, 2 );
 			$message = $client->beta->messages->create(
 				model: $model,
 				maxTokens: 16000,

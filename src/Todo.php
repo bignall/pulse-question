@@ -1,6 +1,7 @@
 <?php
 /**
- * Optional link-up with To-do Hub: a task when the queue is running low.
+ * Optional link-up with To-do Hub: a task when the queue is running low, and one while answers
+ * are held for a moderator.
  *
  * "Add questions to Pulse Question: N days left" when fewer approved questions are waiting than
  * the warning level in Settings (high priority once it's down to reusing old questions), and
@@ -26,6 +27,9 @@ final class Todo {
 	public static function init(): void {
 		add_action( 'transition_post_status', array( self::class, 'onTransition' ), 10, 3 );
 		add_action( 'pulse_question_new_day', array( self::class, 'markDirty' ) );
+		add_action( 'wp_insert_comment', array( self::class, 'markDirty' ) );
+		add_action( 'transition_comment_status', array( self::class, 'markDirty' ) );
+		add_action( 'pulse_question_answer_hidden', array( self::class, 'markDirty' ) );
 		add_action( Daily::CRON_HOOK, array( self::class, 'check' ), 20 );
 		add_action( 'shutdown', array( self::class, 'flush' ) );
 	}
@@ -101,6 +105,27 @@ final class Todo {
 				);
 			}
 			$sent['waiting'] = $waiting;
+		}
+
+		// Answers held for a moderator.
+		$held = \PulseQuestion\Answers\Answers::heldCount();
+		if ( $held !== (int) ( $sent['held'] ?? 0 ) ) {
+			if ( 0 === $held ) {
+				todo_hub_complete( self::SOURCE . ':held-answers' );
+			} else {
+				todo_hub_add(
+					array(
+						/* translators: %s: number of answers. */
+						'title'    => sprintf( _n( 'Review %s held Pulse Question answer', 'Review %s held Pulse Question answers', $held, 'pulse-question' ), number_format_i18n( $held ) ),
+						'category' => 'Pulse Question',
+						'priority' => $held >= 10 ? 'high' : 'normal',
+						'source'   => self::SOURCE,
+						'key'      => self::SOURCE . ':held-answers',
+						'link'     => \PulseQuestion\Answers\Answers::moderationUrl(),
+					)
+				);
+			}
+			$sent['held'] = $held;
 		}
 
 		update_option( self::OPTION, $sent, false );

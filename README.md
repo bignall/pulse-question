@@ -13,7 +13,9 @@ A WordPress plugin for a thought-provoking question every day. Add questions (or
 
 - **Questions written by Claude:** press **Write questions** in the Queue (with an optional theme), or turn on automatic top-up so Claude writes a batch whenever the queue gets short. They wait for your approval unless you turn on auto-approve. See below.
 
-Coming next: answers, votes and comments; then a daily email and social posts.
+- **Answers from members, checked automatically:** members log in to answer, vote and reply. Joining the mailing list is part of becoming a member. Claude checks every answer before it appears, and members can report answers. See below.
+
+Coming next: a daily email and social posts.
 
 ## Questions written by Claude
 
@@ -31,6 +33,28 @@ define( 'PULSE_QUESTION_ANTHROPIC_API_KEY', 'sk-ant-...' );
 - **Model:** Claude Opus 5.5 at medium effort by default, through the official [Anthropic PHP SDK](https://github.com/anthropics/anthropic-sdk-php) (bundled and prefixed, sending requests through WordPress's HTTP API). Requests use server-side fallbacks, so one the model declines for policy reasons is retried on a fallback model. Recent batches, with token counts, are listed in Settings.
 
 Filters: `pulse_question_claude_base_url` (a proxy or gateway address), `pulse_question_claude_timeout` (seconds, default 180). Action: `pulse_question_claude_wrote( $ids, $trigger )`.
+
+## Answers, members and moderation
+
+Answers are WordPress comments on questions, so replies, Akismet (if active) and **Comments** in the admin all work as usual.
+
+- **Members only:** you have to be logged in to answer, vote or report. Guests see the answers, a *Log in to answer* button and a *Join* button. *Join* appears when **Settings → General → Anyone can register** is on; use *Subscriber* as the new user role.
+- **Mailing list:** registering, or answering for the first time, needs the box *Send me the question of the day by email* to be ticked. A second, optional box covers news and offers. Members are added to FluentCRM on the same site or on another site; see Settings → Members. With double opt-in, FluentCRM sends its confirmation email. If a sign-up fails, it's tried again every hour. Recent sign-ups are listed in Settings.
+- **Votes:** members can mark a question as *Good question* and like answers (not their own). Answers sort by *Top* or *Newest*. Replies go one level deep.
+- **Automatic moderation (default):** Claude checks each answer as it's posted, against guidelines you can edit:
+  - fine → published straight away;
+  - unsure → held for you under **Comments → Pending**;
+  - clearly against the rules (swearing, slurs, harassment, hate, sexual content, threats, spam, other people's personal details) → kept off the site (sent to Spam or Trash, both kept 30 days).
+
+  The default guidelines send links, mentions of self-harm, political campaigning and off-topic answers for review. The member sees their held answer marked *Waiting for review*; nobody else does. If Claude can't be reached, the answer is held and checked again later, so nothing appears unchecked. Without an API key, every answer is held. The **Check** column under Comments shows each verdict and the reason for it.
+- **Other modes:** hold every answer for you, or use WordPress's own discussion settings only.
+- **Reports:** when three members report an answer (you can change the number), it's hidden until you look at it.
+- **To-do Hub:** a task when answers are waiting for review.
+- **Cost:** a check uses Claude Opus 5.5 at low effort by default, roughly half a cent per answer. You can choose a smaller, cheaper model in Settings.
+
+WordPress's own limit of one comment every 15 seconds per person applies to answers too.
+
+Filters: `pulse_question_moderation_timeout` (seconds to wait while the member waits, default 25). Actions: `pulse_question_member_joined( $user_id, $marketing )` and `pulse_question_answer_hidden( $comment_id )`. REST: `POST pulse-question/v1/vote` and `/report` (logged in, with a `X-WP-Nonce`).
 
 ## Shortcodes
 

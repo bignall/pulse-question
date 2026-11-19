@@ -13,6 +13,7 @@
 .pq-past,
 .pq-asked,
 .pq-cats,
+.pq-answers,
 .pq-template {
 	--pq-accent: var(--primary, #fb3f03);
 	--pq-accent-2: var(--secondary, #03c0b8);
@@ -210,6 +211,291 @@
 }
 .pq-past--empty {
 	opacity: 0.7;
+}
+
+/* Buttons and links used by answers and today's question. */
+.pq-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.55em 1.1em;
+	border: 1px solid var(--pq-border);
+	border-radius: 999px;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+}
+.pq-button--primary {
+	border-color: var(--pq-accent);
+	background: var(--pq-accent);
+	color: var(--white, #fff);
+}
+.pq-button:hover,
+.pq-button:focus-visible {
+	border-color: var(--pq-accent);
+	filter: brightness(1.05);
+}
+.pq-button:focus-visible,
+.pq-link:focus-visible,
+.pq-vote:focus-visible {
+	outline: 2px solid var(--pq-accent);
+	outline-offset: 2px;
+}
+.pq-link {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	font-size: var(--text-s, 0.875rem);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+	cursor: pointer;
+	opacity: 0.8;
+}
+.pq-link:hover {
+	color: var(--pq-accent);
+	opacity: 1;
+}
+.pq-link--quiet {
+	opacity: 0.55;
+}
+.pq-today__answers {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-s, 0.75rem);
+	margin-block-start: var(--space-m, 1.25rem);
+	font-size: var(--text-s, 0.9rem);
+}
+.pq-today__answers span {
+	opacity: 0.75;
+}
+.pq-card__answers {
+	font-size: var(--text-xs, 0.8rem);
+	opacity: 0.7;
+}
+
+/* Answers. */
+.pq-answers {
+	margin-block-start: var(--space-xl, 2.5rem);
+	padding-block-start: var(--space-l, 2rem);
+	border-block-start: 1px solid var(--pq-border);
+}
+.pq-answers__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-s, 0.75rem) var(--space-m, 1.25rem);
+	margin-block-end: var(--space-m, 1.25rem);
+}
+.pq-answers__title {
+	margin: 0;
+	font-size: var(--h3, 1.5rem);
+}
+.pq-answers__sort {
+	display: flex;
+	gap: var(--space-s, 0.75rem);
+	margin-inline-start: auto;
+	font-size: var(--text-s, 0.875rem);
+}
+.pq-answers__sort a {
+	color: inherit;
+	opacity: 0.7;
+	text-decoration: none;
+}
+.pq-answers__sort a.is-current {
+	opacity: 1;
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-color: var(--pq-accent);
+	text-underline-offset: 0.3em;
+}
+.pq-answers__note,
+.pq-answers__join {
+	margin-block-end: var(--space-m, 1.25rem);
+	padding: var(--space-m, 1rem);
+	border-radius: var(--pq-radius);
+	background: color-mix(in srgb, var(--pq-accent-2) 10%, transparent);
+}
+.pq-answers__join p {
+	margin: 0 0 0.6em;
+}
+.pq-answers__join p:last-child {
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-s, 0.75rem);
+}
+.pq-answers__empty {
+	opacity: 0.7;
+}
+
+/* The answer form. */
+.pq-answer-form {
+	display: grid;
+	gap: var(--space-xs, 0.5rem);
+	margin-block-end: var(--space-l, 2rem);
+}
+.pq-answer-form__label {
+	font-weight: 600;
+}
+.pq-answer-form textarea {
+	inline-size: 100%;
+	min-block-size: 6.5em;
+	padding: var(--space-s, 0.75rem);
+	border: 1px solid var(--pq-border);
+	border-radius: var(--pq-radius);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	resize: vertical;
+	box-sizing: border-box;
+}
+.pq-answer-form textarea:focus {
+	border-color: var(--pq-accent);
+	outline: 2px solid color-mix(in srgb, var(--pq-accent) 35%, transparent);
+}
+.pq-answer-form__replying {
+	margin: 0;
+	font-size: var(--text-s, 0.875rem);
+}
+.pq-answer-form__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-s, 0.75rem);
+	margin: 0;
+}
+.pq-answer-form__hint {
+	font-size: var(--text-xs, 0.8rem);
+	opacity: 0.7;
+}
+.pq-join {
+	margin: 0;
+	font-size: var(--text-s, 0.9rem);
+}
+.pq-join input {
+	margin-inline-end: 0.4em;
+}
+
+/* Answer list. */
+.pq-answers__list,
+.pq-replies {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.pq-answer {
+	margin: 0;
+	padding-block: var(--space-m, 1.1rem);
+	border-block-start: 1px solid var(--pq-border);
+}
+.pq-answer:first-child {
+	border-block-start: 0;
+}
+.pq-answer--waiting {
+	padding-inline: var(--space-m, 1rem);
+	border-radius: var(--pq-radius);
+	border: 1px dashed var(--pq-border);
+}
+.pq-replies {
+	margin-block-start: var(--space-s, 0.75rem);
+	padding-inline-start: var(--space-m, 1.25rem);
+	border-inline-start: 2px solid color-mix(in srgb, var(--pq-accent-2) 45%, transparent);
+}
+.pq-answer--reply {
+	padding-block: var(--space-s, 0.75rem);
+}
+.pq-answer__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.35em 0.75em;
+	font-size: var(--text-s, 0.875rem);
+}
+.pq-answer__name {
+	font-weight: 700;
+}
+.pq-answer__date {
+	opacity: 0.65;
+}
+.pq-answer__badge {
+	padding: 0.1em 0.6em;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--pq-accent) 12%, transparent);
+	font-size: var(--text-xs, 0.75rem);
+}
+.pq-answer__text {
+	margin-block: var(--space-xs, 0.4rem);
+}
+.pq-answer__text p {
+	margin: 0 0 0.6em;
+}
+.pq-answer__text p:last-child {
+	margin: 0;
+}
+.pq-answer__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-m, 1rem);
+}
+.pq-answer__actions form {
+	margin: 0;
+}
+.pq-answer__reported {
+	font-size: var(--text-xs, 0.8rem);
+	opacity: 0.7;
+}
+
+/* Votes. */
+.pq-vote-form {
+	display: inline;
+	margin: 0;
+}
+.pq-vote {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+	padding: 0.3em 0.75em;
+	border: 1px solid var(--pq-border);
+	border-radius: 999px;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: var(--text-s, 0.875rem);
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+}
+.pq-vote__icon {
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+}
+.pq-vote:hover {
+	border-color: var(--pq-accent);
+	color: var(--pq-accent);
+}
+.pq-vote[aria-pressed="true"] {
+	border-color: var(--pq-accent);
+	color: var(--pq-accent);
+}
+.pq-vote[aria-pressed="true"] .pq-vote__icon {
+	fill: currentColor;
+}
+.pq-vote--own {
+	cursor: default;
+	opacity: 0.6;
+}
+.pq-vote--own:hover {
+	border-color: var(--pq-border);
+	color: inherit;
 }
 
 /* The plugin's block templates (question page, /questions/, categories). */

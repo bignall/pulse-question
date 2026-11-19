@@ -24,6 +24,12 @@ final class App {
 		Daily::init();
 		Todo::init();
 		Claude\TopUp::init();
+		Answers\Answers::init();
+		Answers\Moderator::init();
+		Answers\Actions::init();
+		Members\Members::init();
+		Members\MailingList::init();
+		Front\AnswersView::init();
 		Front\Render::init();
 		Front\Shortcodes::init();
 		Front\Blocks::init();
@@ -34,6 +40,7 @@ final class App {
 			Admin\QueuePage::init( $plugin );
 			Admin\QuestionEditor::init();
 			Admin\SettingsPage::init();
+			Admin\AnswersAdmin::init();
 		}
 	}
 
