@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace PulseQuestion\Admin;
 
 use PulseQuestion\App;
+use PulseQuestion\Claude\Generator;
+use PulseQuestion\Claude\TopUp;
 use PulseQuestion\Daily;
 use PulseQuestion\Front\Render;
 use PulseQuestion\Questions;
@@ -21,7 +23,7 @@ final class QueuePage {
 
 	public const SLUG = 'pq-queue';
 
-	private const ACTIONS = array( 'pq_add', 'pq_approve', 'pq_approve_all', 'pq_reorder', 'pq_ask_now', 'pq_trash' );
+	private const ACTIONS = array( 'pq_add', 'pq_approve', 'pq_approve_all', 'pq_reorder', 'pq_ask_now', 'pq_trash', 'pq_claude' );
 
 	public static function init( Plugin $plugin ): void {
 		add_action( 'admin_menu', array( self::class, 'menu' ), 9 );
@@ -142,6 +144,8 @@ final class QueuePage {
 				</form>
 			</div>
 
+			<?php self::claudePanel(); ?>
+
 			<?php if ( $waiting ) : ?>
 				<div class="pq-panel">
 					<h2>
@@ -154,7 +158,7 @@ final class QueuePage {
 					<ul class="pq-list">
 						<?php foreach ( $waiting as $id ) : ?>
 							<li class="pq-row">
-								<span class="pq-row__title"><?php echo esc_html( get_the_title( $id ) ); ?></span>
+								<span class="pq-row__title"><?php echo esc_html( get_the_title( $id ) ); ?><?php self::badge( $id ); ?></span>
 								<span class="pq-row__actions">
 									<a class="button button-small button-primary" href="<?php echo esc_url( self::actionUrl( 'pq_approve', $id ) ); ?>"><?php esc_html_e( 'Approve', 'pulse-question' ); ?></a>
 									<a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php esc_html_e( 'Edit', 'pulse-question' ); ?></a>
@@ -200,7 +204,7 @@ final class QueuePage {
 									<input type="hidden" name="order[]" value="<?php echo esc_attr( (string) $id ); ?>" />
 									<span class="pq-row__handle dashicons dashicons-menu" aria-hidden="true"></span>
 									<span class="pq-row__day"><?php echo esc_html( wp_date( 'D, M j', ( new \DateTimeImmutable( $when . ' 12:00', wp_timezone() ) )->getTimestamp() ) ); ?></span>
-									<span class="pq-row__title"><?php echo esc_html( get_the_title( $id ) ); ?></span>
+									<span class="pq-row__title"><?php echo esc_html( get_the_title( $id ) ); ?><?php self::badge( $id ); ?></span>
 									<span class="pq-row__actions">
 										<a href="<?php echo esc_url( (string) get_edit_post_link( $id ) ); ?>"><?php esc_html_e( 'Edit', 'pulse-question' ); ?></a>
 										<a href="<?php echo esc_url( self::actionUrl( 'pq_ask_now', $id ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Make this today\'s question now?', 'pulse-question' ) ); ?>');"><?php esc_html_e( 'Ask now', 'pulse-question' ); ?></a>
@@ -212,6 +216,57 @@ final class QueuePage {
 					</form>
 				<?php endif; ?>
 			</div>
+		</div>
+		<?php
+	}
+
+	/** "Claude" after a question Claude wrote, with its background line as a tooltip. */
+	private static function badge( int $id ): void {
+		if ( Generator::SOURCE === get_post_meta( $id, Questions::META_SOURCE, true ) ) {
+			$background = wp_strip_all_tags( (string) get_post_field( 'post_content', $id ) );
+			echo ' <span class="pq-badge" title="' . esc_attr( $background ) . '">' . esc_html__( 'Claude', 'pulse-question' ) . '</span>';
+		}
+	}
+
+	private static function claudePanel(): void {
+		?>
+		<div class="pq-panel">
+			<h2><?php esc_html_e( 'Write questions with Claude', 'pulse-question' ); ?></h2>
+			<?php if ( ! Generator::isConfigured() ) : ?>
+				<p>
+					<?php esc_html_e( 'Add an Anthropic API key in Settings and Claude can write questions for you, on demand or whenever the queue gets short.', 'pulse-question' ); ?>
+					<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . Questions::POST_TYPE . '&page=' . SettingsPage::SLUG ) ); ?>"><?php esc_html_e( 'Settings', 'pulse-question' ); ?></a>
+				</p>
+			<?php else : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="pq-claude-form" onsubmit="this.querySelector('[type=submit]').disabled=true;this.querySelector('.spinner').classList.add('is-active');">
+					<input type="hidden" name="action" value="pq_claude" />
+					<?php wp_nonce_field( 'pq_claude' ); ?>
+					<label><?php esc_html_e( 'How many', 'pulse-question' ); ?>
+						<input type="number" name="count" min="1" max="30" class="small-text" value="<?php echo esc_attr( (string) Settings::get( 'claude_batch' ) ); ?>" /></label>
+					<label><?php esc_html_e( 'Theme (optional)', 'pulse-question' ); ?>
+						<input type="text" name="theme" class="regular-text" placeholder="<?php esc_attr_e( 'e.g. winter, food and family, the future', 'pulse-question' ); ?>" /></label>
+					<?php submit_button( __( 'Write questions', 'pulse-question' ), 'secondary', 'submit', false ); ?>
+					<span class="spinner" style="float:none"></span>
+				</form>
+				<p class="description">
+					<?php
+					echo esc_html(
+						Settings::get( 'claude_auto_approve' )
+							? __( 'They go straight into the queue (approval is off for Claude\'s questions in Settings). It takes up to a minute or two.', 'pulse-question' )
+							: __( 'They wait for your approval below. It takes up to a minute or two.', 'pulse-question' )
+					);
+					if ( TopUp::enabled() ) {
+						echo ' ' . esc_html(
+							sprintf(
+								/* translators: %s: number of days. */
+								__( 'Automatic top-up is on: Claude writes more when fewer than %s days are in hand.', 'pulse-question' ),
+								number_format_i18n( (int) Settings::get( 'claude_target_days' ) )
+							)
+						);
+					}
+					?>
+				</p>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -231,6 +286,34 @@ final class QueuePage {
 			'trashed'  => __( 'Question moved to the trash.', 'pulse-question' ),
 			'none'     => __( 'Nothing to do.', 'pulse-question' ),
 		);
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
+		$skipped = isset( $_GET['s'] ) ? absint( $_GET['s'] ) : 0;
+		if ( 'claude' === $msg && 0 === $count ) {
+			echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html(
+				$skipped
+					/* translators: %s: number of questions. */
+					? sprintf( _n( 'Claude\'s question was a repeat of one you already have, so nothing was added. Try a theme.', 'Claude\'s %s questions were all repeats of ones you already have, so nothing was added. Try a theme.', $skipped, 'pulse-question' ), number_format_i18n( $skipped ) )
+					: __( 'Claude didn\'t write any questions this time. Try again, or try a theme.', 'pulse-question' )
+			) . '</p></div>';
+			return;
+		}
+		if ( 'claude' === $msg ) {
+			$texts['claude'] = ( $skipped
+				/* translators: %s: number of questions. */
+				? sprintf( _n( '%s repeat was left out.', '%s repeats were left out.', $skipped, 'pulse-question' ), number_format_i18n( $skipped ) ) . ' '
+				: '' );
+			$texts['claude'] = ( Settings::get( 'claude_auto_approve' )
+				/* translators: %s: number of questions. */
+				? sprintf( _n( 'Claude wrote %s question; it\'s in the queue.', 'Claude wrote %s questions; they\'re in the queue.', $count, 'pulse-question' ), number_format_i18n( $count ) )
+				/* translators: %s: number of questions. */
+				: sprintf( _n( 'Claude wrote %s question; it\'s waiting for your approval.', 'Claude wrote %s questions; they\'re waiting for your approval.', $count, 'pulse-question' ), number_format_i18n( $count ) ) ) . ' ' . $texts['claude'];
+		}
+		if ( 'claude_error' === $msg ) {
+			$error = (string) get_transient( 'pq_claude_error_' . get_current_user_id() );
+			delete_transient( 'pq_claude_error_' . get_current_user_id() );
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( '' !== $error ? $error : __( 'Writing questions failed.', 'pulse-question' ) ) . '</p></div>';
+			return;
+		}
 		if ( isset( $texts[ $msg ] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $texts[ $msg ] ) . '</p></div>';
 		}
@@ -282,6 +365,19 @@ final class QueuePage {
 				break;
 			case 'pq_ask_now':
 				$args = array( 'pq_msg' => null !== Daily::askNow( $id ) ? 'asked' : 'none' );
+				break;
+			case 'pq_claude':
+				$result = Generator::generate( absint( $_POST['count'] ?? 10 ), sanitize_text_field( wp_unslash( (string) ( $_POST['theme'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast and sanitized.
+				if ( is_wp_error( $result ) ) {
+					set_transient( 'pq_claude_error_' . get_current_user_id(), $result->get_error_message(), 5 * MINUTE_IN_SECONDS );
+					$args = array( 'pq_msg' => 'claude_error' );
+				} else {
+					$args = array(
+						'pq_msg' => 'claude',
+						'n'      => count( $result['added'] ),
+						's'      => $result['skipped'],
+					);
+				}
 				break;
 			case 'pq_trash':
 				$args = array( 'pq_msg' => $id && get_post_type( $id ) === Questions::POST_TYPE && wp_trash_post( $id ) ? 'trashed' : 'none' );

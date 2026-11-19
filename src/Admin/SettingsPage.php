@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace PulseQuestion\Admin;
 
+use PulseQuestion\Claude\Generator;
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
 
@@ -91,6 +92,7 @@ final class SettingsPage {
 					<?php else : ?>
 						<input type="hidden" name="<?php echo esc_attr( $store->field( 'todo_tasks' ) ); ?>" value="<?php echo esc_attr( (string) (int) $store->get( 'todo_tasks' ) ); ?>" />
 					<?php endif; ?>
+					<?php self::claudeRows( $store, $flag ); ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
 						<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
@@ -113,6 +115,112 @@ final class SettingsPage {
 				<p><?php submit_button( __( 'Create a page with today\'s question and past questions', 'pulse-question' ), 'secondary', 'submit', false ); ?></p>
 			</form>
 		</div>
+		<?php
+	}
+
+	/**
+	 * The "Questions written by Claude" rows of the settings form.
+	 *
+	 * @param callable(string, string): void $flag Checkbox printer.
+	 */
+	private static function claudeRows( $store, callable $flag ): void {
+		$constant = Generator::keyFromConstant();
+		$saved    = '' !== (string) $store->get( 'claude_api_key' );
+		?>
+		<tr>
+			<th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Questions written by Claude', 'pulse-question' ); ?></h2></th>
+		</tr>
+		<tr>
+			<th scope="row"><label for="pq-claude-key"><?php esc_html_e( 'Anthropic API key', 'pulse-question' ); ?></label></th>
+			<td>
+				<?php if ( $constant ) : ?>
+					<p><?php echo wp_kses_post( __( 'Set in <code>wp-config.php</code> (<code>PULSE_QUESTION_ANTHROPIC_API_KEY</code>).', 'pulse-question' ) ); ?></p>
+				<?php else : ?>
+					<input id="pq-claude-key" type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'claude_api_key' ) ); ?>" value="" placeholder="<?php echo esc_attr( $saved ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : 'sk-ant-…' ); ?>" />
+					<?php if ( $saved ) : ?>
+						<label><input type="checkbox" name="<?php echo esc_attr( $store->field( 'claude_api_key_clear' ) ); ?>" value="1" /> <?php esc_html_e( 'Remove the saved key', 'pulse-question' ); ?></label>
+					<?php endif; ?>
+					<p class="description"><?php echo wp_kses_post( __( 'From <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com</a>. To keep it out of the database, add <code>define( \'PULSE_QUESTION_ANTHROPIC_API_KEY\', \'…\' );</code> to <code>wp-config.php</code> instead. Each batch of 10 questions costs a few cents.', 'pulse-question' ) ); ?></p>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="pq-claude-guidance"><?php esc_html_e( 'Guidance', 'pulse-question' ); ?></label></th>
+			<td>
+				<textarea id="pq-claude-guidance" class="large-text" rows="7" name="<?php echo esc_attr( $store->field( 'claude_guidance' ) ); ?>"><?php echo esc_textarea( (string) $store->get( 'claude_guidance' ) ); ?></textarea>
+				<p class="description"><?php esc_html_e( 'What kind of questions to write: subjects, tone, what to avoid. Leave empty to use the built-in guidance (big variety, politics only on rare occasions).', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Keep the queue topped up', 'pulse-question' ); ?></th>
+			<td>
+				<?php $flag( 'claude_auto', __( 'Write more questions automatically when the queue gets short', 'pulse-question' ) ); ?>
+				<p>
+					<?php esc_html_e( 'When fewer than', 'pulse-question' ); ?>
+					<input type="number" min="1" max="90" class="small-text" name="<?php echo esc_attr( $store->field( 'claude_target_days' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'claude_target_days' ) ); ?>" />
+					<?php esc_html_e( 'days of questions are in the queue or waiting for approval, write', 'pulse-question' ); ?>
+					<input type="number" min="1" max="30" class="small-text" name="<?php echo esc_attr( $store->field( 'claude_batch' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'claude_batch' ) ); ?>" />
+					<?php esc_html_e( 'more.', 'pulse-question' ); ?>
+				</p>
+				<p class="description"><?php esc_html_e( 'At most one batch every 6 hours, checked hourly. The same batch size is used for the button on the Queue page.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Approval', 'pulse-question' ); ?></th>
+			<td>
+				<?php $flag( 'claude_auto_approve', __( 'Approve Claude\'s questions straight away', 'pulse-question' ) ); ?>
+				<p class="description"><?php esc_html_e( 'Off: they wait for your approval in the Queue, so nothing is asked that you haven\'t read.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="pq-claude-model"><?php esc_html_e( 'Model and effort', 'pulse-question' ); ?></label></th>
+			<td>
+				<input id="pq-claude-model" type="text" class="regular-text code" name="<?php echo esc_attr( $store->field( 'claude_model' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'claude_model' ) ); ?>" />
+				<select name="<?php echo esc_attr( $store->field( 'claude_effort' ) ); ?>">
+					<?php foreach ( array( 'low', 'medium', 'high' ) as $effort ) : ?>
+						<option value="<?php echo esc_attr( $effort ); ?>" <?php selected( $store->get( 'claude_effort' ), $effort ); ?>><?php echo esc_html( ucfirst( $effort ) ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<p class="description"><?php esc_html_e( 'Claude Opus 5.5 at medium effort is the default.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<?php
+		$log = array_slice( Generator::history(), 0, 8 );
+		if ( $log ) :
+			?>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Recent batches', 'pulse-question' ); ?></th>
+				<td>
+					<table class="widefat striped" style="max-width:720px">
+						<thead><tr>
+							<th><?php esc_html_e( 'When', 'pulse-question' ); ?></th>
+							<th><?php esc_html_e( 'How', 'pulse-question' ); ?></th>
+							<th><?php esc_html_e( 'Result', 'pulse-question' ); ?></th>
+							<th><?php esc_html_e( 'Tokens in / out', 'pulse-question' ); ?></th>
+						</tr></thead>
+						<tbody>
+						<?php foreach ( $log as $row ) : ?>
+							<tr>
+								<td><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) ( $row['time'] ?? 0 ) ) ); ?></td>
+								<td><?php echo esc_html( 'auto' === ( $row['trigger'] ?? '' ) ? __( 'Automatic', 'pulse-question' ) : __( 'Button', 'pulse-question' ) ); ?></td>
+								<td>
+									<?php
+									if ( '' !== (string) ( $row['error'] ?? '' ) ) {
+										echo '<span style="color:#b32d2e">' . esc_html( (string) $row['error'] ) . '</span>';
+									} else {
+										/* translators: 1: questions added, 2: repeats skipped, 3: model. */
+										echo esc_html( sprintf( __( '%1$d added, %2$d repeats skipped (%3$s)', 'pulse-question' ), (int) $row['added'], (int) $row['skipped'], (string) $row['model'] ) );
+									}
+									?>
+								</td>
+								<td><?php echo esc_html( number_format_i18n( (int) ( $row['input'] ?? 0 ) ) . ' / ' . number_format_i18n( (int) ( $row['output'] ?? 0 ) ) ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		<?php endif; ?>
 		<?php
 	}
 

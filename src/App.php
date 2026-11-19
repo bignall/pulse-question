@@ -23,6 +23,7 @@ final class App {
 		Questions::init();
 		Daily::init();
 		Todo::init();
+		Claude\TopUp::init();
 		Front\Render::init();
 		Front\Shortcodes::init();
 		Front\Blocks::init();

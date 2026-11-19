@@ -3,7 +3,7 @@
  * Plugin Name:       Pulse Question
  * Plugin URI:        https://github.com/bignall/pulse-question
  * Description:       A thought-provoking question every day. Add questions (or approve suggested ones), and each day the next one in the queue becomes the question of the day, with cards of past questions below it.
- * Version:           0.2.0
+ * Version:           0.3.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Arbe
