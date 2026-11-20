@@ -30,7 +30,8 @@
 				"anthropic-ai/sdk",
 				"nyholm/psr7"
 			],
-			"delete_vendor_packages": true
+			"delete_vendor_packages": true,
+			"update_call_sites": false
 		}
 	},
 	"scripts": {
