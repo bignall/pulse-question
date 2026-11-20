@@ -51,5 +51,6 @@ final class LifecycleTask implements Task {
 		}
 		delete_option( 'pulse_question_email_job' );
 		delete_option( 'pulse_question_email_lock' );
+		delete_option( PrefixMigration::RECOUNTED );
 	}
 }
