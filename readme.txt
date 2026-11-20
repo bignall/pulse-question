@@ -1,5 +1,5 @@
 === Pulse Question ===
-Contributors: arbe
+Contributors: bignall
 Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1

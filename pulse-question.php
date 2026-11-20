@@ -1,12 +1,13 @@
 <?php
 /**
  * Plugin Name:       Pulse Question
- * Plugin URI:        https://github.com/bignall/pulse-question
- * Description:       A thought-provoking question every day. Add questions (or approve suggested ones), and each day the next one in the queue becomes the question of the day, with cards of past questions below it.
+ * Plugin URI:        https://bignall.github.io/pulse-question/
+ * Description:       A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
  * Version:           0.6.0
  * Requires at least: 6.4
  * Requires PHP:      8.1
- * Author:            Arbe
+ * Author:            RB Creative Solutions
+ * Author URI:        https://rbcreativesolutions.net
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       pulse-question
