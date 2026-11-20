@@ -30,6 +30,14 @@ final class PrefixMigration {
 
 	private const LOCK = 'pulse_question_migrating';
 
+	/**
+	 * Set once category counts have been recounted after the move. Moving the terms to the new
+	 * taxonomy left their counts at 0 (0.6.0 and 0.6.1), which hid categories wherever empty ones
+	 * are left out (get_terms() with hide_empty, builder loops), so sites migrated by those
+	 * versions get recounted too.
+	 */
+	public const RECOUNTED = 'pulse_question_terms_recounted';
+
 	/** Options: old => new. */
 	private const OPTIONS = array(
 		'pq_settings'               => 'pulse_question_settings',
@@ -93,6 +101,8 @@ final class PrefixMigration {
 		$wpdb->update( $wpdb->posts, array( 'post_type' => 'pulse_question' ), array( 'post_type' => 'pq_question' ) );
 		$wpdb->update( $wpdb->posts, array( 'post_status' => 'pulseq_approved' ), array( 'post_status' => 'pq_approved' ) );
 		$wpdb->update( $wpdb->term_taxonomy, array( 'taxonomy' => 'pulse_question_category' ), array( 'taxonomy' => 'pq_category' ) );
+		// Their counts are recounted once the taxonomy is registered: see maybeRecount().
+		delete_option( self::RECOUNTED );
 		foreach ( array(
 			'single-pq_question' => 'single-pulse_question',
 			'archive-pq_question' => 'archive-pulse_question',
@@ -177,6 +187,28 @@ final class PrefixMigration {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_pq_' ) . '%', $wpdb->esc_like( '_transient_timeout_pq_' ) . '%' ) );
 		// phpcs:enable
 		wp_cache_flush();
+	}
+
+	/**
+	 * Recount every question category's published questions, once per site. Hooked late on init,
+	 * after Questions::register() has registered the taxonomy (the count needs to know which post
+	 * type it counts). Harmless on a new site: its counts are already right.
+	 */
+	public static function maybeRecount(): void {
+		if ( false !== get_option( self::RECOUNTED ) || ! taxonomy_exists( Questions::TAXONOMY ) ) {
+			return;
+		}
+		$ids = get_terms(
+			array(
+				'taxonomy'   => Questions::TAXONOMY,
+				'hide_empty' => false,
+				'fields'     => 'tt_ids',
+			)
+		);
+		if ( is_array( $ids ) && array() !== $ids ) {
+			wp_update_term_count_now( array_map( 'intval', $ids ), Questions::TAXONOMY );
+		}
+		update_option( self::RECOUNTED, time(), true );
 	}
 
 	private static function renameOption( string $old, string $new ): void {
