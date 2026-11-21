@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.6.1
+Stable tag: 0.6.2
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -91,6 +91,9 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.6.2 =
+* Fixed the message shown when Anthropic's servers are busy, which read "PulseQuestion\Vendor\Anthropic's servers…".
 
 = 0.6.1 =
 * The plugin's author is now RB Creative Solutions.
