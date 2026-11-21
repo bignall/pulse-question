@@ -10,7 +10,6 @@
 		"nyholm/psr7": "^1.8"
 	},
 	"require-dev": {
-		"brianhenryie/strauss": "^0.19",
 		"phpcompatibility/phpcompatibility-wp": "*",
 		"phpunit/phpunit": "^10.5",
 		"wp-coding-standards/wpcs": "^3.1"
@@ -36,7 +35,8 @@
 	},
 	"scripts": {
 		"prefix-namespaces": [
-			"strauss",
+			"@composer --working-dir=tools/strauss install --no-interaction --no-progress",
+			"@php tools/strauss/strauss.php",
 			"@composer dump-autoload"
 		],
 		"post-install-cmd": [
