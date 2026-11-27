@@ -24,6 +24,7 @@ To restyle, set these custom properties on any parent element:
 | `--pq-border` | Borders |
 | `--pq-radius` | Corners |
 | `--pq-gap` | Spacing between cards |
+| `--pq-tip-bg` | The share icons' hover labels (your main colour by default) |
 | `--pq-page-bg` | The page background the cards' tint is mixed with (white by default) |
 
 To style everything yourself, untick **Settings → Styles → Use the plugin's styles**. The markup uses `pq-` classes, for example `.pq-today`, `.pq-today__question`, `.pq-cards`, `.pq-card`, `.pq-answers`, `.pq-answer`, `.pq-share` and `.pq-button`.

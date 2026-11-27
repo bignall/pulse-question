@@ -8,6 +8,7 @@
  * [pulse_question_top_answers count="3"]    today's top answers (yesterday's until today has some)
  * [pulse_question_recent_answers count="5"] the newest answers to any question
  * [pulse_question_answers_button id="12"]   a question's answers button, as on the cards (for page builders)
+ * [pulse_question_share id="12"]           a question's share links (today's without an id)
  * [pulse_question_past]                     cards of past questions, with page links
  * [pulse_question_past count="6" paged="0"] the six latest, no page links
  * [pulse_question_past category="ethics"]   one category (slug or id)
@@ -29,6 +30,17 @@ final class Shortcodes {
 		add_shortcode( 'pulse_question_answer_box', static fn (): string => Render::answerBox() );
 		add_shortcode( 'pulse_question_top_answers', static fn ( $atts = array() ): string => Render::topAnswers( self::count( $atts, 'home_top_answers', 10 ) ) );
 		add_shortcode( 'pulse_question_recent_answers', static fn ( $atts = array() ): string => Render::recentAnswers( self::count( $atts, 'home_recent_answers', 20 ) ) );
+		add_shortcode(
+			'pulse_question_share',
+			static function ( $atts = array() ): string {
+				$id = (int) ( ( (array) $atts )['id'] ?? 0 );
+				if ( $id <= 0 ) {
+					$today = \PulseQuestion\Daily::current();
+					$id    = null !== $today ? (int) $today['id'] : 0;
+				}
+				return $id > 0 && Questions::POST_TYPE === get_post_type( $id ) ? Render::shareLinks( $id ) : '';
+			}
+		);
 		add_shortcode(
 			'pulse_question_answers_button',
 			static function ( $atts = array() ): string {

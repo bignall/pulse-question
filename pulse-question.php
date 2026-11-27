@@ -3,7 +3,7 @@
  * Plugin Name:       Pulse Question
  * Plugin URI:        https://bignall.github.io/pulse-question/
  * Description:       A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
- * Version:           0.9.0
+ * Version:           0.9.1
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            RB Creative Solutions

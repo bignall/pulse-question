@@ -684,6 +684,78 @@
 	color: color-mix(in srgb, var(--pq-accent-2) 55%, currentColor);
 	font-weight: 600;
 }
+/* Icon share links: round, in each network's colour, with the name as hover (and focus) text above. */
+.pq-share__link--icon {
+	position: relative;
+	justify-content: center;
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--pq-share-bg, var(--pq-accent-2));
+	color: #fff;
+	transition: transform 0.12s ease, filter 0.12s ease;
+}
+.pq-share__link--icon:hover,
+.pq-share__link--icon:focus-visible {
+	color: #fff;
+	filter: brightness(1.12);
+	transform: translateY(-2px);
+}
+.pq-share__link--facebook { --pq-share-bg: #1877f2; }
+.pq-share__link--x { --pq-share-bg: #000; }
+.pq-share__link--linkedin { --pq-share-bg: #0a66c2; }
+.pq-share__link--pinterest { --pq-share-bg: #e60023; }
+.pq-share__link--bluesky { --pq-share-bg: #1185fe; }
+.pq-share__link--email { --pq-share-bg: var(--pq-accent-2); }
+.pq-share__copy,
+.pq-share__native { --pq-share-bg: var(--pq-accent); }
+.pq-share__icon {
+	display: block;
+	flex: none;
+}
+/* The hover label, in the site's main colour (set --pq-tip-bg to change it). */
+.pq-share__link--icon[data-pq-tip]::after {
+	content: attr(data-pq-tip);
+	position: absolute;
+	inset-block-end: calc(100% + 0.5rem);
+	inset-inline-start: 50%;
+	z-index: 5;
+	padding: 0.35em 0.7em;
+	border-radius: 999px;
+	background: var(--pq-tip-bg, var(--pq-accent));
+	color: #fff;
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.2;
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transform: translate(-50%, 0.2rem);
+	transition: opacity 0.12s ease, transform 0.12s ease;
+}
+.pq-share__link--icon[data-pq-tip]:hover::after,
+.pq-share__link--icon[data-pq-tip]:focus-visible::after {
+	opacity: 1;
+	transform: translate(-50%, 0);
+}
+@media (hover: none) {
+	.pq-share__link--icon[data-pq-tip]::after {
+		display: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.pq-share__link--icon,
+	.pq-share__link--icon[data-pq-tip]::after {
+		transition: none;
+		transform: none;
+	}
+	.pq-share__link--icon[data-pq-tip]:hover::after,
+	.pq-share__link--icon[data-pq-tip]:focus-visible::after {
+		transform: translate(-50%, 0);
+	}
+}
 .pq-share .screen-reader-text {
 	position: absolute;
 	width: 1px;

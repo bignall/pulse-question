@@ -14,7 +14,9 @@ Question pages get Open Graph and X card tags, so a shared link shows the questi
 
 ## Share links
 
-Under each question there are links for Facebook, X, LinkedIn, Pinterest (with the image), Bluesky and email, plus **Copy link**. On phones there's also a **Share…** button that opens the phone's own share sheet.
+Under each question, labelled *Share this question*, there are round icons in each network's colour for Facebook, X, LinkedIn, Pinterest (with the image), Bluesky and email, plus **Copy link**. Hovering (or tabbing to) an icon shows its name in a label in your main colour; screen readers hear "Share on Facebook" and so on. On phones there's also a **Share…** icon that opens the phone's own share sheet. On today's question they sit above the answer box.
+
+In a page builder, add `[pulse_question_share]` for today's question, or `[pulse_question_share id="12"]` for another one.
 
 These are plain links: nothing is loaded from those sites, and no tracking happens, until someone clicks. Turn them off in **Settings → Social sharing**.
 

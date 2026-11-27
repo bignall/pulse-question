@@ -102,6 +102,7 @@ final class Render {
 			$html .= '<div class="pq-today__background">' . wp_kses_post( wpautop( $post->post_content ) ) . '</div>';
 		}
 		$html .= self::categories( $post->ID );
+		$html .= \PulseQuestion\Social\ShareButtons::render( (int) $post->ID );
 		if ( Settings::get( 'answers_open' ) ) {
 			$show_box = $box < 0 ? (bool) Settings::get( 'home_answer_form' ) : (bool) $box;
 			if ( $show_box ) {
@@ -116,9 +117,14 @@ final class Render {
 			$html .= self::topAnswers( $answers < 0 ? (int) Settings::get( 'home_top_answers' ) : min( 10, $answers ), (int) $post->ID, $shown );
 			$html .= self::recentAnswers( $recent < 0 ? (int) Settings::get( 'home_recent_answers' ) : min( 20, $recent ), $shown );
 		}
-		$html .= \PulseQuestion\Social\ShareButtons::render( (int) $post->ID );
 		$html .= '</section>';
 		return $html;
+	}
+
+	/** A question's share links, with the plugin's styles. */
+	public static function shareLinks( int $post_id ): string {
+		self::style();
+		return \PulseQuestion\Social\ShareButtons::render( $post_id );
 	}
 
 	/** The id of today's question, or 0. */
