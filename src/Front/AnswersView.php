@@ -297,7 +297,8 @@ final class AnswersView {
 	 */
 	private static function answer( \WP_Comment $c, int $user, array $voted, array $replies, bool $waiting, bool $is_reply = false ): string {
 		$id    = (int) $c->comment_ID;
-		$name  = '' !== $c->comment_author ? $c->comment_author : __( 'A member', 'pulse-question' );
+		$name  = Answers::publicName( $c->comment_author );
+		$name  = '' !== $name ? $name : __( 'A member', 'pulse-question' );
 		$date  = mysql2date( (string) get_option( 'date_format' ), $c->comment_date );
 		$text  = wpautop( esc_html( $c->comment_content ) );
 		$html  = '<li class="pq-answer' . ( $is_reply ? ' pq-answer--reply' : '' ) . ( $waiting ? ' pq-answer--waiting' : '' ) . '" id="comment-' . $id . '">';

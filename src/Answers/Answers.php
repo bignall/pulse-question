@@ -39,6 +39,18 @@ final class Answers {
 		add_post_type_support( Questions::POST_TYPE, 'comments' );
 	}
 
+	/**
+	 * The name to show for an answer. A name that looks like an email address (often a display
+	 * name nobody changed) shows only the part before the @, so addresses never appear publicly.
+	 */
+	public static function publicName( string $author ): string {
+		$author = trim( $author );
+		if ( preg_match( '/^([^@\s]+)@[^@\s]+\.[^@\s]+$/', $author, $m ) ) {
+			return $m[1];
+		}
+		return $author;
+	}
+
 	public static function isAnswer( \WP_Comment $comment ): bool {
 		return in_array( $comment->comment_type, array( '', 'comment' ), true ) && get_post_type( (int) $comment->comment_post_ID ) === Questions::POST_TYPE;
 	}

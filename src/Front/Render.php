@@ -240,7 +240,8 @@ final class Render {
 		$id       = (int) $answer->comment_ID;
 		$question = (int) $answer->comment_post_ID;
 		$likes    = Votes::count( 'answer', $id );
-		$name     = '' !== $answer->comment_author ? $answer->comment_author : __( 'A member', 'pulse-question' );
+		$name     = \PulseQuestion\Answers\Answers::publicName( $answer->comment_author );
+		$name     = '' !== $name ? $name : __( 'A member', 'pulse-question' );
 		$meta     = esc_html( $name );
 		if ( $likes > 0 ) {
 			/* translators: %s: number of likes. */

@@ -315,7 +315,7 @@ final class DailyEmail {
 			$votes = (int) get_comment_meta( (int) $answer->comment_ID, Votes::META, true );
 			$html .= '<div style="margin:0 0 14px;padding:12px 16px;border-left:3px solid ' . esc_attr( $accent ) . ';background:#faf7f4;">';
 			$html .= '<p style="margin:0 0 6px;font-family:' . esc_attr( $font ) . ';font-size:15px;line-height:1.5;color:' . esc_attr( $text ) . ';">' . esc_html( wp_trim_words( wp_strip_all_tags( $answer->comment_content ), 45, '…' ) ) . '</p>';
-			$html .= '<p style="margin:0;font-family:' . esc_attr( $font ) . ';font-size:13px;color:' . esc_attr( $muted ) . ';">' . esc_html( $answer->comment_author )
+			$html .= '<p style="margin:0;font-family:' . esc_attr( $font ) . ';font-size:13px;color:' . esc_attr( $muted ) . ';">' . esc_html( \PulseQuestion\Answers\Answers::publicName( $answer->comment_author ) )
 				/* translators: %s: number of likes. */
 				. ( $votes > 0 ? ' · ' . esc_html( sprintf( _n( '%s like', '%s likes', $votes, 'pulse-question' ), number_format_i18n( $votes ) ) ) : '' ) . '</p>';
 			$html .= '</div>';
