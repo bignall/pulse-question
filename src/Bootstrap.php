@@ -18,6 +18,7 @@ final class Bootstrap {
 	public static function plugin( string $file ): Plugin {
 		// Data saved before 0.6.0 used the prefix pq_; move it before WP Foundation reads its version.
 		PrefixMigration::maybeRun();
+		add_action( 'init', array( PrefixMigration::class, 'maybeRecount' ), 99 );
 		return Plugin::create( $file, self::PREFIX )
 			->requires( php: '8.1', wp: '6.4' )
 			->settings( Settings::store() )
