@@ -37,8 +37,13 @@ final class Blocks {
 						'type'    => 'boolean',
 						'default' => true,
 					),
+					// -1: the number in Settings.
+					'answers'    => array(
+						'type'    => 'number',
+						'default' => -1,
+					),
 				),
-				'render_callback' => static fn ( array $a ): string => Render::today( (bool) ( $a['background'] ?? true ) ),
+				'render_callback' => static fn ( array $a ): string => Render::today( (bool) ( $a['background'] ?? true ), (int) ( $a['answers'] ?? -1 ) ),
 			)
 		);
 		register_block_type(

@@ -44,6 +44,7 @@ Answers are WordPress comments on questions, so replies, Akismet (if active) and
 
 - **Members only:** you have to be logged in to answer, vote or report. Guests see the answers, a *Log in to answer* button and a *Join* button. *Join* appears when **Settings → General → Anyone can register** is on; use *Subscriber* as the new user role.
 - **Mailing list:** the sign-up form has two boxes, *Send me the question of the day by email* and *Also send me occasional news and offers*. Both are ticked to begin with and neither is required. Members who signed up some other way see the boxes once, with their first answer. A setting turns off the pre-ticking. In the EU and UK, a pre-ticked box doesn't count as consent. Members are added to FluentCRM on the same site or on another site; see Settings → Members. With double opt-in, FluentCRM sends its confirmation email. If a sign-up fails, it's tried again every hour. Recent sign-ups are listed in Settings. **Test connection** (Settings → Members) checks the setup step by step and says what to fix.
+- **Top answers on the home page:** under today's question, the three most-liked answers so far (shortened, each linking to the full answer) and a *Read all* link, so visitors see what others said before they answer. Set the number, or 0 for none, under Settings → Answers; the block and `[pulse_question answers="5"]` can override it.
 - **Votes:** members can mark a question as *Good question* and like answers (not their own). Answers sort by *Top* or *Newest*. Replies go one level deep.
 - **Automatic moderation (default):** Claude checks each answer as it's posted, against guidelines you can edit:
   - fine → published straight away;
@@ -85,6 +86,7 @@ Filters: `pulse_question_share_image`, `pulse_question_share_image_colors`, `pul
 ```
 [pulse_question]                          today's question
 [pulse_question background="0"]           without its background text
+[pulse_question answers="5"]              with its five top answers (0 = none)
 [pulse_question_past]                     cards of past questions, with page links
 [pulse_question_past count="6" paged="0"] the six latest, no page links
 [pulse_question_past category="ethics"]   one category (slug or id)

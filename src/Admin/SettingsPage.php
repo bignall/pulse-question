@@ -253,6 +253,11 @@ final class SettingsPage {
 					<input type="number" min="0" max="10000" class="small-text" name="<?php echo esc_attr( $store->field( 'answer_max_length' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'answer_max_length' ) ); ?>" />
 					<?php esc_html_e( 'characters (0 = no limit)', 'pulse-question' ); ?>
 				</p>
+				<p>
+					<label for="pq-home-top"><?php esc_html_e( 'Top answers under today\'s question:', 'pulse-question' ); ?></label>
+					<input id="pq-home-top" type="number" min="0" max="10" class="small-text" name="<?php echo esc_attr( $store->field( 'home_top_answers' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'home_top_answers' ) ); ?>" />
+					<?php esc_html_e( '(0 = none)', 'pulse-question' ); ?>
+				</p>
 				<?php $flag( 'answer_emails', __( 'Email me about every new answer', 'pulse-question' ) ); ?>
 				<p class="description"><?php esc_html_e( 'Off by default. Held answers still follow WordPress\'s "email me when a comment is held" setting (Settings → Discussion).', 'pulse-question' ); ?></p>
 			</td>

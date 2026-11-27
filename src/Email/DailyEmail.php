@@ -317,20 +317,7 @@ final class DailyEmail {
 		if ( 0 === $best ) {
 			return '';
 		}
-		$answers = get_comments(
-			array(
-				'post_id'  => $best,
-				'status'   => 'approve',
-				'parent'   => 0,
-				'type'     => 'comment',
-				'number'   => $count,
-				'meta_key' => Votes::META, // phpcs:ignore WordPress.DB.SlowDBQuery
-				'orderby'  => array(
-					'meta_value_num'   => 'DESC',
-					'comment_date_gmt' => 'ASC',
-				),
-			)
-		);
+		$answers = \PulseQuestion\Front\AnswersView::top( $best, $count );
 		if ( ! $answers ) {
 			return '';
 		}

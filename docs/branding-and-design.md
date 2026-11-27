@@ -35,6 +35,7 @@ To style everything yourself, untick **Settings → Styles → Use the plugin's 
 ```text
 [pulse_question]                          today's question
 [pulse_question background="0"]           without its background text
+[pulse_question answers="5"]              with its five top answers (0 = none)
 [pulse_question_past]                     cards of past questions, with page links
 [pulse_question_past count="6" paged="0"] the six latest, no page links
 [pulse_question_past category="ethics"]   one category (slug or id)

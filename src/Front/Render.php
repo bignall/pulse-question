@@ -79,8 +79,12 @@ final class Render {
 		return wp_date( $long ? 'l, ' . get_option( 'date_format' ) : get_option( 'date_format' ), $moment->getTimestamp() );
 	}
 
-	/** Today's question, large. */
-	public static function today( bool $show_background = true ): string {
+	/**
+	 * Today's question, large.
+	 *
+	 * @param int $answers How many top answers to show under it; -1 for the setting.
+	 */
+	public static function today( bool $show_background = true, int $answers = -1 ): string {
 		$today = Daily::current();
 		self::style();
 		if ( null === $today ) {
@@ -100,10 +104,39 @@ final class Render {
 			$html .= '<p class="pq-today__answers"><a class="pq-button pq-button--primary" href="' . esc_url( get_permalink( $post ) . '#pq-answers' ) . '">' . esc_html__( 'Answer', 'pulse-question' ) . '</a> <span>'
 				/* translators: %s: number of answers. */
 				. esc_html( $n ? sprintf( _n( '%s answer so far', '%s answers so far', $n, 'pulse-question' ), number_format_i18n( $n ) ) : __( 'Be the first to answer', 'pulse-question' ) ) . '</span></p>';
+			$html .= self::topAnswers( (int) $post->ID, $answers < 0 ? (int) Settings::get( 'home_top_answers' ) : min( 10, $answers ), $n );
 		}
 		$html .= \PulseQuestion\Social\ShareButtons::render( (int) $post->ID );
 		$html .= '</section>';
 		return $html;
+	}
+
+	/** The most-liked answers so far, shortened, each linking to the full answer. */
+	private static function topAnswers( int $post_id, int $count, int $total ): string {
+		$answers = $total > 0 ? AnswersView::top( $post_id, $count ) : array();
+		if ( ! $answers ) {
+			return '';
+		}
+		$url  = (string) get_permalink( $post_id );
+		$html = '<div class="pq-top-answers"><h3 class="pq-top-answers__title">' . esc_html__( 'Top answers so far', 'pulse-question' ) . '</h3><ol class="pq-top-answers__list">';
+		foreach ( $answers as $answer ) {
+			$id    = (int) $answer->comment_ID;
+			$likes = \PulseQuestion\Answers\Votes::count( 'answer', $id );
+			$name  = '' !== $answer->comment_author ? $answer->comment_author : __( 'A member', 'pulse-question' );
+			$html .= '<li class="pq-top-answer"><a class="pq-top-answer__link" href="' . esc_url( $url . '#comment-' . $id ) . '">'
+				. '<span class="pq-top-answer__text">' . esc_html( wp_trim_words( wp_strip_all_tags( $answer->comment_content ), 40, '…' ) ) . '</span>'
+				. '<span class="pq-top-answer__meta">' . esc_html( $name )
+				/* translators: %s: number of likes. */
+				. ( $likes > 0 ? ' · ' . esc_html( sprintf( _n( '%s like', '%s likes', $likes, 'pulse-question' ), number_format_i18n( $likes ) ) ) : '' )
+				. '</span></a></li>';
+		}
+		$html .= '</ol>';
+		if ( $total > count( $answers ) ) {
+			$html .= '<p class="pq-top-answers__more"><a href="' . esc_url( $url . '#pq-answers' ) . '">'
+				/* translators: %s: number of answers. */
+				. esc_html( sprintf( _n( 'Read %s answer', 'Read all %s answers', $total, 'pulse-question' ), number_format_i18n( $total ) ) ) . ' &rarr;</a></p>';
+		}
+		return $html . '</div>';
 	}
 
 	/**

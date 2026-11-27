@@ -7,6 +7,7 @@
 Answers are WordPress comments on questions. That means Akismet (if active), the **Comments** screen, replies and your usual moderation tools all work.
 
 - **Members only.** Visitors need to be logged in to answer, reply, vote or report. Guests can read answers and see *Log in to answer* and *Join* buttons. *Join* appears when registration is open.
+- **Top answers on the home page.** under today's question, the three most-liked answers so far (shortened, each linking to the full answer) and a *Read all* link, so visitors see what others said before they answer. Set the number, or 0 for none, under Settings → Answers; the block and `[pulse_question answers="5"]` can override it.
 - **Votes.** Members can mark a question as a *Good question* and like answers (not their own). Answers sort by *Top* or *Newest*.
 - **Replies** go one level deep, so conversations stay readable.
 - **Length:** answers are limited to 1,500 characters by default (a setting).

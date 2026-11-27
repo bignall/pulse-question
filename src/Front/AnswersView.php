@@ -226,6 +226,33 @@ final class AnswersView {
 		return $html;
 	}
 
+	/**
+	 * The most-liked published answers to a question (not replies), oldest first on a tie.
+	 *
+	 * @return list<\WP_Comment>
+	 */
+	public static function top( int $post_id, int $count ): array {
+		if ( $count <= 0 ) {
+			return array();
+		}
+		return array_values(
+			get_comments(
+				array(
+					'post_id'  => $post_id,
+					'status'   => 'approve',
+					'parent'   => 0,
+					'type'     => 'comment',
+					'number'   => $count,
+					'meta_key' => Votes::META, // phpcs:ignore WordPress.DB.SlowDBQuery
+					'orderby'  => array(
+						'meta_value_num'   => 'DESC',
+						'comment_date_gmt' => 'ASC',
+					),
+				)
+			)
+		);
+	}
+
 	private static function topLevelCount( int $post_id ): int {
 		return (int) get_comments(
 			array(
