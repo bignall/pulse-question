@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.6.2
+Stable tag: 0.7.0
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -22,7 +22,7 @@ Pulse Question asks your visitors one thought-provoking question each day. Membe
 * Your logo and colours on share images, in the email and on the site. It inherits your theme's fonts and follows Automatic.css; restyle with the --pq-accent, --pq-card-bg, --pq-border and --pq-radius CSS properties, or turn the plugin's styles off and use Etch or another builder (pulse_question_view query argument).
 * A setup checklist walks new sites through everything.
 * Questions written by Claude (optional, with your own Anthropic API key): on demand or to keep the queue topped up, waiting for your approval unless you choose otherwise.
-* Answers from logged-in members, with votes, replies and reports. New members are offered your mailing list (FluentCRM), with the boxes ticked by default.
+* Answers from logged-in members, with votes, replies and reports. The top answers so far show under today's question, to get more people answering. New members are offered your mailing list (FluentCRM), with the boxes ticked by default.
 * Automatic moderation: Claude checks each answer against your guidelines and publishes it, holds it for you, or keeps it off the site.
 * Daily email: each new question, with yesterday's top answers, sent as a FluentCRM campaign (on this site or another) or by a simple built-in sender with unsubscribe links.
 * Social sharing: a share image for each question, share tags for links, share buttons, and automatic posts through a webhook (Zapier, Make, n8n and others).
@@ -91,6 +91,9 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.7.0 =
+* Today's question now shows its top answers so far (three by default), each linking to the full answer, with a "Read all" link. Set the number, or 0 for none, under Settings → Answers; the Question of the day block and [pulse_question answers="5"] can override it.
 
 = 0.6.2 =
 * Fixed the message shown when Anthropic's servers are busy, which read "PulseQuestion\Vendor\Anthropic's servers…".
