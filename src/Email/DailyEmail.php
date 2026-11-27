@@ -163,7 +163,7 @@ final class DailyEmail {
 				return $started;
 			}
 
-			$title  = sprintf( '%s %s', wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ), $today['day'] );
+			$title  = sprintf( '%s %s', \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ), $today['day'] );
 			$result = FluentCampaign::send(
 				array(
 					'subject'   => $content['subject'],
@@ -234,9 +234,9 @@ final class DailyEmail {
 	 */
 	public static function content( int $post_id, string $day ): array {
 		$post     = get_post( $post_id );
-		$title    = wp_specialchars_decode( get_the_title( $post ), ENT_QUOTES );
+		$title    = \PulseQuestion\Text::plain( get_the_title( $post ) );
 		$url      = (string) get_permalink( $post );
-		$site     = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+		$site     = \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) );
 		$date     = '' !== $day ? Render::dayLabel( $day ) : '';
 		$subject  = strtr(
 			(string) Settings::get( 'email_subject' ),
@@ -310,7 +310,7 @@ final class DailyEmail {
 		$url  = (string) get_permalink( $best );
 		$html = '<div style="border-top:1px solid #e8e2dc;margin:4px 0 0;padding:24px 0 0;">';
 		$html .= '<p style="margin:0 0 6px;font-family:' . esc_attr( $font ) . ';font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:' . esc_attr( $muted ) . ';">' . esc_html__( 'Yesterday\'s question', 'pulse-question' ) . '</p>';
-		$html .= '<p style="margin:0 0 16px;font-family:' . esc_attr( $font ) . ';font-size:19px;line-height:1.35;font-weight:600;"><a href="' . esc_url( $url ) . '" style="color:' . esc_attr( $text ) . ';text-decoration:none;">' . esc_html( wp_specialchars_decode( get_the_title( $best ), ENT_QUOTES ) ) . '</a></p>';
+		$html .= '<p style="margin:0 0 16px;font-family:' . esc_attr( $font ) . ';font-size:19px;line-height:1.35;font-weight:600;"><a href="' . esc_url( $url ) . '" style="color:' . esc_attr( $text ) . ';text-decoration:none;">' . esc_html( \PulseQuestion\Text::plain( get_the_title( $best ) ) ) . '</a></p>';
 		foreach ( $answers as $answer ) {
 			$votes = (int) get_comment_meta( (int) $answer->comment_ID, Votes::META, true );
 			$html .= '<div style="margin:0 0 14px;padding:12px 16px;border-left:3px solid ' . esc_attr( $accent ) . ';background:#faf7f4;">';
@@ -334,7 +334,7 @@ final class DailyEmail {
 	 * @param array{subject: string, preheader: string, body: string} $email The content.
 	 */
 	public static function wrap( array $email, string $unsubscribe = '' ): string {
-		$site   = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+		$site   = \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) );
 		$font   = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 		$muted  = self::color( 'muted' );
 		$footer = sprintf(
@@ -366,7 +366,7 @@ final class DailyEmail {
 		$address = sanitize_email( (string) Settings::get( 'email_from_address' ) );
 		if ( '' !== $address ) {
 			$name      = trim( (string) Settings::get( 'email_from_name' ) );
-			$name      = '' !== $name ? $name : wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+			$name      = '' !== $name ? $name : \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) );
 			$headers[] = 'From: ' . str_replace( array( '"', "\r", "\n" ), '', $name ) . ' <' . $address . '>';
 		}
 		if ( '' !== $unsubscribe ) {

@@ -198,7 +198,7 @@ final class OutreachSettings {
 		<tr>
 			<th scope="row"><?php esc_html_e( 'From', 'pulse-question' ); ?></th>
 			<td>
-				<label><?php esc_html_e( 'Name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_name' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_name' ) ); ?>" placeholder="<?php echo esc_attr( wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) ); ?>" /></label>
+				<label><?php esc_html_e( 'Name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_name' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_name' ) ); ?>" placeholder="<?php echo esc_attr( \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ) ); ?>" /></label>
 				<label><?php esc_html_e( 'Address', 'pulse-question' ); ?> <input type="email" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_address' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_address' ) ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" /></label>
 				<p class="description"><?php esc_html_e( 'For the built-in sender and test emails. Leave empty to use WordPress\'s (or your SMTP plugin\'s) sender. FluentCRM uses its own settings. Use an address on your own domain so the email isn\'t marked as spam.', 'pulse-question' ); ?></p>
 			</td>

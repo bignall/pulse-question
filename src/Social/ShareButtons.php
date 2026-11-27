@@ -23,7 +23,7 @@ final class ShareButtons {
 			return '';
 		}
 		$url   = (string) get_permalink( $post_id );
-		$title = wp_specialchars_decode( get_the_title( $post_id ), ENT_QUOTES );
+		$title = \PulseQuestion\Text::plain( get_the_title( $post_id ) );
 		$text  = trim( (string) preg_replace( '/\s+/', ' ', $title ) );
 		$image = ShareImage::forQuestion( $post_id );
 

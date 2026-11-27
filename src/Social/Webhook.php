@@ -88,7 +88,7 @@ final class Webhook {
 	 */
 	public static function payload( int $post_id, string $day, bool $test = false ): array {
 		$post   = get_post( $post_id );
-		$title  = wp_specialchars_decode( get_the_title( $post ), ENT_QUOTES );
+		$title  = \PulseQuestion\Text::plain( get_the_title( $post ) );
 		$url    = (string) get_permalink( $post );
 		$image  = ShareImage::forQuestion( $post_id );
 		$bg     = trim( wp_strip_all_tags( (string) $post->post_content ) );
@@ -109,7 +109,7 @@ final class Webhook {
 			'image_height' => $image['height'] ?? 0,
 			'image_alt'    => $title,
 			'site'         => array(
-				'name' => wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ),
+				'name' => \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ),
 				'url'  => home_url( '/' ),
 			),
 		);
@@ -143,7 +143,7 @@ final class Webhook {
 				'{url}'        => $url,
 				'{background}' => $background,
 				'{hashtags}'   => implode( ' ', $tags ),
-				'{site}'       => wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ),
+				'{site}'       => \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ),
 			)
 		);
 		return trim( (string) preg_replace( "/\n{3,}/", "\n\n", $text ) );

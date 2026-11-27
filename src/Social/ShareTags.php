@@ -58,21 +58,21 @@ final class ShareTags {
 			return;
 		}
 		$post  = get_post( $id );
-		$title = wp_specialchars_decode( get_the_title( $post ), ENT_QUOTES );
+		$title = \PulseQuestion\Text::plain( get_the_title( $post ) );
 		$desc  = trim( wp_strip_all_tags( (string) $post->post_content ) );
 		if ( '' === $desc ) {
 			$desc = sprintf(
 				/* translators: 1: label such as "Question of the day", 2: site name. */
 				__( '%1$s on %2$s. Share your answer.', 'pulse-question' ),
 				(string) Settings::get( 'label' ),
-				wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES )
+				\PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) )
 			);
 		}
 		$desc  = wp_html_excerpt( $desc, 200, '…' );
 		$image = ShareImage::forQuestion( $id );
 		$meta  = array(
 			array( 'property', 'og:type', 'article' ),
-			array( 'property', 'og:site_name', wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) ),
+			array( 'property', 'og:site_name', \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ) ),
 			array( 'property', 'og:title', $title ),
 			array( 'property', 'og:description', $desc ),
 			array( 'property', 'og:url', (string) get_permalink( $post ) ),
