@@ -27,6 +27,9 @@ final class ShareImage {
 
 	public const WIDTH  = 1200;
 	public const HEIGHT = 630;
+	/** Instagram's tallest feed shape (4:5). Instagram only takes JPEG. */
+	public const PORTRAIT_WIDTH  = 1080;
+	public const PORTRAIT_HEIGHT = 1350;
 	/** Bump when the design changes, so images are made again. */
 	private const DESIGN = 1;
 
@@ -67,11 +70,22 @@ final class ShareImage {
 	}
 
 	/**
-	 * The generated image, made now if it doesn't exist yet.
+	 * The portrait JPEG for Instagram (1080x1350), made now if it doesn't exist yet. Always the
+	 * generated design, since Instagram needs a JPEG of a shape it accepts.
 	 *
 	 * @return array{url: string, width: int, height: int, path: string}|null
 	 */
-	public static function generated( int $post_id ): ?array {
+	public static function forInstagram( int $post_id ): ?array {
+		return function_exists( 'imagejpeg' ) ? self::generated( $post_id, true ) : null;
+	}
+
+	/**
+	 * The generated image, made now if it doesn't exist yet.
+	 *
+	 * @param bool $portrait The 1080x1350 JPEG instead of the 1200x630 PNG.
+	 * @return array{url: string, width: int, height: int, path: string}|null
+	 */
+	public static function generated( int $post_id, bool $portrait = false ): ?array {
 		$post = get_post( $post_id );
 		if ( ! $post || Questions::POST_TYPE !== $post->post_type || ! self::supported() ) {
 			return null;
@@ -85,20 +99,24 @@ final class ShareImage {
 		$host  = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 		$logo  = self::logo();
 		$hash  = substr( md5( self::DESIGN . '|' . $title . '|' . $label . '|' . $host . '|' . wp_json_encode( self::colors() ) . '|' . $logo . '|' . ( '' !== $logo ? (string) @filemtime( $logo ) : '' ) ), 0, 10 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		$name  = 'q' . $post_id . '-' . $hash . '.png';
+		$w     = $portrait ? self::PORTRAIT_WIDTH : self::WIDTH;
+		$h     = $portrait ? self::PORTRAIT_HEIGHT : self::HEIGHT;
+		$stem  = 'q' . $post_id . ( $portrait ? 'p' : '' ) . '-';
+		$ext   = $portrait ? '.jpg' : '.png';
+		$name  = $stem . $hash . $ext;
 		$path  = $dir['path'] . '/' . $name;
 		if ( ! file_exists( $path ) ) {
-			foreach ( (array) glob( $dir['path'] . '/q' . $post_id . '-*.png' ) as $old ) {
+			foreach ( (array) glob( $dir['path'] . '/' . $stem . '*' . $ext ) as $old ) {
 				wp_delete_file( (string) $old );
 			}
-			if ( ! self::draw( $title, $label, $host, $path ) ) {
+			if ( ! self::draw( $title, $label, $host, $path, $w, $h, $portrait ) ) {
 				return null;
 			}
 		}
 		return array(
 			'url'    => $dir['url'] . '/' . $name,
-			'width'  => self::WIDTH,
-			'height' => self::HEIGHT,
+			'width'  => $w,
+			'height' => $h,
 			'path'   => $path,
 		);
 	}
@@ -107,8 +125,9 @@ final class ShareImage {
 	public static function forget( int $post_id ): void {
 		$dir = self::dir( false );
 		if ( null !== $dir ) {
-			foreach ( (array) glob( $dir['path'] . '/q' . $post_id . '-*.png' ) as $old ) {
-				wp_delete_file( (string) $old );
+			$old = array_merge( (array) glob( $dir['path'] . '/q' . $post_id . '-*.png' ), (array) glob( $dir['path'] . '/q' . $post_id . 'p-*.jpg' ) );
+			foreach ( $old as $file ) {
+				wp_delete_file( (string) $file );
 			}
 		}
 	}
@@ -161,7 +180,7 @@ final class ShareImage {
 		return trim( (string) preg_replace( '/\s+/u', ' ', $text ) );
 	}
 
-	private static function draw( string $title, string $label, string $host, string $path ): bool {
+	private static function draw( string $title, string $label, string $host, string $path, int $w = self::WIDTH, int $h = self::HEIGHT, bool $jpeg = false ): bool {
 		/** @param string $font Path to a TTF or OTF font. */
 		$font = (string) apply_filters( 'pulse_question_share_image_font', dirname( __DIR__, 2 ) . '/assets/fonts/Inter-SemiBold.otf' );
 		$logo = self::logo();
@@ -169,19 +188,22 @@ final class ShareImage {
 			return false;
 		}
 		$c   = self::colors();
-		$img = imagecreatetruecolor( self::WIDTH, self::HEIGHT );
+		$img = imagecreatetruecolor( $w, $h );
 		if ( false === $img ) {
 			return false;
 		}
 		imagealphablending( $img, true );
 		imagesavealpha( $img, false );
 		$col = static fn ( string $hex ): int => (int) imagecolorallocate( $img, ...self::rgb( $hex ) );
-		imagefilledrectangle( $img, 0, 0, self::WIDTH, self::HEIGHT, $col( $c['background'] ) );
+		imagefilledrectangle( $img, 0, 0, $w, $h, $col( $c['background'] ) );
 
-		$pad = 72;
+		// The portrait image is taller, so everything is a little bigger.
+		$tall  = $h > $w;
+		$pad   = $tall ? 84 : 72;
+		$big   = $tall ? 1.3 : 1.0;
 
 		// The pulse line along the bottom.
-		self::pulse( $img, $col( $c['line'] ), self::HEIGHT - 110 );
+		self::pulse( $img, $col( $c['line'] ), $h - ( $tall ? 190 : 110 ), $w );
 
 		// Logo, top left.
 		$top = $pad;
@@ -191,14 +213,14 @@ final class ShareImage {
 			if ( false !== $src ) {
 				$lw = imagesx( $src );
 				$lh = imagesy( $src );
-				$h  = 96;
-				$w  = (int) round( $lw * $h / max( 1, $lh ) );
-				imagecopyresampled( $img, $src, $pad - 6, $top - 18, 0, 0, $w, $h, $lw, $lh );
+				$lh2 = (int) round( 96 * $big );
+				$lw2 = (int) round( $lw * $lh2 / max( 1, $lh ) );
+				imagecopyresampled( $img, $src, $pad - 6, $top - 18, 0, 0, $lw2, $lh2, $lw, $lh );
 				imagedestroy( $src );
 				if ( '' !== $label ) {
-					self::text( $img, 26, $pad + $w + 16, $top + 40, $col( $c['label'] ), $font, mb_strtoupper( $label ), 2 );
+					self::text( $img, (int) round( 26 * $big ), $pad + $lw2 + 16, $top + (int) round( 40 * $big ), $col( $c['label'] ), $font, mb_strtoupper( $label ), 2 );
 				}
-				$top += $h + 10;
+				$top += $lh2 + 10;
 			}
 		} elseif ( '' !== $label ) {
 			self::text( $img, 26, $pad, $top + 26, $col( $c['label'] ), $font, mb_strtoupper( $label ), 2 );
@@ -206,10 +228,10 @@ final class ShareImage {
 		}
 
 		// The question: the largest size that fits.
-		$width  = self::WIDTH - 2 * $pad;
-		$bottom = self::HEIGHT - 150;
+		$width  = $w - 2 * $pad;
+		$bottom = $h - ( $tall ? 250 : 150 );
 		$lines  = array();
-		$size   = 68;
+		$size   = $tall ? 92 : 68;
 		for ( ; $size >= 30; $size -= 2 ) {
 			$lines  = self::wrap( $title, $font, $size, $width );
 			$height = count( $lines ) * (int) round( $size * 1.25 );
@@ -227,12 +249,13 @@ final class ShareImage {
 
 		// The site's address, bottom right.
 		if ( '' !== $host ) {
-			$box = imagettfbbox( 28, 0, $font, $host );
+			$hs  = (int) round( 28 * $big );
+			$box = imagettfbbox( $hs, 0, $font, $host );
 			$tw  = $box ? abs( $box[2] - $box[0] ) : 0;
-			self::text( $img, 28, self::WIDTH - $pad - $tw, self::HEIGHT - 40, $col( $c['accent'] ), $font, $host );
+			self::text( $img, $hs, $w - $pad - $tw, $h - ( $tall ? 70 : 40 ), $col( $c['accent'] ), $font, $host );
 		}
 
-		$ok = imagepng( $img, $path, 6 );
+		$ok = $jpeg ? imagejpeg( $img, $path, 90 ) : imagepng( $img, $path, 6 );
 		imagedestroy( $img );
 		return (bool) $ok;
 	}
@@ -295,8 +318,7 @@ final class ShareImage {
 	 *
 	 * @param \GdImage $img Image.
 	 */
-	private static function pulse( $img, int $color, int $base ): void {
-		$w      = self::WIDTH;
+	private static function pulse( $img, int $color, int $base, int $w = self::WIDTH ): void {
 		$points = array( array( 0, 0 ), array( 0.52, 0 ), array( 0.55, -22 ), array( 0.585, 34 ), array( 0.62, -60 ), array( 0.655, 30 ), array( 0.68, 0 ), array( 1, 0 ) );
 		imagesetthickness( $img, 6 );
 		for ( $i = 1, $n = count( $points ); $i < $n; $i++ ) {

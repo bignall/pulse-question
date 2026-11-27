@@ -91,6 +91,7 @@ final class Webhook {
 		$title  = \PulseQuestion\Text::plain( get_the_title( $post ) );
 		$url    = (string) get_permalink( $post );
 		$image  = ShareImage::forQuestion( $post_id );
+		$insta  = ShareImage::forInstagram( $post_id );
 		$bg     = trim( wp_strip_all_tags( (string) $post->post_content ) );
 		$terms  = get_the_terms( $post_id, Questions::TAXONOMY );
 		$tags   = self::hashtags();
@@ -108,6 +109,10 @@ final class Webhook {
 			'image_width'  => $image['width'] ?? 0,
 			'image_height' => $image['height'] ?? 0,
 			'image_alt'    => $title,
+			// Instagram: a 1080x1350 JPEG (the only format it takes) and a caption without a link,
+			// since links in Instagram captions can't be clicked.
+			'instagram_image_url' => $insta['url'] ?? '',
+			'instagram_text'      => self::instagramText( $title, $tags ),
 			'site'         => array(
 				'name' => \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ),
 				'url'  => home_url( '/' ),
@@ -120,6 +125,18 @@ final class Webhook {
 		 * @param int                  $post_id The question.
 		 */
 		return (array) apply_filters( 'pulse_question_social_payload', $data, $post_id );
+	}
+
+	/**
+	 * The Instagram caption: the question, where to answer, and the hashtags.
+	 *
+	 * @param list<string> $tags Hashtags.
+	 */
+	public static function instagramText( string $question, array $tags ): string {
+		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		/* translators: %s: the site's address, such as example.com. */
+		$cta  = sprintf( __( 'Share your answer at %s (link in bio).', 'pulse-question' ), $host );
+		return trim( $question . "\n\n" . $cta . "\n\n" . implode( ' ', $tags ) );
 	}
 
 	/** @return list<string> Hashtags from Settings, each starting with #. */

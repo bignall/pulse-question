@@ -50,9 +50,13 @@ Posts start with the next question. A failed post is tried again hourly (up to f
   "image_width": 1200,
   "image_height": 630,
   "image_alt": "Which skill would you learn if time were no object?",
+  "instagram_image_url": "https://example.com/wp-content/uploads/pulse-question/share/q42p-1a2b3c4d5e.jpg",
+  "instagram_text": "Which skill would you learn if time were no object?\n\nShare your answer at example.com (link in bio).\n\n#QuestionOfTheDay",
   "site": { "name": "Example", "url": "https://example.com/" }
 }
 ```
+
+For **Instagram**, use `instagram_image_url` and `instagram_text`. Instagram only takes JPEG images, so this is a separate 1080×1350 portrait JPEG (Instagram's tallest feed shape), made from the same design. Links in Instagram captions can't be clicked, so `instagram_text` says to use the link in your bio instead of including the address. In Make, use **Instagram for Business → Create a Photo Post**; the Instagram account must be a professional account linked to your Facebook Page.
 
 `text` comes from the **Post text** template. Its placeholders are `{question}`, `{url}`, `{background}`, `{hashtags}` and `{site}`.
 

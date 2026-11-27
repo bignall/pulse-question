@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.8.2
+Stable tag: 0.9.0
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -91,6 +91,9 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.9.0 =
+* Instagram-ready automatic posts: the webhook now also sends instagram_image_url, a 1080×1350 portrait JPEG (Instagram only takes JPEG), and instagram_text, a caption that points to the link in your bio since Instagram captions can't have clickable links.
 
 = 0.8.2 =
 * Fixed curly quotes and other special characters showing as codes such as &#8217; in social posts, the daily email subject and heading, share-button text and share tags.
