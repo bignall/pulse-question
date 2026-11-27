@@ -28,6 +28,7 @@ final class App {
 		Answers\Moderator::init();
 		Answers\Actions::init();
 		Members\Members::init();
+		Members\GoogleLogin::init();
 		Members\MailingList::init();
 		Email\DailyEmail::init();
 		Social\Webhook::init();

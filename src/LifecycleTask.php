@@ -46,7 +46,7 @@ final class LifecycleTask implements Task {
 			}
 		}
 		// Members stay (they're WordPress users); their Pulse Question details go.
-		foreach ( array( Members\Members::META_JOINED, Members\Members::META_MARKETING, Members\Members::META_ASKED, Members\MailingList::META_PENDING ) as $key ) {
+		foreach ( array( Members\Members::META_JOINED, Members\Members::META_MARKETING, Members\Members::META_ASKED, Members\MailingList::META_PENDING, Members\GoogleLogin::META_SUB ) as $key ) {
 			delete_metadata( 'user', 0, $key, '', true );
 		}
 		delete_option( 'pulse_question_email_job' );

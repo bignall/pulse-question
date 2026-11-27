@@ -42,9 +42,11 @@ Filters: `pulse_question_claude_base_url` (a proxy or gateway address), `pulse_q
 
 Answers are WordPress comments on questions, so replies, Akismet (if active) and **Comments** in the admin all work as usual.
 
-- **Members only:** you have to be logged in to answer, vote or report. Guests see the answers, a *Log in to answer* button and a *Join* button. *Join* appears when **Settings → General → Anyone can register** is on; use *Subscriber* as the new user role.
+- **Members only:** you have to be logged in to answer, vote or report. Guests see the answers, a *Log in to answer* button and a *Join with email* button, plus *Continue with Google* when it's set up.
+- **Sign in with Google:** add a Google OAuth client id and secret under Settings → Members (or `PULSE_QUESTION_GOOGLE_CLIENT_ID` and `PULSE_QUESTION_GOOGLE_CLIENT_SECRET` in `wp-config.php`). Members can then join or log in with their Google account on the log-in and sign-up pages and in the answer box. A Google account matches a member by its verified email address; accounts that can edit posts keep using their password. New members get the mailing list boxes with their first answer. *Join* appears when **Settings → General → Anyone can register** is on; use *Subscriber* as the new user role.
 - **Mailing list:** the sign-up form has two boxes, *Send me the question of the day by email* and *Also send me occasional news and offers*. Both are ticked to begin with and neither is required. Members who signed up some other way see the boxes once, with their first answer. A setting turns off the pre-ticking. In the EU and UK, a pre-ticked box doesn't count as consent. Members are added to FluentCRM on the same site or on another site; see Settings → Members. With double opt-in, FluentCRM sends its confirmation email. If a sign-up fails, it's tried again every hour. Recent sign-ups are listed in Settings. **Test connection** (Settings → Members) checks the setup step by step and says what to fix.
-- **Top answers on the home page:** under today's question, the three most-liked answers so far (shortened, each linking to the full answer) and a *Read all* link, so visitors see what others said before they answer. Set the number, or 0 for none, under Settings → Answers; the block and `[pulse_question answers="5"]` can override it.
+- **On the home page:** today's question has its own answer box (or *Continue with Google*, *Log in* and *Join* buttons for guests), so visitors can answer without leaving the page. Below it are the three most-liked answers so far, or yesterday's top answers until today has some, then the five newest answers to any question. Each links to the full answer. Set the numbers (0 for none) and turn the box off under Settings → Answers. The block and the `[pulse_question]` shortcode can override them.
+- **Past question cards** have an answers button: *12 answers*, or *Answer* when there are none yet.
 - **Votes:** members can mark a question as *Good question* and like answers (not their own). Answers sort by *Top* or *Newest*. Replies go one level deep.
 - **Automatic moderation (default):** Claude checks each answer as it's posted, against guidelines you can edit:
   - fine → published straight away;
@@ -59,7 +61,7 @@ Answers are WordPress comments on questions, so replies, Akismet (if active) and
 
 WordPress's own limit of one comment every 15 seconds per person applies to answers too.
 
-Filters: `pulse_question_moderation_timeout` (seconds to wait while the member waits, default 25). Actions: `pulse_question_member_joined( $user_id, $marketing, $list )` and `pulse_question_answer_hidden( $comment_id )`. REST: `POST pulse-question/v1/vote` and `/report` (logged in, with a `X-WP-Nonce`).
+Filters: `pulse_question_moderation_timeout` (seconds to wait while the member waits, default 25). Actions: `pulse_question_member_joined( $user_id, $marketing, $list )`, `pulse_question_google_joined( $user_id )` and `pulse_question_answer_hidden( $comment_id )`. REST: `POST pulse-question/v1/vote` and `/report` (logged in, with a `X-WP-Nonce`).
 
 ## Daily email
 
@@ -87,6 +89,11 @@ Filters: `pulse_question_share_image`, `pulse_question_share_image_colors`, `pul
 [pulse_question]                          today's question
 [pulse_question background="0"]           without its background text
 [pulse_question answers="5"]              with its five top answers (0 = none)
+[pulse_question recent="0" box="0"]       without recent answers or the answer box
+[pulse_question_answer_box]               the answer box for today's question
+[pulse_question_top_answers count="3"]    today's top answers (yesterday's until today has some)
+[pulse_question_recent_answers count="5"] the newest answers to any question
+[pulse_question_answers_button]           a question's answers button, as on the cards (in a loop)
 [pulse_question_past]                     cards of past questions, with page links
 [pulse_question_past count="6" paged="0"] the six latest, no page links
 [pulse_question_past category="ethics"]   one category (slug or id)

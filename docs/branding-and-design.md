@@ -24,6 +24,7 @@ To restyle, set these custom properties on any parent element:
 | `--pq-border` | Borders |
 | `--pq-radius` | Corners |
 | `--pq-gap` | Spacing between cards |
+| `--pq-page-bg` | The page background the cards' tint is mixed with (white by default) |
 
 To style everything yourself, untick **Settings → Styles → Use the plugin's styles**. The markup uses `pq-` classes, for example `.pq-today`, `.pq-today__question`, `.pq-cards`, `.pq-card`, `.pq-answers`, `.pq-answer`, `.pq-share` and `.pq-button`.
 
@@ -36,6 +37,11 @@ To style everything yourself, untick **Settings → Styles → Use the plugin's 
 [pulse_question]                          today's question
 [pulse_question background="0"]           without its background text
 [pulse_question answers="5"]              with its five top answers (0 = none)
+[pulse_question recent="0" box="0"]       without recent answers or the answer box
+[pulse_question_answer_box]               the answer box for today's question
+[pulse_question_top_answers count="3"]    today's top answers (yesterday's until today has some)
+[pulse_question_recent_answers count="5"] the newest answers to any question
+[pulse_question_answers_button]           a question's answers button, as on the cards (in a loop)
 [pulse_question_past]                     cards of past questions, with page links
 [pulse_question_past count="6" paged="0"] the six latest, no page links
 [pulse_question_past category="ethics"]   one category (slug or id)
@@ -53,4 +59,4 @@ new WP_Query( array( 'post_type' => 'pulse_question', 'pulse_question_view' => '
 new WP_Query( array( 'post_type' => 'pulse_question', 'pulse_question_view' => 'past', 'posts_per_page' => 12 ) ); // asked, newest first
 ```
 
-Loops set up before 0.6.0 with `pq_question` and `pq_view` keep working. A question's post date is the day it was last asked, so builders can show and sort by it. The background is the post content. To show the answers and share links on a custom question template, use the post content, or call `PulseQuestion\Front\AnswersView::render( $post_id )` and `PulseQuestion\Social\ShareButtons::render( $post_id )`.
+Loops set up before 0.6.0 with `pq_question` and `pq_view` keep working. A question's post date is the day it was last asked, so builders can show and sort by it. The background is the post content. In an Etch layout, add `[pulse_question_answer_box]`, `[pulse_question_top_answers]` and `[pulse_question_recent_answers]` under today's question, and `[pulse_question_answers_button]` inside a past-questions loop. To show the answers and share links on a custom question template, use the post content, or call `PulseQuestion\Front\AnswersView::render( $post_id )` and `PulseQuestion\Social\ShareButtons::render( $post_id )`.

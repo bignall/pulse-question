@@ -32,9 +32,21 @@ final class AnswersView {
 		wp_register_script( 'pulse-question-answers', App::url( 'assets/answers.js' ), array(), App::version(), true );
 	}
 
-	/** After posting, back to the answers (WordPress adds #comment-N for published ones). */
+	/**
+	 * After posting, back to the answers (WordPress adds #comment-N for published ones). From the
+	 * answer box under today's question, back to that page, with a thank-you.
+	 */
 	public static function afterPost( string $location, \WP_Comment $comment ): string {
-		if ( ! Answers::isAnswer( $comment ) || '1' === $comment->comment_approved ) {
+		if ( ! Answers::isAnswer( $comment ) ) {
+			return $location;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WordPress's comment form; only picks where to go back to.
+		$box = ! empty( $_POST['pulse_question_box'] ) && ! empty( $_POST['redirect_to'] ) ? wp_validate_redirect( esc_url_raw( wp_unslash( (string) $_POST['redirect_to'] ) ), '' ) : '';
+		if ( '' !== $box ) {
+			$key = '1' === $comment->comment_approved ? 'pulse_question_posted' : 'pulse_question_held';
+			return add_query_arg( $key, $comment->comment_ID, remove_query_arg( array( 'pulse_question_posted', 'pulse_question_held' ), $box ) ) . '#pq-answer-box';
+		}
+		if ( '1' === $comment->comment_approved ) {
 			return $location;
 		}
 		return add_query_arg( 'pulse_question_held', $comment->comment_ID, get_permalink( (int) $comment->comment_post_ID ) ) . '#pq-answers';
@@ -101,17 +113,23 @@ final class AnswersView {
 		return '<a href="' . esc_url( $url ) . '"' . ( $value === $current ? ' aria-current="true" class="is-current"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
 
-	private static function form( int $post_id, int $user, int $held ): string {
+	/**
+	 * The answer form, or log in / join links for guests.
+	 *
+	 * @param string $box Set for the answer box under today's question: the page to come back to.
+	 */
+	public static function form( int $post_id, int $user, int $held, string $box = '' ): string {
 		if ( ! comments_open( $post_id ) ) {
 			return '';
 		}
-		$back = get_permalink( $post_id ) . '#pq-answers';
+		$back = '' !== $box ? $box . '#pq-answer-box' : get_permalink( $post_id ) . '#pq-answers';
 		if ( $user <= 0 ) {
-			$join = get_option( 'users_can_register' )
-				? ' <a class="pq-button" href="' . esc_url( add_query_arg( 'redirect_to', rawurlencode( (string) $back ), wp_registration_url() ) ) . '">' . esc_html__( 'Join', 'pulse-question' ) . '</a>'
+			$join   = get_option( 'users_can_register' )
+				? ' <a class="pq-button" href="' . esc_url( add_query_arg( 'redirect_to', rawurlencode( (string) $back ), wp_registration_url() ) ) . '">' . esc_html__( 'Join with email', 'pulse-question' ) . '</a>'
 				: '';
-			return '<div class="pq-answers__join"><p>' . esc_html__( 'Members can answer, vote and reply.', 'pulse-question' ) . '</p>'
-				. '<p><a class="pq-button pq-button--primary" href="' . esc_url( wp_login_url( (string) $back ) ) . '">' . esc_html__( 'Log in to answer', 'pulse-question' ) . '</a>' . $join . '</p></div>';
+			$google = get_option( 'users_can_register' ) ? \PulseQuestion\Members\GoogleLogin::button( (string) $back ) : '';
+			return '<div class="pq-answers__join"><p>' . esc_html__( 'Members can answer, vote and reply. Joining is free.', 'pulse-question' ) . '</p>'
+				. '<p class="pq-answers__join-buttons">' . $google . ( '' !== $google ? ' ' : '' ) . '<a class="pq-button' . ( '' === $google ? ' pq-button--primary' : '' ) . '" href="' . esc_url( wp_login_url( (string) $back ) ) . '">' . esc_html__( 'Log in to answer', 'pulse-question' ) . '</a>' . $join . '</p></div>';
 		}
 
 		$out = '';
@@ -122,12 +140,18 @@ final class AnswersView {
 			}
 		}
 		$max  = (int) Settings::get( 'answer_max_length' );
+		$id   = '' !== $box ? 'pq-answer-box-text' : 'pq-answer-text';
 		$out .= '<form class="pq-answer-form" method="post" action="' . esc_url( site_url( '/wp-comments-post.php' ) ) . '">';
-		$out .= '<label class="pq-answer-form__label" for="pq-answer-text">' . esc_html__( 'Your answer', 'pulse-question' ) . '</label>';
-		$out .= '<p class="pq-answer-form__replying" hidden><span></span> <button type="button" class="pq-link" data-pq-cancel-reply>' . esc_html__( 'Cancel', 'pulse-question' ) . '</button></p>';
-		$out .= '<textarea id="pq-answer-text" name="comment" rows="4" required' . ( $max > 0 ? ' maxlength="' . esc_attr( (string) $max ) . '"' : '' ) . '></textarea>';
+		$out .= '<label class="pq-answer-form__label" for="' . $id . '">' . esc_html__( 'Your answer', 'pulse-question' ) . '</label>';
+		if ( '' === $box ) {
+			$out .= '<p class="pq-answer-form__replying" hidden><span></span> <button type="button" class="pq-link" data-pq-cancel-reply>' . esc_html__( 'Cancel', 'pulse-question' ) . '</button></p>';
+		}
+		$out .= '<textarea id="' . $id . '" name="comment" rows="4" required' . ( $max > 0 ? ' maxlength="' . esc_attr( (string) $max ) . '"' : '' ) . '></textarea>';
 		$out .= '<input type="hidden" name="comment_post_ID" value="' . esc_attr( (string) $post_id ) . '" />';
 		$out .= '<input type="hidden" name="comment_parent" value="0" />';
+		if ( '' !== $box ) {
+			$out .= '<input type="hidden" name="pulse_question_box" value="1" /><input type="hidden" name="redirect_to" value="' . esc_url( $box ) . '" />';
+		}
 		if ( ! Members::wasAsked( $user ) ) {
 			$out .= Members::fields();
 		}

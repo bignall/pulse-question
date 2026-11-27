@@ -11,6 +11,7 @@ namespace PulseQuestion\Admin;
 
 use PulseQuestion\Claude\Generator;
 use PulseQuestion\Members\ConnectionTest;
+use PulseQuestion\Members\GoogleLogin;
 use PulseQuestion\Members\MailingList;
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
@@ -256,8 +257,14 @@ final class SettingsPage {
 				<p>
 					<label for="pq-home-top"><?php esc_html_e( 'Top answers under today\'s question:', 'pulse-question' ); ?></label>
 					<input id="pq-home-top" type="number" min="0" max="10" class="small-text" name="<?php echo esc_attr( $store->field( 'home_top_answers' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'home_top_answers' ) ); ?>" />
+					<?php esc_html_e( '(0 = none; until today has answers, yesterday\'s are shown)', 'pulse-question' ); ?>
+				</p>
+				<p>
+					<label for="pq-home-recent"><?php esc_html_e( 'Recent answers to any question:', 'pulse-question' ); ?></label>
+					<input id="pq-home-recent" type="number" min="0" max="20" class="small-text" name="<?php echo esc_attr( $store->field( 'home_recent_answers' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'home_recent_answers' ) ); ?>" />
 					<?php esc_html_e( '(0 = none)', 'pulse-question' ); ?>
 				</p>
+				<?php $flag( 'home_answer_form', __( 'Show the answer box under today\'s question, not only on its own page', 'pulse-question' ) ); ?>
 				<?php $flag( 'answer_emails', __( 'Email me about every new answer', 'pulse-question' ) ); ?>
 				<p class="description"><?php esc_html_e( 'Off by default. Held answers still follow WordPress\'s "email me when a comment is held" setting (Settings → Discussion).', 'pulse-question' ); ?></p>
 			</td>
@@ -324,6 +331,28 @@ final class SettingsPage {
 				<p><label><?php esc_html_e( 'Marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
 				<?php $flag( 'join_prechecked', __( 'Tick both boxes to begin with', 'pulse-question' ) ); ?>
 				<p class="description"><?php esc_html_e( 'In the EU and UK, a ticked box doesn\'t count as consent, so turn this off if you have visitors there. Double opt-in (below) helps either way.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><label for="pq-google-id"><?php esc_html_e( 'Sign in with Google', 'pulse-question' ); ?></label></th>
+			<td>
+				<p><input id="pq-google-id" type="text" class="large-text" placeholder="<?php esc_attr_e( 'Client ID (…apps.googleusercontent.com)', 'pulse-question' ); ?>" name="<?php echo esc_attr( $store->field( 'google_client_id' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'google_client_id' ) ); ?>" /></p>
+				<?php if ( GoogleLogin::secretFromConstant() ) : ?>
+					<p><?php echo wp_kses_post( __( 'Client secret set in <code>wp-config.php</code> (<code>PULSE_QUESTION_GOOGLE_CLIENT_SECRET</code>).', 'pulse-question' ) ); ?></p>
+				<?php else : ?>
+					<p>
+						<input type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'google_client_secret' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'google_client_secret' ) ? __( 'Secret saved. Leave blank to keep it.', 'pulse-question' ) : __( 'Client secret', 'pulse-question' ) ); ?>" />
+						<?php if ( '' !== (string) $store->get( 'google_client_secret' ) ) : ?>
+							<label><input type="checkbox" name="<?php echo esc_attr( $store->field( 'google_client_secret_clear' ) ); ?>" value="1" /> <?php esc_html_e( 'Remove the saved secret', 'pulse-question' ); ?></label>
+						<?php endif; ?>
+					</p>
+				<?php endif; ?>
+				<p class="description">
+					<?php echo wp_kses_post( __( 'Adds <strong>Continue with Google</strong> to the log-in and sign-up pages and the answer box. In <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Google Cloud → Clients</a>, create a <em>Web application</em> client and add this under <em>Authorized redirect URIs</em>:', 'pulse-question' ) ); ?>
+					<br /><code><?php echo esc_html( GoogleLogin::redirectUri() ); ?></code>
+				</p>
+				<p class="description"><?php esc_html_e( 'New members are created only when Anyone can register is on. Accounts that can edit posts keep signing in with their password.', 'pulse-question' ); ?></p>
+				<p><?php echo GoogleLogin::isConfigured() ? '<strong style="color:#00a32a">' . esc_html__( 'On', 'pulse-question' ) . '</strong>' : '<em>' . esc_html__( 'Off until both are filled in.', 'pulse-question' ) . '</em>'; ?></p>
 			</td>
 		</tr>
 		<tr>

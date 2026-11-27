@@ -42,8 +42,12 @@ final class Blocks {
 						'type'    => 'number',
 						'default' => -1,
 					),
+					'recent'     => array(
+						'type'    => 'number',
+						'default' => -1,
+					),
 				),
-				'render_callback' => static fn ( array $a ): string => Render::today( (bool) ( $a['background'] ?? true ), (int) ( $a['answers'] ?? -1 ) ),
+				'render_callback' => static fn ( array $a ): string => Render::today( (bool) ( $a['background'] ?? true ), (int) ( $a['answers'] ?? -1 ), (int) ( $a['recent'] ?? -1 ) ),
 			)
 		);
 		register_block_type(

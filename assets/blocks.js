@@ -12,7 +12,7 @@
 		description: __( "Today's question, large, with its background text.", 'pulse-question' ),
 		icon: 'format-chat',
 		category: 'widgets',
-		attributes: { background: { type: 'boolean', default: true }, answers: { type: 'number', default: -1 } },
+		attributes: { background: { type: 'boolean', default: true }, answers: { type: 'number', default: -1 }, recent: { type: 'number', default: -1 } },
 		edit( { attributes, setAttributes } ) {
 			return el(
 				'div',
@@ -40,6 +40,19 @@
 								min: 0,
 								max: 10,
 								onChange: ( v ) => setAttributes( { answers: v ?? 0 } ),
+							} ),
+						el( ToggleControl, {
+							label: __( 'Recent answers: use the number in Settings', 'pulse-question' ),
+							checked: attributes.recent < 0,
+							onChange: ( v ) => setAttributes( { recent: v ? -1 : 5 } ),
+						} ),
+						attributes.recent >= 0 &&
+							el( RangeControl, {
+								label: __( 'Recent answers to show', 'pulse-question' ),
+								value: attributes.recent,
+								min: 0,
+								max: 20,
+								onChange: ( v ) => setAttributes( { recent: v ?? 0 } ),
 							} )
 					)
 				),

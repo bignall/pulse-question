@@ -9,6 +9,21 @@ Visitors sign up on WordPress's own registration page, which gets two extra boxe
 
 Both are ticked to begin with, and neither is required. Members who signed up some other way see the same boxes once, with their first answer. If they untick both, they aren't asked again. You can change both labels, or leave the second one empty to hide it.
 
+### Sign in with Google
+
+Members can join or log in with their Google account instead of making a password. The *Continue with Google* button appears on the log-in and sign-up pages and in the answer box.
+
+1. In [Google Cloud → Clients](https://console.cloud.google.com/auth/clients), create an OAuth client of type **Web application**. (The first time, Google asks you to set up the consent screen: your site's name, a support email and your privacy policy link. The scopes needed are `openid`, `email` and `profile`, which don't need Google's review.)
+2. Under **Authorized redirect URIs**, add the address shown in **Questions → Settings → Members → Sign in with Google**. It looks like `https://example.com/wp-admin/admin-post.php?action=pulse_question_google`.
+3. Paste the **Client ID** and **Client secret** into that setting, or keep them out of the database with `define( 'PULSE_QUESTION_GOOGLE_CLIENT_ID', '…' );` and `define( 'PULSE_QUESTION_GOOGLE_CLIENT_SECRET', '…' );` in `wp-config.php`.
+4. In Google Cloud, **publish** the app (Audience → Publish app) so anyone can sign in, not only test users.
+
+How members are matched:
+
+- A Google account is linked to the member with the same verified email address, or a new member is made (only when **Anyone can register** is on).
+- Accounts that can edit posts (editors and administrators) aren't linked: they keep signing in with their password.
+- New members see the mailing-list boxes with their first answer, as above.
+
 **In the EU and UK, a pre-ticked box doesn't count as consent.** If you have visitors there, turn off **Tick both boxes to begin with**. Double opt-in (below) helps either way.
 
 ## Where members go

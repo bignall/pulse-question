@@ -319,6 +319,27 @@ final class Questions {
 	}
 
 	/**
+	 * The question asked most recently before $day (or before today's), other than $today_id; 0 if none.
+	 * On a tie (Ask now used that day), the newer question.
+	 */
+	public static function previous( int $today_id, string $day ): int {
+		$best = 0;
+		$when = '';
+		foreach ( array_keys( self::asked() ) as $id ) {
+			if ( $id === $today_id ) {
+				continue;
+			}
+			foreach ( self::askedDays( $id ) as $asked ) {
+				if ( ( '' === $day || $asked < $day ) && ( $asked > $when || ( $asked === $when && $id > $best ) ) ) {
+					$best = $id;
+					$when = $asked;
+				}
+			}
+		}
+		return $best;
+	}
+
+	/**
 	 * Days a question was asked, newest first.
 	 *
 	 * @return list<string>

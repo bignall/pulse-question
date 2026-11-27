@@ -299,21 +299,7 @@ final class DailyEmail {
 		if ( $count <= 0 || ! Settings::get( 'answers_open' ) ) {
 			return '';
 		}
-		// The question asked most recently before today's.
-		$best = 0;
-		$when = '';
-		foreach ( Questions::asked() as $id => $last ) {
-			if ( $id === $today_id ) {
-				continue;
-			}
-			foreach ( Questions::askedDays( $id ) as $asked ) {
-				// Latest day before today; on a tie (Ask now used that day), the newer question.
-				if ( ( '' === $day || $asked < $day ) && ( $asked > $when || ( $asked === $when && $id > $best ) ) ) {
-					$best = $id;
-					$when = $asked;
-				}
-			}
-		}
+		$best = Questions::previous( $today_id, $day );
 		if ( 0 === $best ) {
 			return '';
 		}
