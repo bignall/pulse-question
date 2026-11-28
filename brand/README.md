@@ -5,7 +5,8 @@ From the original pulsequestion.com logo (500×500 source, so the full logo is o
 | File | Use |
 | --- | --- |
 | `pulse-question-logo.png` / `.webp` | Header logo, transparent background |
-| `site-icon-512.png` | WordPress Site Icon (Settings → General) |
+| `site-icon-white-512.png` | WordPress Site Icon (Settings → General): the logo on a white rounded square, so it shows on dark browser tabs |
+| `site-icon-512.png` | The earlier transparent site icon |
 | `apple-touch-icon-180.png` | Home screen icon (white background) |
 | `favicon.ico`, `favicon-32.png`, `favicon-48.png` | Browser tab: the question mark only, so it reads at 16–48px |
 
