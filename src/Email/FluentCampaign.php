@@ -83,6 +83,7 @@ final class FluentCampaign {
 				'email_pre_header' => $content['preheader'],
 				'email_body'       => $content['body'],
 				'design_template'  => 'simple',
+				'settings'         => array( 'mailer_settings' => self::sender() ),
 			)
 		);
 		if ( ! is_string( $r ) && 422 === $r['code'] && str_contains( wp_json_encode( $r['body'] ), 'title' ) ) {
@@ -98,6 +99,7 @@ final class FluentCampaign {
 					'email_pre_header' => $content['preheader'],
 					'email_body'       => $content['body'],
 					'design_template'  => 'simple',
+					'settings'         => array( 'mailer_settings' => self::sender() ),
 				)
 			);
 		}
@@ -138,6 +140,45 @@ final class FluentCampaign {
 			return $result( false, $id, $count, is_string( $r ) ? $r : self::problem( $r, __( 'FluentCRM didn\'t start sending.', 'pulse-question' ) ) );
 		}
 		return $result( true, $id, $count );
+	}
+
+	/**
+	 * The campaign's sender, from Settings → Daily email → FluentCRM sender.
+	 *
+	 * @return array{from_name: string, from_email: string, reply_to_name: string, reply_to_email: string, is_custom: string}
+	 */
+	public static function sender(): array {
+		return self::mailerSettings( (string) Settings::get( 'crm_from_name' ), (string) Settings::get( 'crm_from_address' ), (string) Settings::get( 'crm_reply_to' ) );
+	}
+
+	/**
+	 * FluentCRM's per-campaign sender. It only uses a custom sender when the address is given too
+	 * (a name alone falls back to the mail plugin's sender), and a custom sender drops FluentCRM's
+	 * default reply-to, so both go with the name. Without a name and address, FluentCRM's own
+	 * sender settings are used.
+	 *
+	 * @return array{from_name: string, from_email: string, reply_to_name: string, reply_to_email: string, is_custom: string}
+	 */
+	public static function mailerSettings( string $name, string $address, string $reply_to ): array {
+		$name     = trim( $name );
+		$address  = trim( $address );
+		$reply_to = trim( $reply_to );
+		if ( '' === $name || '' === $address ) {
+			return array(
+				'from_name'      => '',
+				'from_email'     => '',
+				'reply_to_name'  => '',
+				'reply_to_email' => '',
+				'is_custom'      => 'no',
+			);
+		}
+		return array(
+			'from_name'      => $name,
+			'from_email'     => $address,
+			'reply_to_name'  => '' !== $reply_to ? $name : '',
+			'reply_to_email' => $reply_to,
+			'is_custom'      => 'yes',
+		);
 	}
 
 	/** @return list<int> */

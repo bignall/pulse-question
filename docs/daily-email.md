@@ -32,6 +32,8 @@ In **Settings → Daily email**, tick **Email each new question to the mailing l
 
 The **subject** is `{question}` by default; `{date}` and `{site}` work too. For the built-in sender you can set the **From** name and address. Use an address on your own domain so the email isn't marked as spam.
 
+With FluentCRM, the email uses FluentCRM's own sender settings unless you fill in **FluentCRM sender**: a name (such as your site's name), the address it comes from and, if replies should go elsewhere, a reply-to. FluentCRM needs the name and the address together; with only a name it falls back to its default sender. Use an address your FluentCRM site is set up to send from. This only changes the daily email, not your other FluentCRM campaigns.
+
 ![Daily email settings](images/settings-email.png)
 
 ## Checking it

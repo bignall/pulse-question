@@ -200,9 +200,23 @@ final class OutreachSettings {
 			<td>
 				<label><?php esc_html_e( 'Name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_name' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_name' ) ); ?>" placeholder="<?php echo esc_attr( \PulseQuestion\Text::plain( (string) get_bloginfo( 'name' ) ) ); ?>" /></label>
 				<label><?php esc_html_e( 'Address', 'pulse-question' ); ?> <input type="email" class="regular-text" name="<?php echo esc_attr( $store->field( 'email_from_address' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'email_from_address' ) ); ?>" placeholder="<?php echo esc_attr( (string) get_option( 'admin_email' ) ); ?>" /></label>
-				<p class="description"><?php esc_html_e( 'For the built-in sender and test emails. Leave empty to use WordPress\'s (or your SMTP plugin\'s) sender. FluentCRM uses its own settings. Use an address on your own domain so the email isn\'t marked as spam.', 'pulse-question' ); ?></p>
+				<p class="description"><?php esc_html_e( 'For the built-in sender and test emails. Leave empty to use WordPress\'s (or your SMTP plugin\'s) sender. Use an address on your own domain so the email isn\'t marked as spam.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>
+		<?php if ( 'builtin' !== $method ) : ?>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'FluentCRM sender', 'pulse-question' ); ?></th>
+			<td>
+				<label><?php esc_html_e( 'Name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'crm_from_name' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'crm_from_name' ) ); ?>" /></label>
+				<label><?php esc_html_e( 'Address', 'pulse-question' ); ?> <input type="email" class="regular-text" name="<?php echo esc_attr( $store->field( 'crm_from_address' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'crm_from_address' ) ); ?>" /></label>
+				<label><?php esc_html_e( 'Reply-to', 'pulse-question' ); ?> <input type="email" class="regular-text" name="<?php echo esc_attr( $store->field( 'crm_reply_to' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'crm_reply_to' ) ); ?>" /></label>
+				<p class="description"><?php esc_html_e( 'Who the daily email comes from in FluentCRM. Fill in the name and address to use them (FluentCRM needs both), plus a reply-to if replies should go elsewhere. Use an address your FluentCRM site is set up to send from. Leave empty to use FluentCRM\'s own sender settings.', 'pulse-question' ); ?></p>
+				<?php if ( '' !== trim( (string) $store->get( 'crm_from_name' ) ) && '' === (string) $store->get( 'crm_from_address' ) ) : ?>
+					<p class="description"><strong><?php esc_html_e( 'Add the address too: with a name alone, FluentCRM uses its own sender.', 'pulse-question' ); ?></strong></p>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php endif; ?>
 		<tr>
 			<th scope="row"><label for="pq-email-top"><?php esc_html_e( 'Yesterday\'s answers', 'pulse-question' ); ?></label></th>
 			<td><?php esc_html_e( 'Show the top', 'pulse-question' ); ?>

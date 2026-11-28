@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.1
+Stable tag: 0.9.2
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -91,6 +91,9 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.9.2 =
+* New FluentCRM sender setting (name, address and reply-to) for the daily email, so it can come from your site's name instead of FluentCRM's default sender.
 
 = 0.9.1 =
 * Share links are now round icons in each network's colour, with the name as a hover label in your main colour, under "Share this question". On today's question they come before the answer box. New [pulse_question_share] shortcode for page builders.
