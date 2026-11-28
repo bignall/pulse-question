@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.6
+Stable tag: 0.9.7
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -91,6 +91,11 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.9.7 =
+* The Settings page now uses WP Foundation's settings page (0.1.5): the same tabs, single Save button, unsaved-change warnings and password-manager protection, now shared with other plugins.
+* Google sign-in and the mailing list's other-site login have one setting per row.
+* The mailing list's application password can now be removed, like the other saved secrets.
 
 = 0.9.6 =
 * Password managers such as LastPass can no longer change the Google client ID, the mailing list user name or the saved secrets on the Settings page. Only typing, pasting or dropping text changes them; anything else is put back, including just before saving.

@@ -44,7 +44,7 @@ final class App {
 		if ( is_admin() ) {
 			Admin\QueuePage::init( $plugin );
 			Admin\QuestionEditor::init();
-			Admin\SettingsPage::init();
+			Admin\SettingsPage::init( $plugin );
 			Admin\Setup::init();
 			Admin\AnswersAdmin::init();
 		}

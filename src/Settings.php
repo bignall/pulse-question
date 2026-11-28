@@ -118,8 +118,8 @@ final class Settings {
 			'low_queue_days' => max( 0, min( 60, (int) ( $input['low_queue_days'] ?? 7 ) ) ),
 			'todo_tasks'     => empty( $input['todo_tasks'] ) ? 0 : 1,
 			'load_styles'    => empty( $input['load_styles'] ) ? 0 : 1,
-			// A blank key field keeps the saved key; tick "remove" to clear it.
-			'claude_api_key'      => ! empty( $input['claude_api_key_clear'] ) ? '' : ( '' !== trim( (string) ( $input['claude_api_key'] ?? '' ) ) ? trim( sanitize_text_field( (string) $input['claude_api_key'] ) ) : (string) $current->get( 'claude_api_key' ) ),
+			// Secrets: a blank field keeps the saved value; the "remove" box clears it.
+			'claude_api_key'      => $current->secret( $input, 'claude_api_key' ),
 			'claude_model'        => preg_match( '/^[a-z0-9][a-z0-9.\-]{2,80}$/', (string) ( $input['claude_model'] ?? '' ) ) ? (string) $input['claude_model'] : 'claude-opus-5-5',
 			'claude_effort'       => in_array( $input['claude_effort'] ?? '', array( 'low', 'medium', 'high', 'xhigh', 'max' ), true ) ? (string) $input['claude_effort'] : 'medium',
 			'claude_guidance'     => sanitize_textarea_field( (string) ( $input['claude_guidance'] ?? '' ) ),
@@ -134,8 +134,7 @@ final class Settings {
 			'home_recent_answers'   => max( 0, min( 20, (int) ( $input['home_recent_answers'] ?? 5 ) ) ),
 			'home_answer_form'      => empty( $input['home_answer_form'] ) ? 0 : 1,
 			'google_client_id'      => preg_replace( '/[^A-Za-z0-9._\-]/', '', (string) ( $input['google_client_id'] ?? '' ) ),
-			// A blank secret field keeps the saved one; tick "remove" to clear it.
-			'google_client_secret'  => ! empty( $input['google_client_secret_clear'] ) ? '' : ( '' !== trim( (string) ( $input['google_client_secret'] ?? '' ) ) ? trim( sanitize_text_field( (string) $input['google_client_secret'] ) ) : (string) $current->get( 'google_client_secret' ) ),
+			'google_client_secret'  => $current->secret( $input, 'google_client_secret' ),
 			'report_threshold'      => max( 0, min( 50, (int) ( $input['report_threshold'] ?? 3 ) ) ),
 			'moderation'            => in_array( $input['moderation'] ?? '', array( 'claude', 'hold', 'wordpress' ), true ) ? (string) $input['moderation'] : 'claude',
 			'moderation_model'      => preg_match( '/^[a-z0-9][a-z0-9.\-]{2,80}$/', (string) ( $input['moderation_model'] ?? '' ) ) ? (string) $input['moderation_model'] : 'claude-opus-5-5',
@@ -149,8 +148,8 @@ final class Settings {
 			'join_prechecked'       => empty( $input['join_prechecked'] ) ? 0 : 1,
 			'list_remote_url'       => untrailingslashit( esc_url_raw( trim( (string) ( $input['list_remote_url'] ?? '' ) ), array( 'https', 'http' ) ) ),
 			'list_remote_user'      => sanitize_user( (string) ( $input['list_remote_user'] ?? '' ) ),
-			// A blank password field keeps the saved one.
-			'list_remote_password'  => '' !== trim( (string) ( $input['list_remote_password'] ?? '' ) ) ? preg_replace( '/\s+/', '', (string) $input['list_remote_password'] ) : (string) $current->get( 'list_remote_password' ),
+			// Application passwords are shown with spaces, which aren't part of them.
+			'list_remote_password'  => (string) preg_replace( '/\s+/', '', $current->secret( $input, 'list_remote_password' ) ),
 			'list_label'            => sanitize_text_field( (string) ( $input['list_label'] ?? '' ) ),
 			'marketing_label'       => sanitize_text_field( (string) ( $input['marketing_label'] ?? '' ) ),
 			'email_enabled'         => $email,

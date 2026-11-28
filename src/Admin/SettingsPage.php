@@ -15,229 +15,140 @@ use PulseQuestion\Members\GoogleLogin;
 use PulseQuestion\Members\MailingList;
 use PulseQuestion\Questions;
 use PulseQuestion\Settings;
+use PulseQuestion\Vendor\Bignall\WPFoundation\Plugin;
+use PulseQuestion\Vendor\Bignall\WPFoundation\Settings\Fields;
+use PulseQuestion\Vendor\Bignall\WPFoundation\Settings\SettingsPage as Page;
 
 final class SettingsPage {
 
 	public const SLUG = 'pulse-question-settings';
 
-	public static function init(): void {
-		add_action( 'admin_menu', array( self::class, 'menu' ), 20 );
+	public static function init( Plugin $plugin ): void {
+		$plugin->settingsPage( self::page() );
 		add_action( 'admin_post_pulse_question_make_page', array( self::class, 'makePage' ) );
 		add_action( 'admin_post_pulse_question_test_list', array( self::class, 'testList' ) );
 		OutreachSettings::init();
 	}
 
-	public static function menu(): void {
-		add_submenu_page( 'edit.php?post_type=' . Questions::POST_TYPE, __( 'Pulse Question Settings', 'pulse-question' ), __( 'Settings', 'pulse-question' ), 'manage_options', self::SLUG, array( self::class, 'render' ) );
+	/**
+	 * The page: one tab per section, built on WP Foundation's SettingsPage. The tab ids are the
+	 * anchors the setup checklist, To-do Hub tasks and the test buttons link to.
+	 */
+	public static function page(): Page {
+		$flag = array( self::class, 'flag' );
+		return ( new Page( Settings::store(), self::SLUG, __( 'Pulse Question Settings', 'pulse-question' ) ) )
+			->parent( 'edit.php?post_type=' . Questions::POST_TYPE, __( 'Settings', 'pulse-question' ) )
+			->before( array( self::class, 'notices' ) )
+			->tab( 'pq-general', __( 'General', 'pulse-question' ), array( self::class, 'generalRows' ) )
+			->tab( 'pq-claude', __( 'Claude', 'pulse-question' ), array( self::class, 'claudeRows' ), __( 'Questions written by Claude', 'pulse-question' ) )
+			->tab( 'pq-answers-settings', __( 'Answers', 'pulse-question' ), static fn ( Fields $f ) => self::answerRows( $f->settings(), $flag ), __( 'Answers and moderation', 'pulse-question' ) )
+			->tab( 'pq-members', __( 'Members', 'pulse-question' ), array( self::class, 'memberRows' ) )
+			->tab( 'pq-mailing-list', __( 'Mailing list', 'pulse-question' ), array( self::class, 'listRows' ) )
+			->tab( 'pq-email', __( 'Daily email', 'pulse-question' ), static fn ( Fields $f ) => OutreachSettings::emailRows( $f->settings(), $flag ) )
+			->tab( 'pq-social', __( 'Social', 'pulse-question' ), static fn ( Fields $f ) => OutreachSettings::socialRows( $f->settings(), $flag ), __( 'Social sharing', 'pulse-question' ) )
+			->tab( 'pq-brand', __( 'Branding', 'pulse-question' ), array( self::class, 'brandRows' ) )
+			->after( array( self::class, 'makePageForm' ) );
 	}
 
-	public static function render(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to change these settings.', 'pulse-question' ) );
-		}
+	/** A checkbox for a setting, inside a row printed by hand. */
+	public static function flag( string $key, string $label ): void {
 		$store = Settings::store();
-		$flag  = static function ( string $key, string $label ) use ( $store ): void {
-			echo '<label><input type="checkbox" name="' . esc_attr( $store->field( $key ) ) . '" value="1" ' . checked( (bool) $store->get( $key ), true, false ) . ' /> ' . esc_html( $label ) . '</label>';
-		};
+		echo '<label><input type="checkbox" name="' . esc_attr( $store->field( $key ) ) . '" value="1" ' . checked( (bool) $store->get( $key ), true, false ) . ' /> ' . esc_html( $label ) . '</label>';
+	}
+
+	/** Above the tabs: results of the buttons, the setup checklist and "Page created". */
+	public static function notices(): void {
+		OutreachSettings::notice();
+		Setup::render();
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only.
 		$made = isset( $_GET['pulse_question_page_made'] ) ? absint( $_GET['pulse_question_page_made'] ) : 0;
+		if ( $made ) {
+			echo '<div class="notice notice-success"><p>' . esc_html__( 'Page created.', 'pulse-question' )
+				. ' <a href="' . esc_url( (string) get_permalink( $made ) ) . '">' . esc_html__( 'View it', 'pulse-question' ) . '</a> · '
+				. '<a href="' . esc_url( (string) get_edit_post_link( $made ) ) . '">' . esc_html__( 'Edit it', 'pulse-question' ) . '</a></p></div>';
+		}
+	}
+
+	/** Below the settings form: the form the "Create a page" button in General belongs to. */
+	public static function makePageForm(): void {
+		echo '<form method="post" id="pq-make-page" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		echo '<input type="hidden" name="action" value="pulse_question_make_page" />';
+		wp_nonce_field( 'pulse_question_make_page' );
+		echo '</form>';
+	}
+
+	public static function generalRows( Fields $f ): void {
+		$f->time(
+			'switch_time',
+			__( 'New question each day at', 'pulse-question' ),
+			/* translators: %s: timezone name. */
+			esc_html( sprintf( __( 'In the site\'s timezone (%s). It changes on the first visit or hourly check after this time.', 'pulse-question' ), wp_timezone_string() ) )
+		);
+		$f->text( 'label', __( 'Label', 'pulse-question' ), esc_html__( 'Shown above today\'s question, before the date.', 'pulse-question' ) );
+		$f->checkbox( 'approve_mine', __( 'Approval', 'pulse-question' ), __( 'Questions I add are approved straight away', 'pulse-question' ), esc_html__( 'Turn off to have every question wait for approval in the Queue first.', 'pulse-question' ) );
+		$f->number( 'per_page', __( 'Past questions per page', 'pulse-question' ), min: 3, max: 60 );
+		$f->number( 'low_queue_days', __( 'Warn when the queue is short', 'pulse-question' ), min: 0, max: 60, before: __( 'Fewer than', 'pulse-question' ), after: __( 'days of questions left (0 = never)', 'pulse-question' ) );
+		if ( function_exists( 'todo_hub_add' ) ) {
+			$f->checkbox( 'todo_tasks', __( 'To-do list', 'pulse-question' ), __( 'Add tasks to To-do Hub when the queue is short or questions wait for approval', 'pulse-question' ) );
+		} else {
+			// Not shown, but kept: an unticked (missing) checkbox would turn it off.
+			echo '<tr hidden><td colspan="2"><input type="hidden" name="' . esc_attr( $f->settings()->field( 'todo_tasks' ) ) . '" value="' . esc_attr( (string) (int) $f->settings()->get( 'todo_tasks' ) ) . '" /></td></tr>';
+		}
+		$f->checkbox( 'remove_data', __( 'Uninstall', 'pulse-question' ), __( 'Delete all questions, their categories and these settings when the plugin is deleted', 'pulse-question' ) );
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Pulse Question Settings', 'pulse-question' ); ?></h1>
-			<?php settings_errors(); ?>
-			<?php OutreachSettings::notice(); ?>
-			<?php Setup::render(); ?>
-			<?php if ( $made ) : ?>
-				<div class="notice notice-success"><p>
-					<?php esc_html_e( 'Page created.', 'pulse-question' ); ?>
-					<a href="<?php echo esc_url( (string) get_permalink( $made ) ); ?>"><?php esc_html_e( 'View it', 'pulse-question' ); ?></a> ·
-					<a href="<?php echo esc_url( (string) get_edit_post_link( $made ) ); ?>"><?php esc_html_e( 'Edit it', 'pulse-question' ); ?></a>
-				</p></div>
-			<?php endif; ?>
-
-			<form method="post" action="options.php" class="pq-settings" id="pq-settings-form">
-				<?php settings_fields( $store->group() ); ?>
-				<nav class="pq-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Settings sections', 'pulse-question' ); ?>">
-					<?php foreach ( self::tabs() as $tab => $tab_label ) : ?>
-						<a class="pq-tab" role="tab" id="pq-tab-<?php echo esc_attr( $tab ); ?>" href="#<?php echo esc_attr( $tab ); ?>" aria-controls="<?php echo esc_attr( $tab ); ?>"><?php echo esc_html( $tab_label ); ?><span class="pq-tab__dot" aria-hidden="true"></span></a>
-					<?php endforeach; ?>
-				</nav>
-				<div class="pq-tab-frame">
-
-				<section class="pq-tab-panel" id="pq-general" role="tabpanel" aria-labelledby="pq-tab-pq-general">
-					<h2 class="pq-tab-panel__title"><?php esc_html_e( 'General', 'pulse-question' ); ?></h2>
-					<table class="form-table" role="presentation">
-					<tr>
-						<th scope="row"><label for="pq-switch"><?php esc_html_e( 'New question each day at', 'pulse-question' ); ?></label></th>
-						<td>
-							<input id="pq-switch" type="time" name="<?php echo esc_attr( $store->field( 'switch_time' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'switch_time' ) ); ?>" />
-							<p class="description">
-								<?php
-								/* translators: %s: timezone name. */
-								echo esc_html( sprintf( __( 'In the site\'s timezone (%s). It changes on the first visit or hourly check after this time.', 'pulse-question' ), wp_timezone_string() ) );
-								?>
-							</p>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="pq-label"><?php esc_html_e( 'Label', 'pulse-question' ); ?></label></th>
-						<td><input id="pq-label" type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'label' ) ); ?>" />
-							<p class="description"><?php esc_html_e( 'Shown above today\'s question, before the date.', 'pulse-question' ); ?></p></td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Approval', 'pulse-question' ); ?></th>
-						<td><?php $flag( 'approve_mine', __( 'Questions I add are approved straight away', 'pulse-question' ) ); ?>
-							<p class="description"><?php esc_html_e( 'Turn off to have every question wait for approval in the Queue first.', 'pulse-question' ); ?></p></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="pq-per-page"><?php esc_html_e( 'Past questions per page', 'pulse-question' ); ?></label></th>
-						<td><input id="pq-per-page" type="number" min="3" max="60" class="small-text" name="<?php echo esc_attr( $store->field( 'per_page' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'per_page' ) ); ?>" /></td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="pq-low"><?php esc_html_e( 'Warn when the queue is short', 'pulse-question' ); ?></label></th>
-						<td>
-							<?php esc_html_e( 'Fewer than', 'pulse-question' ); ?>
-							<input id="pq-low" type="number" min="0" max="60" class="small-text" name="<?php echo esc_attr( $store->field( 'low_queue_days' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'low_queue_days' ) ); ?>" />
-							<?php esc_html_e( 'days of questions left (0 = never)', 'pulse-question' ); ?>
-						</td>
-					</tr>
-					<?php if ( function_exists( 'todo_hub_add' ) ) : ?>
-						<tr>
-							<th scope="row"><?php esc_html_e( 'To-do list', 'pulse-question' ); ?></th>
-							<td><?php $flag( 'todo_tasks', __( 'Add tasks to To-do Hub when the queue is short or questions wait for approval', 'pulse-question' ) ); ?></td>
-						</tr>
-					<?php else : ?>
-						<input type="hidden" name="<?php echo esc_attr( $store->field( 'todo_tasks' ) ); ?>" value="<?php echo esc_attr( (string) (int) $store->get( 'todo_tasks' ) ); ?>" />
-					<?php endif; ?>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Uninstall', 'pulse-question' ); ?></th>
-						<td><?php $flag( 'remove_data', __( 'Delete all questions, their categories and these settings when the plugin is deleted', 'pulse-question' ) ); ?></td>
-					</tr>
-					</table>
-					<div class="pq-show" id="pq-show">
-						<h3><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h3>
-						<p><?php esc_html_e( 'Add the "Question of the day" and "Past questions" blocks to any page or template, or use the shortcodes [pulse_question] and [pulse_question_past]. Each question also has its own page, and all asked questions are listed at /questions/.', 'pulse-question' ); ?></p>
-						<p>
-							<label><input type="checkbox" form="pq-make-page" name="front" value="1" /> <?php esc_html_e( 'and make it the home page', 'pulse-question' ); ?></label>
-						</p>
-						<p><button type="submit" form="pq-make-page" class="button"><?php esc_html_e( 'Create a page with today\'s question and past questions', 'pulse-question' ); ?></button></p>
-					</div>
-				</section>
-
-				<?php
-				self::panel( 'pq-claude', __( 'Questions written by Claude', 'pulse-question' ), static fn () => self::claudeRows( $store, $flag ) );
-				self::panel( 'pq-answers-settings', __( 'Answers and moderation', 'pulse-question' ), static fn () => self::answerRows( $store, $flag ) );
-				self::panel( 'pq-members', __( 'Members', 'pulse-question' ), static fn () => self::memberRows( $store ) );
-				self::panel( 'pq-mailing-list', __( 'Mailing list', 'pulse-question' ), static fn () => self::listRows( $store, $flag ) );
-				self::panel( 'pq-email', __( 'Daily email', 'pulse-question' ), static fn () => OutreachSettings::emailRows( $store, $flag ) );
-				self::panel( 'pq-social', __( 'Social sharing', 'pulse-question' ), static fn () => OutreachSettings::socialRows( $store, $flag ) );
-				self::panel( 'pq-brand', __( 'Branding', 'pulse-question' ), static fn () => self::brandRows( $store, $flag ) );
-				?>
-
-				<div class="pq-savebar">
-					<?php submit_button( __( 'Save changes', 'pulse-question' ), 'primary', 'submit', false ); ?>
-					<span class="pq-savebar__status" aria-live="polite"></span>
-				</div>
-				</div>
-			</form>
-			<form method="post" id="pq-make-page" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="pulse_question_make_page" />
-				<?php wp_nonce_field( 'pulse_question_make_page' ); ?>
-			</form>
-		</div>
+		<tr id="pq-show" class="wpf-settings__group">
+			<th scope="rowgroup" colspan="2">
+				<h3><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h3>
+				<p class="description"><?php esc_html_e( 'Add the "Question of the day" and "Past questions" blocks to any page or template, or use the shortcodes [pulse_question] and [pulse_question_past]. Each question also has its own page, and all asked questions are listed at /questions/.', 'pulse-question' ); ?></p>
+			</th>
+		</tr>
 		<?php
-	}
-
-	/**
-	 * Keeps browsers and password managers from filling in a field. These look like a log-in form
-	 * (a text field, then a password field), so Chrome would put a saved user name in the Google
-	 * client ID and a saved password in the secrets, and Save would store them. A read-only field
-	 * isn't filled; it becomes editable when clicked or tabbed into.
-	 */
-	private static function noAutofill(): void {
-		echo 'data-pq-guard readonly onfocus="this.removeAttribute(\'readonly\')" onpointerdown="this.removeAttribute(\'readonly\')" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other"';
-	}
-
-	/**
-	 * The tabs, by the id of the panel each one shows. Links elsewhere use these ids as anchors.
-	 *
-	 * @return array<string, string>
-	 */
-	private static function tabs(): array {
-		return array(
-			'pq-general'          => __( 'General', 'pulse-question' ),
-			'pq-claude'           => __( 'Claude', 'pulse-question' ),
-			'pq-answers-settings' => __( 'Answers', 'pulse-question' ),
-			'pq-members'          => __( 'Members', 'pulse-question' ),
-			'pq-mailing-list'     => __( 'Mailing list', 'pulse-question' ),
-			'pq-email'            => __( 'Daily email', 'pulse-question' ),
-			'pq-social'           => __( 'Social', 'pulse-question' ),
-			'pq-brand'            => __( 'Branding', 'pulse-question' ),
+		$f->html(
+			__( 'Make a page', 'pulse-question' ),
+			static function (): void {
+				echo '<p><label><input type="checkbox" form="pq-make-page" name="front" value="1" /> ' . esc_html__( 'and make it the home page', 'pulse-question' ) . '</label></p>';
+				echo '<p><button type="submit" form="pq-make-page" class="button">' . esc_html__( 'Create a page with today\'s question and past questions', 'pulse-question' ) . '</button></p>';
+			}
 		);
 	}
 
-	/**
-	 * One tab's panel: a heading and a form table of rows.
-	 *
-	 * @param callable(): void $rows Prints the table rows.
-	 */
-	private static function panel( string $id, string $title, callable $rows ): void {
-		?>
-		<section class="pq-tab-panel" id="<?php echo esc_attr( $id ); ?>" role="tabpanel" aria-labelledby="pq-tab-<?php echo esc_attr( $id ); ?>">
-			<h2 class="pq-tab-panel__title"><?php echo esc_html( $title ); ?></h2>
-			<table class="form-table" role="presentation">
-				<?php $rows(); ?>
-			</table>
-		</section>
-		<?php
+	/** Branding, and whether to use the plugin's styles at all. */
+	public static function brandRows( Fields $f ): void {
+		OutreachSettings::logoRow( $f->settings() );
+		$f->color( 'brand_accent', __( 'Main colour', 'pulse-question' ), esc_html__( 'Buttons and links.', 'pulse-question' ), \PulseQuestion\Branding::DEFAULT_ACCENT );
+		$f->color( 'brand_accent_2', __( 'Second colour', 'pulse-question' ), esc_html__( 'Labels and the pulse line. Both colours are used on the site, in the daily email and on share images. Leave them empty to follow your theme\'s Automatic.css colours on the site, with orange and teal elsewhere.', 'pulse-question' ), \PulseQuestion\Branding::DEFAULT_ACCENT_2 );
+		$f->media(
+			'brand_home_icon',
+			__( 'Home screen icon', 'pulse-question' ),
+			esc_html__( 'The icon iPhones and iPads show when someone adds your site to their home screen. Use a square image at least 180×180 pixels with a solid background and no rounded corners: the phone rounds them itself and fills see-through parts with black. Leave it unset to use the site icon.', 'pulse-question' ),
+			__( 'Choose a home screen icon', 'pulse-question' ),
+			__( 'Use the site icon', 'pulse-question' )
+		);
+		$f->checkbox( 'load_styles', __( 'Styles', 'pulse-question' ), __( 'Use the plugin\'s styles', 'pulse-question' ), esc_html__( 'They follow Automatic.css variables when the site has them, and your own styles always win over them. Turn them off to style everything yourself, for example in Etch; the markup uses pq- classes.', 'pulse-question' ) );
 	}
 
-	/**
-	 * Branding, and whether to use the plugin's styles at all.
-	 *
-	 * @param callable(string, string): void $flag Checkbox printer.
-	 */
-	private static function brandRows( $store, callable $flag ): void {
-		OutreachSettings::brandRows( $store );
+	/** The "Questions written by Claude" tab. */
+	public static function claudeRows( Fields $f ): void {
+		$flag = array( self::class, 'flag' );
+		if ( Generator::keyFromConstant() ) {
+			$f->html(
+				__( 'Anthropic API key', 'pulse-question' ),
+				static function (): void {
+					echo '<p>' . wp_kses_post( __( 'Set in <code>wp-config.php</code> (<code>PULSE_QUESTION_ANTHROPIC_API_KEY</code>).', 'pulse-question' ) ) . '</p>';
+				}
+			);
+		} else {
+			$f->secret(
+				'claude_api_key',
+				__( 'Anthropic API key', 'pulse-question' ),
+				__( 'From <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com</a>. To keep it out of the database, add <code>define( \'PULSE_QUESTION_ANTHROPIC_API_KEY\', \'…\' );</code> to <code>wp-config.php</code> instead. Each batch of 10 questions costs a few cents.', 'pulse-question' ),
+				'sk-ant-…',
+				remove: __( 'Remove the saved key', 'pulse-question' )
+			);
+		}
+		$f->textarea( 'claude_guidance', __( 'Guidance', 'pulse-question' ), esc_html__( 'What kind of questions to write: subjects, tone, what to avoid. Leave empty to use the built-in guidance (big variety, politics only on rare occasions).', 'pulse-question' ), 7 );
+		$store = $f->settings();
 		?>
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
-			<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
-				<p class="description"><?php esc_html_e( 'They follow Automatic.css variables when the site has them, and your own styles always win over them. Turn them off to style everything yourself, for example in Etch; the markup uses pq- classes.', 'pulse-question' ); ?></p></td>
-		</tr>
-		<?php
-	}
-
-	/**
-	 * The "Questions written by Claude" rows of the settings form.
-	 *
-	 * @param callable(string, string): void $flag Checkbox printer.
-	 */
-	private static function claudeRows( $store, callable $flag ): void {
-		$constant = Generator::keyFromConstant();
-		$saved    = '' !== (string) $store->get( 'claude_api_key' );
-		?>
-		<tr>
-			<th scope="row"><label for="pq-claude-key"><?php esc_html_e( 'Anthropic API key', 'pulse-question' ); ?></label></th>
-			<td>
-				<?php if ( $constant ) : ?>
-					<p><?php echo wp_kses_post( __( 'Set in <code>wp-config.php</code> (<code>PULSE_QUESTION_ANTHROPIC_API_KEY</code>).', 'pulse-question' ) ); ?></p>
-				<?php else : ?>
-					<input id="pq-claude-key" type="password" class="regular-text" autocomplete="new-password" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'claude_api_key' ) ); ?>" value="" placeholder="<?php echo esc_attr( $saved ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : 'sk-ant-…' ); ?>" />
-					<?php if ( $saved ) : ?>
-						<label><input type="checkbox" name="<?php echo esc_attr( $store->field( 'claude_api_key_clear' ) ); ?>" value="1" /> <?php esc_html_e( 'Remove the saved key', 'pulse-question' ); ?></label>
-					<?php endif; ?>
-					<p class="description"><?php echo wp_kses_post( __( 'From <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com</a>. To keep it out of the database, add <code>define( \'PULSE_QUESTION_ANTHROPIC_API_KEY\', \'…\' );</code> to <code>wp-config.php</code> instead. Each batch of 10 questions costs a few cents.', 'pulse-question' ) ); ?></p>
-				<?php endif; ?>
-			</td>
-		</tr>
-		<tr>
-			<th scope="row"><label for="pq-claude-guidance"><?php esc_html_e( 'Guidance', 'pulse-question' ); ?></label></th>
-			<td>
-				<textarea id="pq-claude-guidance" class="large-text" rows="7" name="<?php echo esc_attr( $store->field( 'claude_guidance' ) ); ?>"><?php echo esc_textarea( (string) $store->get( 'claude_guidance' ) ); ?></textarea>
-				<p class="description"><?php esc_html_e( 'What kind of questions to write: subjects, tone, what to avoid. Leave empty to use the built-in guidance (big variety, politics only on rare occasions).', 'pulse-question' ); ?></p>
-			</td>
-		</tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Keep the queue topped up', 'pulse-question' ); ?></th>
 			<td>
@@ -385,83 +296,87 @@ final class SettingsPage {
 	}
 
 	/** Members: signing up and signing in with Google. */
-	private static function memberRows( $store ): void {
-		?>
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Signing up', 'pulse-question' ); ?></th>
-			<td>
-				<?php if ( ! get_option( 'users_can_register' ) ) : ?>
-					<p style="color:#b32d2e"><?php echo wp_kses_post( __( 'Visitors can\'t sign up yet. Turn on <strong>Anyone can register</strong> (as Subscriber) under Settings → General.', 'pulse-question' ) ); ?></p>
-				<?php else : ?>
-					<p><?php esc_html_e( 'Visitors sign up on the WordPress sign-up page, which gets the boxes for joining the mailing list (set them under Mailing list). Both are optional. Members who signed up earlier see them once, with their first answer.', 'pulse-question' ); ?></p>
-				<?php endif; ?>
-			</td>
-		</tr>
-		<tr>
-			<th scope="row"><label for="pq-google-id"><?php esc_html_e( 'Sign in with Google', 'pulse-question' ); ?></label></th>
-			<td>
-				<p><input id="pq-google-id" type="text" class="large-text" autocomplete="off" <?php self::noAutofill(); ?> placeholder="<?php esc_attr_e( 'Client ID (…apps.googleusercontent.com)', 'pulse-question' ); ?>" name="<?php echo esc_attr( $store->field( 'google_client_id' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'google_client_id' ) ); ?>" /></p>
-				<?php if ( GoogleLogin::secretFromConstant() ) : ?>
-					<p><?php echo wp_kses_post( __( 'Client secret set in <code>wp-config.php</code> (<code>PULSE_QUESTION_GOOGLE_CLIENT_SECRET</code>).', 'pulse-question' ) ); ?></p>
-				<?php else : ?>
-					<p>
-						<input type="password" class="regular-text" autocomplete="new-password" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'google_client_secret' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'google_client_secret' ) ? __( 'Secret saved. Leave blank to keep it.', 'pulse-question' ) : __( 'Client secret', 'pulse-question' ) ); ?>" />
-						<?php if ( '' !== (string) $store->get( 'google_client_secret' ) ) : ?>
-							<label><input type="checkbox" name="<?php echo esc_attr( $store->field( 'google_client_secret_clear' ) ); ?>" value="1" /> <?php esc_html_e( 'Remove the saved secret', 'pulse-question' ); ?></label>
-						<?php endif; ?>
-					</p>
-				<?php endif; ?>
-				<p class="description">
-					<?php echo wp_kses_post( __( 'Adds <strong>Continue with Google</strong> to the log-in and sign-up pages and the answer box. In <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Google Cloud → Clients</a>, create a <em>Web application</em> client and add this under <em>Authorized redirect URIs</em>:', 'pulse-question' ) ); ?>
-					<br /><code><?php echo esc_html( GoogleLogin::redirectUri() ); ?></code>
-				</p>
-				<p class="description"><?php esc_html_e( 'New members are created only when Anyone can register is on. Accounts that can edit posts keep signing in with their password.', 'pulse-question' ); ?></p>
-				<p><?php echo GoogleLogin::isConfigured() ? '<strong style="color:#00a32a">' . esc_html__( 'On', 'pulse-question' ) . '</strong>' : '<em>' . esc_html__( 'Off until both are filled in.', 'pulse-question' ) . '</em>'; ?></p>
-			</td>
-		</tr>
-		<?php
+	public static function memberRows( Fields $f ): void {
+		$f->html(
+			__( 'Signing up', 'pulse-question' ),
+			static function (): void {
+				if ( ! get_option( 'users_can_register' ) ) {
+					echo '<p style="color:#b32d2e">' . wp_kses_post( __( 'Visitors can\'t sign up yet. Turn on <strong>Anyone can register</strong> (as Subscriber) under Settings → General.', 'pulse-question' ) ) . '</p>';
+				} else {
+					echo '<p>' . esc_html__( 'Visitors sign up on the WordPress sign-up page, which gets the boxes for joining the mailing list (set them under Mailing list). Both are optional. Members who signed up earlier see them once, with their first answer.', 'pulse-question' ) . '</p>';
+				}
+			}
+		);
+		$f->heading(
+			__( 'Sign in with Google', 'pulse-question' ),
+			__( 'Adds <strong>Continue with Google</strong> to the log-in and sign-up pages and the answer box. In <a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noopener">Google Cloud → Clients</a>, create a <em>Web application</em> client and add this under <em>Authorized redirect URIs</em>:', 'pulse-question' )
+				. '<br /><code>' . esc_html( GoogleLogin::redirectUri() ) . '</code>'
+		);
+		$f->text( 'google_client_id', __( 'Client ID', 'pulse-question' ), placeholder: __( '…apps.googleusercontent.com', 'pulse-question' ), class: 'large-text', guard: true );
+		if ( GoogleLogin::secretFromConstant() ) {
+			$f->html(
+				__( 'Client secret', 'pulse-question' ),
+				static function (): void {
+					echo '<p>' . wp_kses_post( __( 'Set in <code>wp-config.php</code> (<code>PULSE_QUESTION_GOOGLE_CLIENT_SECRET</code>).', 'pulse-question' ) ) . '</p>';
+				}
+			);
+		} else {
+			$f->secret( 'google_client_secret', __( 'Client secret', 'pulse-question' ), remove: __( 'Remove the saved secret', 'pulse-question' ) );
+		}
+		$f->html(
+			__( 'Status', 'pulse-question' ),
+			static function (): void {
+				echo GoogleLogin::isConfigured() ? '<strong style="color:#00a32a">' . esc_html__( 'On', 'pulse-question' ) . '</strong>' : '<em>' . esc_html__( 'Off until both are filled in.', 'pulse-question' ) . '</em>';
+				echo '<p class="description">' . esc_html__( 'New members are created only when Anyone can register is on. Accounts that can edit posts keep signing in with their password.', 'pulse-question' ) . '</p>';
+			}
+		);
 	}
 
-	/**
-	 * The mailing list: the boxes on the sign-up page and where joiners go.
-	 *
-	 * @param callable(string, string): void $flag Checkbox printer.
-	 */
-	private static function listRows( $store, callable $flag ): void {
-		$provider = (string) $store->get( 'list_provider' );
-		?>
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Sign-up boxes', 'pulse-question' ); ?></th>
-			<td>
-				<p><label><?php esc_html_e( 'Daily email box', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'list_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_label' ) ); ?>" /></label></p>
-				<p><label><?php esc_html_e( 'Marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
-				<?php $flag( 'join_prechecked', __( 'Tick both boxes to begin with', 'pulse-question' ) ); ?>
-				<p class="description"><?php esc_html_e( 'In the EU and UK, a ticked box doesn\'t count as consent, so turn this off if you have visitors there. Double opt-in (below) helps either way.', 'pulse-question' ); ?></p>
-			</td>
-		</tr>
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Connection', 'pulse-question' ); ?></th>
-			<td>
-				<fieldset>
-					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="none" <?php checked( 'none', $provider ); ?> /> <?php esc_html_e( 'Not connected yet (joining is recorded on each member)', 'pulse-question' ); ?></label><br />
-					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="fluentcrm" <?php checked( 'fluentcrm', $provider ); ?> /> <?php esc_html_e( 'FluentCRM on this site', 'pulse-question' ); ?><?php echo MailingList::localAvailable() ? '' : ' <em>(' . esc_html__( 'not active here', 'pulse-question' ) . ')</em>'; ?></label><br />
-					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="fluentcrm_remote" <?php checked( 'fluentcrm_remote', $provider ); ?> /> <?php esc_html_e( 'FluentCRM on another site', 'pulse-question' ); ?></label>
-				</fieldset>
+	/** The mailing list: the boxes on the sign-up page and where joiners go. */
+	public static function listRows( Fields $f ): void {
+		$store = $f->settings();
+		$f->text( 'list_label', __( 'Daily email box', 'pulse-question' ), class: 'large-text' );
+		$f->text( 'marketing_label', __( 'Marketing box', 'pulse-question' ), esc_html__( 'Empty = don\'t show it.', 'pulse-question' ), class: 'large-text' );
+		$f->checkbox( 'join_prechecked', __( 'Ticked', 'pulse-question' ), __( 'Tick both boxes to begin with', 'pulse-question' ), esc_html__( 'In the EU and UK, a ticked box doesn\'t count as consent, so turn this off if you have visitors there. Double opt-in (below) helps either way.', 'pulse-question' ) );
+
+		$f->heading( __( 'Connection', 'pulse-question' ) );
+		$f->radio(
+			'list_provider',
+			__( 'Mailing list', 'pulse-question' ),
+			array(
+				'none'             => __( 'Not connected yet (joining is recorded on each member)', 'pulse-question' ),
+				'fluentcrm'        => __( 'FluentCRM on this site', 'pulse-question' ) . ( MailingList::localAvailable() ? '' : ' ' . __( '(not active here)', 'pulse-question' ) ),
+				'fluentcrm_remote' => __( 'FluentCRM on another site', 'pulse-question' ),
+			)
+		);
+		$f->html(
+			__( 'Lists and tags', 'pulse-question' ),
+			static function () use ( $store ): void {
+				?>
 				<p>
 					<label><?php esc_html_e( 'List ids', 'pulse-question' ); ?> <input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $store->field( 'list_ids' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_ids' ) ); ?>" placeholder="3" /></label>
 					<label><?php esc_html_e( 'Marketing list ids', 'pulse-question' ); ?> <input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $store->field( 'marketing_list_ids' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_list_ids' ) ); ?>" placeholder="1" /></label>
 					<label><?php esc_html_e( 'Tag ids', 'pulse-question' ); ?> <input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $store->field( 'list_tag_ids' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_tag_ids' ) ); ?>" /></label>
 				</p>
 				<p class="description"><?php esc_html_e( 'The numbers FluentCRM shows for each list and tag (FluentCRM → Lists). Separate several with commas.', 'pulse-question' ); ?></p>
-				<?php $flag( 'list_double_optin', __( 'Send FluentCRM\'s confirmation email (double opt-in)', 'pulse-question' ) ); ?>
-				<div style="margin-top:12px">
-					<p><strong><?php esc_html_e( 'FluentCRM on another site', 'pulse-question' ); ?></strong></p>
-					<p><label><?php esc_html_e( 'Site address', 'pulse-question' ); ?> <input type="url" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_url' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_url' ) ); ?>" placeholder="https://example.com" /></label></p>
-					<p><label><?php esc_html_e( 'User name', 'pulse-question' ); ?> <input type="text" class="regular-text" autocomplete="off" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'list_remote_user' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_user' ) ); ?>" /></label></p>
-					<p><label><?php esc_html_e( 'Application password', 'pulse-question' ); ?> <input type="password" class="regular-text" autocomplete="new-password" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'list_remote_password' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'list_remote_password' ) ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : '' ); ?>" /></label></p>
-					<p class="description"><?php esc_html_e( 'A user on that site with an application password (Users → Profile). An administrator works. Otherwise, under FluentCRM → Settings → Managers, give the user: "Add, update and import contacts", "Create and update tags, lists, companies and segments" and, for the daily email, "Write and send emails".', 'pulse-question' ); ?></p>
-				</div>
-				<p id="pq-list-test" style="margin-top:12px">
+				<?php
+			}
+		);
+		$f->checkbox( 'list_double_optin', __( 'Double opt-in', 'pulse-question' ), __( 'Send FluentCRM\'s confirmation email (double opt-in)', 'pulse-question' ) );
+
+		$f->heading(
+			__( 'FluentCRM on another site', 'pulse-question' ),
+			esc_html__( 'A user on that site with an application password (Users → Profile). An administrator works. Otherwise, under FluentCRM → Settings → Managers, give the user: "Add, update and import contacts", "Create and update tags, lists, companies and segments" and, for the daily email, "Write and send emails".', 'pulse-question' )
+		);
+		$f->text( 'list_remote_url', __( 'Site address', 'pulse-question' ), placeholder: 'https://example.com', type: 'url' );
+		$f->text( 'list_remote_user', __( 'User name', 'pulse-question' ), guard: true );
+		$f->secret( 'list_remote_password', __( 'Application password', 'pulse-question' ), remove: __( 'Remove the saved password', 'pulse-question' ) );
+
+		$f->html(
+			__( 'Check it', 'pulse-question' ),
+			static function (): void {
+				?>
+				<p id="pq-list-test">
 					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=pulse_question_test_list' ), 'pulse_question_test_list' ) ); ?>"><?php esc_html_e( 'Test connection', 'pulse-question' ); ?></a>
 					<span class="description"><?php esc_html_e( 'Checks the saved settings, so save your changes first. Nobody is added to the list.', 'pulse-question' ); ?></span>
 				</p>
@@ -486,10 +401,8 @@ final class SettingsPage {
 					}
 					echo '</ul>';
 				}
-				?>
-			</td>
-		</tr>
-		<?php
+			}
+		);
 	}
 
 	/** Run the mailing list connection test and show the result under the button. */

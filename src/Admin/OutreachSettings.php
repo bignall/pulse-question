@@ -32,24 +32,19 @@ final class OutreachSettings {
 		add_action( 'admin_enqueue_scripts', array( self::class, 'assets' ) );
 	}
 
-	/** The media picker and colour pickers, on the Settings page only. */
+	/** The logo picker, on the Settings page only. Tabs, saving and the other fields are WP Foundation's. */
 	public static function assets( string $hook ): void {
 		if ( ! str_ends_with( $hook, '_page_' . SettingsPage::SLUG ) ) {
 			return;
 		}
 		wp_enqueue_media();
-		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_script( 'pulse-question-settings', \PulseQuestion\App::url( 'assets/admin-settings.js' ), array( 'jquery', 'wp-color-picker' ), \PulseQuestion\App::version(), true );
+		wp_enqueue_script( 'pulse-question-settings', \PulseQuestion\App::url( 'assets/admin-settings.js' ), array( 'jquery' ), \PulseQuestion\App::version(), true );
 		wp_localize_script(
 			'pulse-question-settings',
 			'pulseQuestionSettings',
 			array(
 				'chooseLogo' => __( 'Choose a logo', 'pulse-question' ),
 				'useLogo'    => __( 'Use this logo', 'pulse-question' ),
-				'chooseIcon' => __( 'Choose a home screen icon', 'pulse-question' ),
-				'useIcon'    => __( 'Use this icon', 'pulse-question' ),
-				/* translators: %s: the tabs with changes, such as "Claude, Branding". */
-				'unsaved'    => __( 'Unsaved changes: %s', 'pulse-question' ),
 			)
 		);
 	}
@@ -332,9 +327,12 @@ final class OutreachSettings {
 	}
 
 	/**
+	 * The logo choice: automatic, the bundled logo, or an image. Three options plus a media
+	 * picker, so it's printed here rather than with a WP Foundation field.
+	 *
 	 * @param \PulseQuestion\Vendor\Bignall\WPFoundation\Settings\Settings $store Settings.
 	 */
-	public static function brandRows( $store ): void {
+	public static function logoRow( $store ): void {
 		$logo   = (int) $store->get( 'brand_logo' );
 		$auto   = \PulseQuestion\Branding::automaticSource();
 		$chosen = $logo > 0 ? wp_get_attachment_image_url( $logo, 'medium' ) : '';
@@ -362,30 +360,6 @@ final class OutreachSettings {
 					<p><img class="pq-logo-preview" src="<?php echo esc_url( (string) $chosen ); ?>" alt="" style="max-height:72px;width:auto;<?php echo $chosen ? '' : 'display:none'; ?>" /></p>
 				</fieldset>
 				<p class="description"><?php esc_html_e( 'Shown on share images. A wide logo with a transparent background works best.', 'pulse-question' ); ?></p>
-			</td>
-		</tr>
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Colours', 'pulse-question' ); ?></th>
-			<td>
-				<p class="pq-color-row"><label for="pq-accent"><?php esc_html_e( 'Main colour (buttons, links)', 'pulse-question' ); ?></label>
-					<input id="pq-accent" type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent' ) ); ?>" /></p>
-				<p class="pq-color-row"><label for="pq-accent-2"><?php esc_html_e( 'Second colour (labels, the pulse line)', 'pulse-question' ); ?></label>
-					<input id="pq-accent-2" type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT_2 ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent_2' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent_2' ) ); ?>" /></p>
-				<p class="description"><?php esc_html_e( 'Used on the site, in the daily email and on share images. Leave them empty to follow your theme\'s Automatic.css colours on the site, with orange and teal elsewhere.', 'pulse-question' ); ?></p>
-			</td>
-		</tr>
-		<?php
-		$home     = (int) $store->get( 'brand_home_icon' );
-		$home_url = $home > 0 ? (string) wp_get_attachment_image_url( $home, 'thumbnail' ) : '';
-		?>
-		<tr>
-			<th scope="row"><?php esc_html_e( 'Home screen icon', 'pulse-question' ); ?></th>
-			<td class="pq-media-choice">
-				<input type="hidden" class="pq-media-value" name="<?php echo esc_attr( $store->field( 'brand_home_icon' ) ); ?>" value="<?php echo esc_attr( (string) $home ); ?>" />
-				<p><img class="pq-media-preview" src="<?php echo esc_url( $home_url ); ?>" alt="" width="60" height="60" style="border-radius:13px;<?php echo $home_url ? '' : 'display:none'; ?>" /></p>
-				<button type="button" class="button pq-media-pick"><?php esc_html_e( 'Choose…', 'pulse-question' ); ?></button>
-				<button type="button" class="button-link pq-media-clear" <?php echo $home > 0 ? '' : 'style="display:none"'; ?>><?php esc_html_e( 'Use the site icon', 'pulse-question' ); ?></button>
-				<p class="description"><?php esc_html_e( 'The icon iPhones and iPads show when someone adds your site to their home screen. Use a square image at least 180×180 pixels with a solid background and no rounded corners: the phone rounds them itself and fills see-through parts with black. Leave it unset to use the site icon.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>
 		<?php
