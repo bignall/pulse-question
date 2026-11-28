@@ -28,7 +28,7 @@ How members are matched:
 
 ## Where members go
 
-Under **Settings → Members and mailing list**, choose one:
+Under **Settings → Mailing list → Connection**, choose one:
 
 - **Not connected yet:** each member's choice is kept on the site, and the [built-in sender](daily-email.md) emails those who chose the daily email.
 - **FluentCRM on this site:** contacts are added straight to FluentCRM.

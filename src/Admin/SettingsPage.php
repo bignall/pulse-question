@@ -44,6 +44,7 @@ final class SettingsPage {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Pulse Question Settings', 'pulse-question' ); ?></h1>
+			<?php settings_errors(); ?>
 			<?php OutreachSettings::notice(); ?>
 			<?php Setup::render(); ?>
 			<?php if ( $made ) : ?>
@@ -54,9 +55,18 @@ final class SettingsPage {
 				</p></div>
 			<?php endif; ?>
 
-			<form method="post" action="options.php">
+			<form method="post" action="options.php" class="pq-settings" id="pq-settings-form">
 				<?php settings_fields( $store->group() ); ?>
-				<table class="form-table" role="presentation">
+				<nav class="pq-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Settings sections', 'pulse-question' ); ?>">
+					<?php foreach ( self::tabs() as $tab => $tab_label ) : ?>
+						<a class="pq-tab" role="tab" id="pq-tab-<?php echo esc_attr( $tab ); ?>" href="#<?php echo esc_attr( $tab ); ?>" aria-controls="<?php echo esc_attr( $tab ); ?>"><?php echo esc_html( $tab_label ); ?><span class="pq-tab__dot" aria-hidden="true"></span></a>
+					<?php endforeach; ?>
+				</nav>
+				<div class="pq-tab-frame">
+
+				<section class="pq-tab-panel" id="pq-general" role="tabpanel" aria-labelledby="pq-tab-pq-general">
+					<h2 class="pq-tab-panel__title"><?php esc_html_e( 'General', 'pulse-question' ); ?></h2>
+					<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><label for="pq-switch"><?php esc_html_e( 'New question each day at', 'pulse-question' ); ?></label></th>
 						<td>
@@ -99,34 +109,92 @@ final class SettingsPage {
 					<?php else : ?>
 						<input type="hidden" name="<?php echo esc_attr( $store->field( 'todo_tasks' ) ); ?>" value="<?php echo esc_attr( (string) (int) $store->get( 'todo_tasks' ) ); ?>" />
 					<?php endif; ?>
-					<?php self::claudeRows( $store, $flag ); ?>
-					<?php self::answerRows( $store, $flag ); ?>
-					<?php self::memberRows( $store, $flag ); ?>
-					<?php OutreachSettings::emailRows( $store, $flag ); ?>
-					<?php OutreachSettings::socialRows( $store, $flag ); ?>
-					<?php OutreachSettings::brandRows( $store ); ?>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
-						<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
-							<p class="description"><?php esc_html_e( 'They follow Automatic.css variables when the site has them, and your own styles always win over them. Turn them off to style everything yourself, for example in Etch; the markup uses pq- classes.', 'pulse-question' ); ?></p></td>
-					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Uninstall', 'pulse-question' ); ?></th>
 						<td><?php $flag( 'remove_data', __( 'Delete all questions, their categories and these settings when the plugin is deleted', 'pulse-question' ) ); ?></td>
 					</tr>
-				</table>
-				<?php submit_button(); ?>
-			</form>
+					</table>
+					<div class="pq-show" id="pq-show">
+						<h3><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h3>
+						<p><?php esc_html_e( 'Add the "Question of the day" and "Past questions" blocks to any page or template, or use the shortcodes [pulse_question] and [pulse_question_past]. Each question also has its own page, and all asked questions are listed at /questions/.', 'pulse-question' ); ?></p>
+						<p>
+							<label><input type="checkbox" form="pq-make-page" name="front" value="1" /> <?php esc_html_e( 'and make it the home page', 'pulse-question' ); ?></label>
+						</p>
+						<p><button type="submit" form="pq-make-page" class="button"><?php esc_html_e( 'Create a page with today\'s question and past questions', 'pulse-question' ); ?></button></p>
+					</div>
+				</section>
 
-			<h2 id="pq-show"><?php esc_html_e( 'Show it on your site', 'pulse-question' ); ?></h2>
-			<p><?php esc_html_e( 'Add the "Question of the day" and "Past questions" blocks to any page or template, or use the shortcodes [pulse_question] and [pulse_question_past]. Each question also has its own page, and all asked questions are listed at /questions/.', 'pulse-question' ); ?></p>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<?php
+				self::panel( 'pq-claude', __( 'Questions written by Claude', 'pulse-question' ), static fn () => self::claudeRows( $store, $flag ) );
+				self::panel( 'pq-answers-settings', __( 'Answers and moderation', 'pulse-question' ), static fn () => self::answerRows( $store, $flag ) );
+				self::panel( 'pq-members', __( 'Members', 'pulse-question' ), static fn () => self::memberRows( $store ) );
+				self::panel( 'pq-mailing-list', __( 'Mailing list', 'pulse-question' ), static fn () => self::listRows( $store, $flag ) );
+				self::panel( 'pq-email', __( 'Daily email', 'pulse-question' ), static fn () => OutreachSettings::emailRows( $store, $flag ) );
+				self::panel( 'pq-social', __( 'Social sharing', 'pulse-question' ), static fn () => OutreachSettings::socialRows( $store, $flag ) );
+				self::panel( 'pq-brand', __( 'Branding', 'pulse-question' ), static fn () => self::brandRows( $store, $flag ) );
+				?>
+
+				<div class="pq-savebar">
+					<?php submit_button( __( 'Save changes', 'pulse-question' ), 'primary', 'submit', false ); ?>
+					<span class="pq-savebar__status" aria-live="polite"></span>
+				</div>
+				</div>
+			</form>
+			<form method="post" id="pq-make-page" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="pulse_question_make_page" />
 				<?php wp_nonce_field( 'pulse_question_make_page' ); ?>
-				<label><input type="checkbox" name="front" value="1" /> <?php esc_html_e( 'and make it the home page', 'pulse-question' ); ?></label>
-				<p><?php submit_button( __( 'Create a page with today\'s question and past questions', 'pulse-question' ), 'secondary', 'submit', false ); ?></p>
 			</form>
 		</div>
+		<?php
+	}
+
+	/**
+	 * The tabs, by the id of the panel each one shows. Links elsewhere use these ids as anchors.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function tabs(): array {
+		return array(
+			'pq-general'          => __( 'General', 'pulse-question' ),
+			'pq-claude'           => __( 'Claude', 'pulse-question' ),
+			'pq-answers-settings' => __( 'Answers', 'pulse-question' ),
+			'pq-members'          => __( 'Members', 'pulse-question' ),
+			'pq-mailing-list'     => __( 'Mailing list', 'pulse-question' ),
+			'pq-email'            => __( 'Daily email', 'pulse-question' ),
+			'pq-social'           => __( 'Social', 'pulse-question' ),
+			'pq-brand'            => __( 'Branding', 'pulse-question' ),
+		);
+	}
+
+	/**
+	 * One tab's panel: a heading and a form table of rows.
+	 *
+	 * @param callable(): void $rows Prints the table rows.
+	 */
+	private static function panel( string $id, string $title, callable $rows ): void {
+		?>
+		<section class="pq-tab-panel" id="<?php echo esc_attr( $id ); ?>" role="tabpanel" aria-labelledby="pq-tab-<?php echo esc_attr( $id ); ?>">
+			<h2 class="pq-tab-panel__title"><?php echo esc_html( $title ); ?></h2>
+			<table class="form-table" role="presentation">
+				<?php $rows(); ?>
+			</table>
+		</section>
+		<?php
+	}
+
+	/**
+	 * Branding, and whether to use the plugin's styles at all.
+	 *
+	 * @param callable(string, string): void $flag Checkbox printer.
+	 */
+	private static function brandRows( $store, callable $flag ): void {
+		OutreachSettings::brandRows( $store );
+		?>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Styles', 'pulse-question' ); ?></th>
+			<td><?php $flag( 'load_styles', __( 'Use the plugin\'s styles', 'pulse-question' ) ); ?>
+				<p class="description"><?php esc_html_e( 'They follow Automatic.css variables when the site has them, and your own styles always win over them. Turn them off to style everything yourself, for example in Etch; the markup uses pq- classes.', 'pulse-question' ); ?></p></td>
+		</tr>
 		<?php
 	}
 
@@ -139,9 +207,6 @@ final class SettingsPage {
 		$constant = Generator::keyFromConstant();
 		$saved    = '' !== (string) $store->get( 'claude_api_key' );
 		?>
-		<tr id="pq-claude">
-			<th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Questions written by Claude', 'pulse-question' ); ?></h2></th>
-		</tr>
 		<tr>
 			<th scope="row"><label for="pq-claude-key"><?php esc_html_e( 'Anthropic API key', 'pulse-question' ); ?></label></th>
 			<td>
@@ -244,7 +309,6 @@ final class SettingsPage {
 	private static function answerRows( $store, callable $flag ): void {
 		$mode = (string) $store->get( 'moderation' );
 		?>
-		<tr id="pq-answers-settings"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Answers and moderation', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Answers', 'pulse-question' ); ?></th>
 			<td>
@@ -264,7 +328,7 @@ final class SettingsPage {
 					<input id="pq-home-recent" type="number" min="0" max="20" class="small-text" name="<?php echo esc_attr( $store->field( 'home_recent_answers' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'home_recent_answers' ) ); ?>" />
 					<?php esc_html_e( '(0 = none)', 'pulse-question' ); ?>
 				</p>
-				<?php $flag( 'home_answer_form', __( 'Show the answer box under today\'s question, not only on its own page', 'pulse-question' ) ); ?>
+				<?php $flag( 'home_answer_form', __( 'Show the answer box under today\'s question, not only on its own page', 'pulse-question' ) ); ?><br />
 				<?php $flag( 'answer_emails', __( 'Email me about every new answer', 'pulse-question' ) ); ?>
 				<p class="description"><?php esc_html_e( 'Off by default. Held answers still follow WordPress\'s "email me when a comment is held" setting (Settings → Discussion).', 'pulse-question' ); ?></p>
 			</td>
@@ -310,27 +374,17 @@ final class SettingsPage {
 		<?php
 	}
 
-	/**
-	 * Members and the mailing list.
-	 *
-	 * @param callable(string, string): void $flag Checkbox printer.
-	 */
-	private static function memberRows( $store, callable $flag ): void {
-		$provider = (string) $store->get( 'list_provider' );
+	/** Members: signing up and signing in with Google. */
+	private static function memberRows( $store ): void {
 		?>
-		<tr id="pq-members"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Members and mailing list', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Signing up', 'pulse-question' ); ?></th>
 			<td>
 				<?php if ( ! get_option( 'users_can_register' ) ) : ?>
 					<p style="color:#b32d2e"><?php echo wp_kses_post( __( 'Visitors can\'t sign up yet. Turn on <strong>Anyone can register</strong> (as Subscriber) under Settings → General.', 'pulse-question' ) ); ?></p>
 				<?php else : ?>
-					<p><?php esc_html_e( 'Visitors sign up on the WordPress sign-up page, which gets the mailing list boxes below. Both are optional. Members who signed up earlier see them once, with their first answer.', 'pulse-question' ); ?></p>
+					<p><?php esc_html_e( 'Visitors sign up on the WordPress sign-up page, which gets the boxes for joining the mailing list (set them under Mailing list). Both are optional. Members who signed up earlier see them once, with their first answer.', 'pulse-question' ); ?></p>
 				<?php endif; ?>
-				<p><label><?php esc_html_e( 'Daily email box', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'list_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_label' ) ); ?>" /></label></p>
-				<p><label><?php esc_html_e( 'Marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
-				<?php $flag( 'join_prechecked', __( 'Tick both boxes to begin with', 'pulse-question' ) ); ?>
-				<p class="description"><?php esc_html_e( 'In the EU and UK, a ticked box doesn\'t count as consent, so turn this off if you have visitors there. Double opt-in (below) helps either way.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>
 		<tr>
@@ -355,8 +409,28 @@ final class SettingsPage {
 				<p><?php echo GoogleLogin::isConfigured() ? '<strong style="color:#00a32a">' . esc_html__( 'On', 'pulse-question' ) . '</strong>' : '<em>' . esc_html__( 'Off until both are filled in.', 'pulse-question' ) . '</em>'; ?></p>
 			</td>
 		</tr>
+		<?php
+	}
+
+	/**
+	 * The mailing list: the boxes on the sign-up page and where joiners go.
+	 *
+	 * @param callable(string, string): void $flag Checkbox printer.
+	 */
+	private static function listRows( $store, callable $flag ): void {
+		$provider = (string) $store->get( 'list_provider' );
+		?>
 		<tr>
-			<th scope="row"><?php esc_html_e( 'Mailing list', 'pulse-question' ); ?></th>
+			<th scope="row"><?php esc_html_e( 'Sign-up boxes', 'pulse-question' ); ?></th>
+			<td>
+				<p><label><?php esc_html_e( 'Daily email box', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'list_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_label' ) ); ?>" /></label></p>
+				<p><label><?php esc_html_e( 'Marketing box (empty = don\'t show)', 'pulse-question' ); ?><br /><input type="text" class="large-text" name="<?php echo esc_attr( $store->field( 'marketing_label' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'marketing_label' ) ); ?>" /></label></p>
+				<?php $flag( 'join_prechecked', __( 'Tick both boxes to begin with', 'pulse-question' ) ); ?>
+				<p class="description"><?php esc_html_e( 'In the EU and UK, a ticked box doesn\'t count as consent, so turn this off if you have visitors there. Double opt-in (below) helps either way.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Connection', 'pulse-question' ); ?></th>
 			<td>
 				<fieldset>
 					<label><input type="radio" name="<?php echo esc_attr( $store->field( 'list_provider' ) ); ?>" value="none" <?php checked( 'none', $provider ); ?> /> <?php esc_html_e( 'Not connected yet (joining is recorded on each member)', 'pulse-question' ); ?></label><br />

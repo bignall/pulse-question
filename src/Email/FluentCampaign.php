@@ -1,7 +1,7 @@
 <?php
 /**
  * Sends the daily email as a FluentCRM campaign, on this site or on another site (through
- * FluentCRM's REST API with the application password from Settings → Members). FluentCRM then
+ * FluentCRM's REST API with the application password from Settings → Mailing list). FluentCRM then
  * does the sending, the unsubscribe links, the footer and the open and click reports.
  *
  * Steps, the same ones FluentCRM's own campaign screen takes: create the campaign, set its
@@ -198,7 +198,7 @@ final class FluentCampaign {
 			return __( 'FluentCRM isn\'t active on the mailing list site.', 'pulse-question' );
 		}
 		if ( 401 === $r['code'] || 403 === $r['code'] ) {
-			return __( 'FluentCRM refused: the user in Settings → Members needs the "Write and send emails" permission (FluentCRM → Settings → Managers), or use an administrator. Test connection, under Members, checks the login.', 'pulse-question' );
+			return __( 'FluentCRM refused: the user under Settings → Mailing list needs the "Write and send emails" permission (FluentCRM → Settings → Managers), or use an administrator. Test connection, under Mailing list, checks the login.', 'pulse-question' );
 		}
 		/* translators: 1: what failed, 2: HTTP status, 3: FluentCRM's message. */
 		return trim( sprintf( __( '%1$s (HTTP %2$d) %3$s', 'pulse-question' ), $fallback, $r['code'], $message ) );

@@ -6,7 +6,7 @@
 
 **Questions → Queue** is where you'll spend most of your time.
 
-- **Add questions** one per line. Your own questions go straight into the queue unless you turn off **Settings → Approval**.
+- **Add questions** one per line. Your own questions go straight into the queue unless you turn off **Settings → General → Approval**.
 - **Waiting for approval** lists questions that need a yes or no (Claude's, by default). You can *Approve*, *Edit* or *Reject* each one, or *Approve all*.
 - **Drag** queued questions to reorder them. Each shows the day it will be asked.
 - **Ask the next one now** replaces today's question straight away.
@@ -26,7 +26,7 @@ The editor's content becomes the question's **background**. It's a line or two s
 
 ## Questions written by Claude
 
-Add an [Anthropic API key](https://platform.claude.com/settings/keys) under **Settings → Questions written by Claude**. To keep the key out of the database, put it in `wp-config.php` instead:
+Add an [Anthropic API key](https://platform.claude.com/settings/keys) under **Settings → Claude**. To keep the key out of the database, put it in `wp-config.php` instead:
 
 ```php
 define( 'PULSE_QUESTION_ANTHROPIC_API_KEY', 'sk-ant-...' );

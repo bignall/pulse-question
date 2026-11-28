@@ -1,6 +1,6 @@
 <?php
 /**
- * "Test connection" for the mailing list (Settings → Members). Checks the saved settings one
+ * "Test connection" for the mailing list (Settings → Mailing list). Checks the saved settings one
  * step at a time and says in plain words which step failed and what to do:
  *
  *   FluentCRM on another site: can we reach it, does a redirect get in the way, is the login

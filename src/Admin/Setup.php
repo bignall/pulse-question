@@ -103,7 +103,7 @@ final class Setup {
 				'text'     => __( 'FluentCRM on this site or another. Without it, members\' choices are kept on the site and the built-in sender emails them.', 'pulse-question' ),
 				'done'     => 'none' !== MailingList::provider(),
 				'optional' => true,
-				'link'     => self::settingsUrl( 'pq-members' ),
+				'link'     => self::settingsUrl( 'pq-mailing-list' ),
 				'action'   => __( 'Connect', 'pulse-question' ),
 				'markable' => false,
 			),

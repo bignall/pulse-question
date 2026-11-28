@@ -38,7 +38,7 @@ The answer is always sent as something to judge, never as instructions to follow
 
 The **Check** column under **Comments** shows each verdict, its category and the reason.
 
-**Other modes** (in **Settings → Answers and moderation**): *Hold every answer for me*, or *WordPress's own moderation settings only*. Without an API key, every answer is held.
+**Other modes** (in **Settings → Answers**): *Hold every answer for me*, or *WordPress's own moderation settings only*. Without an API key, every answer is held.
 
 **Cost:** each check uses Claude Opus 5.5 at low effort by default, roughly half a cent per answer. You can choose a smaller, cheaper model in Settings.
 

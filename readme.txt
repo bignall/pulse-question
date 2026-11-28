@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.3
+Stable tag: 0.9.4
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -80,7 +80,7 @@ Adds branding settings and a setup checklist, and renames the plugin's data to l
 
 When you use "Write questions with Claude" or automatic top-up, the plugin sends the guidance from Settings, the names of your question categories and the titles of your latest 300 questions to the Anthropic API (api.anthropic.com), to write new questions. Nothing is sent until you add an API key. When automatic moderation is on (the default once a key is added), the text of each answer and the question it answers are sent to the Anthropic API, together with your moderation guidelines, to decide whether to publish it. Member names and email addresses are not sent. Anthropic's terms: https://www.anthropic.com/legal/commercial-terms and privacy policy: https://www.anthropic.com/legal/privacy
 
-If you connect a FluentCRM site on another domain (Settings → Members), each new member's email address, name, chosen lists and tags are sent to that site's REST API. With FluentCRM on the same site, nothing leaves your site.
+If you connect a FluentCRM site on another domain (Settings → Mailing list), each new member's email address, name, chosen lists and tags are sent to that site's REST API. With FluentCRM on the same site, nothing leaves your site.
 
 If you set a social webhook address (Settings → Social sharing), each new question's text, link, background, category and share image address are sent to that address, which you choose (for example Zapier, Make or n8n). Nothing is sent until you add one.
 
@@ -91,6 +91,11 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.9.4 =
+* The Settings page is now in tabs: General, Claude, Answers, Members, Mailing list, Daily email, Social and Branding. One Save button saves every tab and brings you back to the one you were on. Tabs with unsaved changes are marked, you're warned before leaving with unsaved changes, and Cmd/Ctrl+S saves.
+* Members and the mailing list have their own tabs. The sign-up box labels are now under Mailing list.
+* Fixed the colour pickers hiding their labels under Branding.
 
 = 0.9.3 =
 * New Home screen icon setting (Settings → Branding): a square icon for iPhones and iPads in place of WordPress's one from the site icon, whose see-through corners show as black there.

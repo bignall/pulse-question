@@ -48,6 +48,8 @@ final class OutreachSettings {
 				'useLogo'    => __( 'Use this logo', 'pulse-question' ),
 				'chooseIcon' => __( 'Choose a home screen icon', 'pulse-question' ),
 				'useIcon'    => __( 'Use this icon', 'pulse-question' ),
+				/* translators: %s: the tabs with changes, such as "Claude, Branding". */
+				'unsaved'    => __( 'Unsaved changes: %s', 'pulse-question' ),
 			)
 		);
 	}
@@ -144,7 +146,6 @@ final class OutreachSettings {
 		$today  = Daily::stored();
 		$state  = DailyEmail::state();
 		?>
-		<tr id="pq-email"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Daily email', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Send it', 'pulse-question' ); ?></th>
 			<td>
@@ -155,7 +156,7 @@ final class OutreachSettings {
 						echo esc_html(
 							sprintf(
 								/* translators: %s: number of members. */
-								_n( 'Sent by WordPress to the %s member who chose the daily email, 40 a minute. For more than a few hundred members, connect FluentCRM under Members and use an email service.', 'Sent by WordPress to the %s members who chose the daily email, 40 a minute. For more than a few hundred members, connect FluentCRM under Members and use an email service.', Builtin::recipientCount(), 'pulse-question' ),
+								_n( 'Sent by WordPress to the %s member who chose the daily email, 40 a minute. For more than a few hundred members, connect FluentCRM under Mailing list and use an email service.', 'Sent by WordPress to the %s members who chose the daily email, 40 a minute. For more than a few hundred members, connect FluentCRM under Mailing list and use an email service.', Builtin::recipientCount(), 'pulse-question' ),
 								number_format_i18n( Builtin::recipientCount() )
 							)
 						);
@@ -165,10 +166,10 @@ final class OutreachSettings {
 							$lists
 								/* translators: 1: list ids, 2: where. */
 								? sprintf( __( 'Sent as a FluentCRM campaign to list %1$s (%2$s), to subscribed contacts only. FluentCRM adds its footer and unsubscribe link, and reports opens and clicks.', 'pulse-question' ), implode( ', ', $lists ), 'fluentcrm' === $method ? __( 'on this site', 'pulse-question' ) : __( 'on the mailing list site', 'pulse-question' ) )
-								: __( 'Sent as a FluentCRM campaign, but no list ids are set under Members yet.', 'pulse-question' )
+								: __( 'Sent as a FluentCRM campaign, but no list ids are set under Mailing list yet.', 'pulse-question' )
 						);
 						if ( 'fluentcrm_remote' === $method ) {
-							echo ' ' . esc_html__( 'The user in Members needs FluentCRM\'s "Write and send emails" permission.', 'pulse-question' );
+							echo ' ' . esc_html__( 'The user under Mailing list needs FluentCRM\'s "Write and send emails" permission.', 'pulse-question' );
 						}
 					}
 					?>
@@ -270,7 +271,6 @@ final class OutreachSettings {
 		$today = Daily::stored();
 		$seo   = ShareTags::seoPlugin();
 		?>
-		<tr id="pq-social"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Social sharing', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'On the site', 'pulse-question' ); ?></th>
 			<td>
@@ -340,7 +340,6 @@ final class OutreachSettings {
 		$chosen = $logo > 0 ? wp_get_attachment_image_url( $logo, 'medium' ) : '';
 		$field  = $store->field( 'brand_logo' );
 		?>
-		<tr id="pq-brand"><th scope="row" colspan="2"><h2 style="margin:1em 0 0"><?php esc_html_e( 'Branding', 'pulse-question' ); ?></h2></th></tr>
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Logo', 'pulse-question' ); ?></th>
 			<td>
@@ -368,10 +367,10 @@ final class OutreachSettings {
 		<tr>
 			<th scope="row"><?php esc_html_e( 'Colours', 'pulse-question' ); ?></th>
 			<td>
-				<p><label><?php esc_html_e( 'Main colour (buttons, links)', 'pulse-question' ); ?><br />
-					<input type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent' ) ); ?>" /></label></p>
-				<p><label><?php esc_html_e( 'Second colour (labels, the pulse line)', 'pulse-question' ); ?><br />
-					<input type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT_2 ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent_2' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent_2' ) ); ?>" /></label></p>
+				<p class="pq-color-row"><label for="pq-accent"><?php esc_html_e( 'Main colour (buttons, links)', 'pulse-question' ); ?></label>
+					<input id="pq-accent" type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent' ) ); ?>" /></p>
+				<p class="pq-color-row"><label for="pq-accent-2"><?php esc_html_e( 'Second colour (labels, the pulse line)', 'pulse-question' ); ?></label>
+					<input id="pq-accent-2" type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT_2 ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent_2' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent_2' ) ); ?>" /></p>
 				<p class="description"><?php esc_html_e( 'Used on the site, in the daily email and on share images. Leave them empty to follow your theme\'s Automatic.css colours on the site, with orange and teal elsewhere.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>

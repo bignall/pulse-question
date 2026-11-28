@@ -25,7 +25,7 @@ Each step is ticked as soon as it's done. For steps the plugin can't see (for ex
 
 ## When the question changes
 
-Set the time under **Settings → New question each day at**, in your site's time zone. The new question goes up on the first visit or hourly check after that time, so it doesn't depend on WP-Cron running exactly on time.
+Set the time under **Settings → General → New question each day at**, in your site's time zone. The new question goes up on the first visit or hourly check after that time, so it doesn't depend on WP-Cron running exactly on time.
 
 For a reliable hourly check, have your host call `wp-cron.php` every few minutes (on SiteGround: *Site Tools → Devs → Cron Jobs*), and add `define( 'DISABLE_WP_CRON', true );` to `wp-config.php`.
 
@@ -38,4 +38,4 @@ If [To-do Hub](https://github.com/bignall/todo-hub) is active, Pulse Question ad
 - answers are waiting for review;
 - the daily email or a social post failed.
 
-Turn this off under **Settings → To-do list**.
+Turn this off under **Settings → General → To-do list**.
