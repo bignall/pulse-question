@@ -9,6 +9,7 @@ In **Settings → Branding**:
   - **The Pulse Question logo**.
   - **An image** from the Media Library. A wide logo with a transparent background works best.
 - **Main colour** for buttons and links, and **second colour** for labels and the pulse line. They're used on the site, in the daily email and on share images. Leave them empty to follow your theme's Automatic.css colours on the site, with orange and teal elsewhere.
+- **Home screen icon**, the icon iPhones and iPads show when someone adds your site to their home screen. WordPress normally uses your site icon, but iPhones fill see-through corners with black, so a site icon with rounded corners or a transparent background looks wrong there. Choose a square image (at least 180×180 pixels) with a solid background and square corners; the phone rounds them itself. Leave it unset to use the site icon.
 
 ## The plugin's styles
 

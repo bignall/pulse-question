@@ -6,6 +6,10 @@
  * Editor, otherwise the site icon, otherwise none), -1 = the Pulse Question logo that comes
  * with the plugin, or a Media Library image id.
  *
+ * Home screen icon (brand_home_icon): a Media Library image id used as the apple-touch-icon
+ * instead of WordPress's one from the site icon (0 = leave WordPress's). iPhones fill see-through
+ * corners with black, so a site icon with rounded or transparent corners needs a square one here.
+ *
  * Colours (brand_accent, brand_accent_2): empty = the theme's Automatic.css colours on the
  * site and the plugin's defaults elsewhere. Set, they're used everywhere.
  *
@@ -20,6 +24,37 @@ final class Branding {
 
 	public const DEFAULT_ACCENT   = '#fb3f03';
 	public const DEFAULT_ACCENT_2 = '#03c0b8';
+
+	public static function init(): void {
+		add_filter( 'site_icon_meta_tags', array( self::class, 'siteIconTags' ) );
+	}
+
+	/**
+	 * WordPress's site icon tags, with the home screen icon in place of its apple-touch-icon.
+	 *
+	 * @param array<int, string> $tags Meta and link tags.
+	 * @return array<int, string>
+	 */
+	public static function siteIconTags( array $tags ): array {
+		$id  = (int) Settings::get( 'brand_home_icon' );
+		$url = $id > 0 ? (string) wp_get_attachment_image_url( $id, 'full' ) : '';
+		if ( '' === $url ) {
+			return $tags;
+		}
+		return self::withAppleTouchIcon( $tags, sprintf( '<link rel="apple-touch-icon" href="%s" />', esc_url( $url ) ) );
+	}
+
+	/**
+	 * Replace any apple-touch-icon tags with the given one.
+	 *
+	 * @param array<int, string> $tags Meta and link tags.
+	 * @return list<string>
+	 */
+	public static function withAppleTouchIcon( array $tags, string $tag ): array {
+		$kept   = array_values( array_filter( $tags, static fn ( string $t ): bool => ! preg_match( '/rel=["\']apple-touch-icon(?:-precomposed)?["\']/i', $t ) ) );
+		$kept[] = $tag;
+		return $kept;
+	}
 
 	/** The main colour: buttons, links, the address on share images. */
 	public static function accent(): string {

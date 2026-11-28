@@ -2,6 +2,40 @@
 ( function ( $ ) {
 	$( '.pq-color' ).wpColorPicker();
 
+	// A single image (the home screen icon): choose, or clear to use the site icon.
+	$( '.pq-media-choice' ).each( function () {
+		var cell = $( this );
+		var input = cell.find( '.pq-media-value' );
+		var img = cell.find( '.pq-media-preview' );
+		var clear = cell.find( '.pq-media-clear' );
+		var picker;
+		cell.on( 'click', '.pq-media-pick', function ( e ) {
+			e.preventDefault();
+			if ( ! picker ) {
+				picker = wp.media( {
+					title: pulseQuestionSettings.chooseIcon,
+					button: { text: pulseQuestionSettings.useIcon },
+					library: { type: 'image' },
+					multiple: false,
+				} );
+				picker.on( 'select', function () {
+					var image = picker.state().get( 'selection' ).first().toJSON();
+					input.val( image.id );
+					var size = image.sizes && image.sizes.thumbnail ? image.sizes.thumbnail : image;
+					img.attr( 'src', size.url ).show();
+					clear.show();
+				} );
+			}
+			picker.open();
+		} );
+		cell.on( 'click', '.pq-media-clear', function ( e ) {
+			e.preventDefault();
+			input.val( 0 );
+			img.hide();
+			clear.hide();
+		} );
+	} );
+
 	var box = $( '.pq-logo-choice' );
 	if ( ! box.length ) {
 		return;

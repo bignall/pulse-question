@@ -33,6 +33,7 @@ final class App {
 		Email\DailyEmail::init();
 		Social\Webhook::init();
 		Social\ShareTags::init();
+		Branding::init();
 		Front\AnswersView::init();
 		Front\Render::init();
 		Front\Shortcodes::init();

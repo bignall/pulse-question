@@ -46,6 +46,8 @@ final class OutreachSettings {
 			array(
 				'chooseLogo' => __( 'Choose a logo', 'pulse-question' ),
 				'useLogo'    => __( 'Use this logo', 'pulse-question' ),
+				'chooseIcon' => __( 'Choose a home screen icon', 'pulse-question' ),
+				'useIcon'    => __( 'Use this icon', 'pulse-question' ),
 			)
 		);
 	}
@@ -371,6 +373,20 @@ final class OutreachSettings {
 				<p><label><?php esc_html_e( 'Second colour (labels, the pulse line)', 'pulse-question' ); ?><br />
 					<input type="text" class="pq-color" data-default-color="<?php echo esc_attr( \PulseQuestion\Branding::DEFAULT_ACCENT_2 ); ?>" name="<?php echo esc_attr( $store->field( 'brand_accent_2' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'brand_accent_2' ) ); ?>" /></label></p>
 				<p class="description"><?php esc_html_e( 'Used on the site, in the daily email and on share images. Leave them empty to follow your theme\'s Automatic.css colours on the site, with orange and teal elsewhere.', 'pulse-question' ); ?></p>
+			</td>
+		</tr>
+		<?php
+		$home     = (int) $store->get( 'brand_home_icon' );
+		$home_url = $home > 0 ? (string) wp_get_attachment_image_url( $home, 'thumbnail' ) : '';
+		?>
+		<tr>
+			<th scope="row"><?php esc_html_e( 'Home screen icon', 'pulse-question' ); ?></th>
+			<td class="pq-media-choice">
+				<input type="hidden" class="pq-media-value" name="<?php echo esc_attr( $store->field( 'brand_home_icon' ) ); ?>" value="<?php echo esc_attr( (string) $home ); ?>" />
+				<p><img class="pq-media-preview" src="<?php echo esc_url( $home_url ); ?>" alt="" width="60" height="60" style="border-radius:13px;<?php echo $home_url ? '' : 'display:none'; ?>" /></p>
+				<button type="button" class="button pq-media-pick"><?php esc_html_e( 'Choose…', 'pulse-question' ); ?></button>
+				<button type="button" class="button-link pq-media-clear" <?php echo $home > 0 ? '' : 'style="display:none"'; ?>><?php esc_html_e( 'Use the site icon', 'pulse-question' ); ?></button>
+				<p class="description"><?php esc_html_e( 'The icon iPhones and iPads show when someone adds your site to their home screen. Use a square image at least 180×180 pixels with a solid background and no rounded corners: the phone rounds them itself and fills see-through parts with black. Leave it unset to use the site icon.', 'pulse-question' ); ?></p>
 			</td>
 		</tr>
 		<?php
