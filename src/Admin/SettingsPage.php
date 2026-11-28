@@ -155,7 +155,7 @@ final class SettingsPage {
 	 * isn't filled; it becomes editable when clicked or tabbed into.
 	 */
 	private static function noAutofill(): void {
-		echo 'readonly onfocus="this.removeAttribute(\'readonly\')" onpointerdown="this.removeAttribute(\'readonly\')" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other"';
+		echo 'data-pq-guard readonly onfocus="this.removeAttribute(\'readonly\')" onpointerdown="this.removeAttribute(\'readonly\')" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other"';
 	}
 
 	/**

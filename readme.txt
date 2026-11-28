@@ -4,7 +4,7 @@ Tags: question of the day, daily question, prompts, engagement, journal
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.9.5
+Stable tag: 0.9.6
 License: GPLv2 or later
 
 A question of the day for WordPress: a queue you control, member answers checked by Claude, a daily email and share images.
@@ -91,6 +91,9 @@ Share links on question pages are plain links to Facebook, X, LinkedIn, Pinteres
 Share images use the Inter font by The Inter Project Authors, under the SIL Open Font License 1.1 (assets/fonts/LICENSE-Inter.txt).
 
 == Changelog ==
+
+= 0.9.6 =
+* Password managers such as LastPass can no longer change the Google client ID, the mailing list user name or the saved secrets on the Settings page. Only typing, pasting or dropping text changes them; anything else is put back, including just before saving.
 
 = 0.9.5 =
 * Browsers and password managers no longer fill in the Google client ID, the mailing list user name or the saved secrets (Anthropic API key, Google client secret, application password) on the Settings page. Chrome took them for a log-in form, so saving could store your own email or password there.

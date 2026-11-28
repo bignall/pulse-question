@@ -113,7 +113,50 @@
 			status.text( done );
 		}
 
-		form.on( 'input change', check );
+		// Fields password managers mistake for a log-in (the Google client ID, user names, secrets):
+		// only typing, pasting, cutting or dropping text may change them. Anything else, such as
+		// LastPass or Chrome filling them in, is put back, and again just before saving.
+		var noEdit = [ 'Tab', 'Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown' ];
+		var guarded = form.find( '[data-pq-guard]' ).each( function () {
+			var el = this;
+			el.pqGood = el.defaultValue;
+			el.pqEditing = false;
+			$( el ).on( 'keydown paste cut drop', function ( e ) {
+				if ( e.originalEvent && e.originalEvent.isTrusted && ( 'keydown' !== e.type || -1 === noEdit.indexOf( e.key ) ) ) {
+					el.pqEditing = true;
+				}
+			} );
+			el.addEventListener( 'input', function ( e ) {
+				// Typing, dictation, undo and so on come from the browser itself with an inputType;
+				// a script's value has none, and browser autofill is a "replacement".
+				var typed = e.isTrusted && e.inputType && 'insertReplacementText' !== e.inputType;
+				if ( el.pqEditing || typed ) {
+					el.pqGood = el.value;
+					el.pqEditing = false;
+				}
+			}, true );
+		} );
+		function restore() {
+			guarded.each( function () {
+				if ( this.value !== this.pqGood ) {
+					this.value = this.pqGood;
+				}
+			} );
+		}
+		restore();
+		form.on( 'input change', function () {
+			restore();
+			check();
+		} );
+		// Some fill without any event, so look again now and then.
+		setInterval( function () {
+			if ( guarded.filter( function () {
+				return this.value !== this.pqGood;
+			} ).length ) {
+				restore();
+				check();
+			}
+		}, 400 );
 		$( window ).on( 'beforeunload', function ( e ) {
 			if ( ! submitting && check() ) {
 				e.preventDefault();
@@ -124,6 +167,7 @@
 
 		// Save comes back to the same tab, and Cmd/Ctrl+S saves.
 		form.on( 'submit', function () {
+			restore();
 			submitting = true;
 			var search = location.search.replace( /([?&])settings-updated=[^&]*&?/, '$1' ).replace( /[?&]$/, '' );
 			form.find( 'input[name="_wp_http_referer"]' ).val( location.pathname + search + '#' + active );
