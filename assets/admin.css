@@ -239,3 +239,8 @@
 		padding-right: 14px;
 	}
 }
+/* Read-only only until clicked, to keep browsers from filling them in: don't look disabled. */
+.pq-settings input[readonly][data-1p-ignore] {
+	background-color: #fff;
+	color: #2c3338;
+}

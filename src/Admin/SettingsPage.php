@@ -149,6 +149,16 @@ final class SettingsPage {
 	}
 
 	/**
+	 * Keeps browsers and password managers from filling in a field. These look like a log-in form
+	 * (a text field, then a password field), so Chrome would put a saved user name in the Google
+	 * client ID and a saved password in the secrets, and Save would store them. A read-only field
+	 * isn't filled; it becomes editable when clicked or tabbed into.
+	 */
+	private static function noAutofill(): void {
+		echo 'readonly onfocus="this.removeAttribute(\'readonly\')" onpointerdown="this.removeAttribute(\'readonly\')" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other"';
+	}
+
+	/**
 	 * The tabs, by the id of the panel each one shows. Links elsewhere use these ids as anchors.
 	 *
 	 * @return array<string, string>
@@ -213,7 +223,7 @@ final class SettingsPage {
 				<?php if ( $constant ) : ?>
 					<p><?php echo wp_kses_post( __( 'Set in <code>wp-config.php</code> (<code>PULSE_QUESTION_ANTHROPIC_API_KEY</code>).', 'pulse-question' ) ); ?></p>
 				<?php else : ?>
-					<input id="pq-claude-key" type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'claude_api_key' ) ); ?>" value="" placeholder="<?php echo esc_attr( $saved ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : 'sk-ant-…' ); ?>" />
+					<input id="pq-claude-key" type="password" class="regular-text" autocomplete="new-password" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'claude_api_key' ) ); ?>" value="" placeholder="<?php echo esc_attr( $saved ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : 'sk-ant-…' ); ?>" />
 					<?php if ( $saved ) : ?>
 						<label><input type="checkbox" name="<?php echo esc_attr( $store->field( 'claude_api_key_clear' ) ); ?>" value="1" /> <?php esc_html_e( 'Remove the saved key', 'pulse-question' ); ?></label>
 					<?php endif; ?>
@@ -390,12 +400,12 @@ final class SettingsPage {
 		<tr>
 			<th scope="row"><label for="pq-google-id"><?php esc_html_e( 'Sign in with Google', 'pulse-question' ); ?></label></th>
 			<td>
-				<p><input id="pq-google-id" type="text" class="large-text" placeholder="<?php esc_attr_e( 'Client ID (…apps.googleusercontent.com)', 'pulse-question' ); ?>" name="<?php echo esc_attr( $store->field( 'google_client_id' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'google_client_id' ) ); ?>" /></p>
+				<p><input id="pq-google-id" type="text" class="large-text" autocomplete="off" <?php self::noAutofill(); ?> placeholder="<?php esc_attr_e( 'Client ID (…apps.googleusercontent.com)', 'pulse-question' ); ?>" name="<?php echo esc_attr( $store->field( 'google_client_id' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'google_client_id' ) ); ?>" /></p>
 				<?php if ( GoogleLogin::secretFromConstant() ) : ?>
 					<p><?php echo wp_kses_post( __( 'Client secret set in <code>wp-config.php</code> (<code>PULSE_QUESTION_GOOGLE_CLIENT_SECRET</code>).', 'pulse-question' ) ); ?></p>
 				<?php else : ?>
 					<p>
-						<input type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'google_client_secret' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'google_client_secret' ) ? __( 'Secret saved. Leave blank to keep it.', 'pulse-question' ) : __( 'Client secret', 'pulse-question' ) ); ?>" />
+						<input type="password" class="regular-text" autocomplete="new-password" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'google_client_secret' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'google_client_secret' ) ? __( 'Secret saved. Leave blank to keep it.', 'pulse-question' ) : __( 'Client secret', 'pulse-question' ) ); ?>" />
 						<?php if ( '' !== (string) $store->get( 'google_client_secret' ) ) : ?>
 							<label><input type="checkbox" name="<?php echo esc_attr( $store->field( 'google_client_secret_clear' ) ); ?>" value="1" /> <?php esc_html_e( 'Remove the saved secret', 'pulse-question' ); ?></label>
 						<?php endif; ?>
@@ -447,8 +457,8 @@ final class SettingsPage {
 				<div style="margin-top:12px">
 					<p><strong><?php esc_html_e( 'FluentCRM on another site', 'pulse-question' ); ?></strong></p>
 					<p><label><?php esc_html_e( 'Site address', 'pulse-question' ); ?> <input type="url" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_url' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_url' ) ); ?>" placeholder="https://example.com" /></label></p>
-					<p><label><?php esc_html_e( 'User name', 'pulse-question' ); ?> <input type="text" class="regular-text" name="<?php echo esc_attr( $store->field( 'list_remote_user' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_user' ) ); ?>" /></label></p>
-					<p><label><?php esc_html_e( 'Application password', 'pulse-question' ); ?> <input type="password" class="regular-text" autocomplete="new-password" name="<?php echo esc_attr( $store->field( 'list_remote_password' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'list_remote_password' ) ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : '' ); ?>" /></label></p>
+					<p><label><?php esc_html_e( 'User name', 'pulse-question' ); ?> <input type="text" class="regular-text" autocomplete="off" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'list_remote_user' ) ); ?>" value="<?php echo esc_attr( (string) $store->get( 'list_remote_user' ) ); ?>" /></label></p>
+					<p><label><?php esc_html_e( 'Application password', 'pulse-question' ); ?> <input type="password" class="regular-text" autocomplete="new-password" <?php self::noAutofill(); ?> name="<?php echo esc_attr( $store->field( 'list_remote_password' ) ); ?>" value="" placeholder="<?php echo esc_attr( '' !== (string) $store->get( 'list_remote_password' ) ? __( 'Saved. Leave blank to keep it.', 'pulse-question' ) : '' ); ?>" /></label></p>
 					<p class="description"><?php esc_html_e( 'A user on that site with an application password (Users → Profile). An administrator works. Otherwise, under FluentCRM → Settings → Managers, give the user: "Add, update and import contacts", "Create and update tags, lists, companies and segments" and, for the daily email, "Write and send emails".', 'pulse-question' ); ?></p>
 				</div>
 				<p id="pq-list-test" style="margin-top:12px">
